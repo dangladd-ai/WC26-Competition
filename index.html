@@ -138,7 +138,25 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 .modal-stat-val{font-size:22px;font-weight:800;line-height:1}
 .modal-stat-lbl{font-size:11px;color:#888;margin-top:2px}
 
-@media(max-width:720px){.grid3,.grid4{grid-template-columns:1fr}.modal-grp-grid{grid-template-columns:repeat(2,1fr)}}
+/* Team popularity */
+.pop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pop-grp-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#bbb;margin:14px 0 6px;grid-column:1/-1;padding-top:10px;border-top:1px solid #f0f0f0}
+.pop-grp-label:first-child{margin-top:0;padding-top:0;border-top:none}
+.pop-team{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:#f9f9f9;border:1px solid #eee}
+.pop-team.most{background:#f0fdf4;border-color:#86efac}
+.pop-team.none{background:#fafafa;opacity:.5}
+.pop-team-name{font-size:12px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pop-bar-wrap{width:50px;height:5px;background:#e5e7eb;border-radius:3px;flex-shrink:0}
+.pop-bar-fill{height:5px;border-radius:3px;background:#4ade80;transition:width .4s}
+.pop-count{font-size:12px;font-weight:700;color:#166534;min-width:18px;text-align:right;flex-shrink:0}
+.pop-count.zero{color:#ccc}
+.pop-status{font-size:10px;padding:1px 5px;border-radius:4px;flex-shrink:0}
+.pop-status.thru{background:#f0fdf4;color:#166534}
+.pop-status.out{background:#fef2f2;color:#991b1b}
+.pop-status.live{background:#fef2f2;color:#b91c1c;animation:pulse 1.5s infinite}
+.pop-status.tbd{background:#fefce8;color:#78350f}
+
+@media(max-width:720px){.grid3,.grid4{grid-template-columns:1fr}.modal-grp-grid{grid-template-columns:repeat(2,1fr)}.pop-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -161,6 +179,10 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <!-- ═══ FULL LEADERBOARD ══════════════════════════════════════════════════ -->
 <h2>🏆 Full competition leaderboard — all 23 entrants</h2>
 <div class="card"><table class="lb-full" id="full-lb"></table></div>
+
+<!-- ═══ TEAM POPULARITY ═══════════════════════════════════════════════════ -->
+<h2>🌍 Team popularity — how many entrants selected each team</h2>
+<div class="card" id="team-popularity"></div>
 
 <hr class="section-divider">
 
@@ -375,6 +397,47 @@ function calcEntrant(picks) {
 // RENDER
 // ══════════════════════════════════════════════════════════════════════════════
 
+function renderTeamPopularity(scored) {
+  // Count how many entrants picked each team
+  const counts = {};
+  Object.keys(GROUPS).forEach(g => GROUPS[g].forEach(t => counts[t] = 0));
+  ALL_ENTRANTS.forEach(e => Object.values(e.picks).flat().forEach(t => { if(counts[t]!==undefined) counts[t]++; }));
+
+  const maxCount = Math.max(...Object.values(counts));
+
+  const posLabel = (team, grp) => {
+    const pos = teamPos(team, grp);
+    const live = isLiveTeam(team);
+    if (live) return ['live', 'Live'];
+    if (!pos) return ['tbd', 'TBD'];
+    if (pos==='W') return ['thru', '1st'];
+    if (pos==='RU') return ['thru', '2nd'];
+    if (pos==='T3') return ['out', '3rd'];
+    return ['out', '4th'];
+  };
+
+  let html = '<div class="pop-grid">';
+  Object.entries(GROUPS).forEach(([grp, teams]) => {
+    html += `<div class="pop-grp-label">Group ${grp}</div>`;
+    // Sort teams within group by pick count descending
+    const sorted = [...teams].sort((a,b) => counts[b] - counts[a]);
+    sorted.forEach(team => {
+      const count = counts[team];
+      const barW = maxCount > 0 ? ((count / maxCount) * 100).toFixed(0) : 0;
+      const [statusCls, statusTxt] = posLabel(team, grp);
+      const isMost = count === maxCount && count > 0;
+      html += `<div class="pop-team${isMost?' most':''}${count===0?' none':''}">
+        <span class="pop-team-name" title="${team}">${team}</span>
+        <div class="pop-bar-wrap"><div class="pop-bar-fill" style="width:${barW}%"></div></div>
+        <span class="pop-count${count===0?' zero':''}">${count}</span>
+        <span class="pop-status ${statusCls}">${statusTxt}</span>
+      </div>`;
+    });
+  });
+  html += '</div>';
+  document.getElementById('team-popularity').innerHTML = html;
+}
+
 function renderAll() {
   // Score all entrants
   const scored = ALL_ENTRANTS.map(e=>({...e,...calcEntrant(e.picks)})).sort((a,b)=>b.total-a.total);
@@ -466,6 +529,9 @@ function renderAll() {
       <div class="chips">${chips}</div>
     </div>`;
   }).join('');
+
+  // ── Team popularity
+  renderTeamPopularity(scored);
 
   // ── Group tables
   const playedGroups = [...new Set(allResults().map(r=>r.g))];
@@ -621,7 +687,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Seeded with Germany 3–1 Curaçao (~65\'). Click <b>↻ Refresh scores</b> to pull latest.';
+  'Updated Jun 14 ~21:00 BST — Germany 7–1 Curaçao (FT). Netherlands vs Japan live. Click <b>↻ Refresh</b> for latest.';
 setInterval(refreshAll, 60000);
 refreshAll();
 </script>
