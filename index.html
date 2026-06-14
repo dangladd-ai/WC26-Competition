@@ -138,25 +138,22 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 .modal-stat-val{font-size:22px;font-weight:800;line-height:1}
 .modal-stat-lbl{font-size:11px;color:#888;margin-top:2px}
 
-/* Team popularity */
-.pop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.pop-grp-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#bbb;margin:14px 0 6px;grid-column:1/-1;padding-top:10px;border-top:1px solid #f0f0f0}
-.pop-grp-label:first-child{margin-top:0;padding-top:0;border-top:none}
-.pop-team{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:#f9f9f9;border:1px solid #eee}
-.pop-team.most{background:#f0fdf4;border-color:#86efac}
-.pop-team.none{background:#fafafa;opacity:.5}
-.pop-team-name{font-size:12px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pop-bar-wrap{width:50px;height:5px;background:#e5e7eb;border-radius:3px;flex-shrink:0}
-.pop-bar-fill{height:5px;border-radius:3px;background:#4ade80;transition:width .4s}
-.pop-count{font-size:12px;font-weight:700;color:#166534;min-width:18px;text-align:right;flex-shrink:0}
-.pop-count.zero{color:#ccc}
-.pop-status{font-size:10px;padding:1px 5px;border-radius:4px;flex-shrink:0}
-.pop-status.thru{background:#f0fdf4;color:#166534}
-.pop-status.out{background:#fef2f2;color:#991b1b}
-.pop-status.live{background:#fef2f2;color:#b91c1c;animation:pulse 1.5s infinite}
-.pop-status.tbd{background:#fefce8;color:#78350f}
+/* Team popularity — compact */
+.pop-wrapper{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pop-grp-card{background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:10px 12px}
+.pop-grp-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:7px}
+.pop-row{display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #f0f0f0}
+.pop-row:last-child{border-bottom:none}
+.pop-name{font-size:11px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#111}
+.pop-pip-wrap{display:flex;gap:2px;flex-shrink:0}
+.pop-pip{width:7px;height:7px;border-radius:2px;background:#e5e7eb}
+.pop-pip.filled{background:#4ade80}
+.pop-pip.filled.out{background:#fca5a5}
+.pop-pip.filled.live{background:#ef4444}
+.pop-n{font-size:11px;font-weight:700;color:#374151;min-width:14px;text-align:right;flex-shrink:0}
+.pop-n.zero{color:#d1d5db}
 
-@media(max-width:720px){.grid3,.grid4{grid-template-columns:1fr}.modal-grp-grid{grid-template-columns:repeat(2,1fr)}.pop-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){.grid3,.grid4{grid-template-columns:1fr}.modal-grp-grid{grid-template-columns:repeat(2,1fr)}.pop-wrapper{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -398,41 +395,38 @@ function calcEntrant(picks) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 function renderTeamPopularity(scored) {
-  // Count how many entrants picked each team
   const counts = {};
   Object.keys(GROUPS).forEach(g => GROUPS[g].forEach(t => counts[t] = 0));
   ALL_ENTRANTS.forEach(e => Object.values(e.picks).flat().forEach(t => { if(counts[t]!==undefined) counts[t]++; }));
 
-  const maxCount = Math.max(...Object.values(counts));
-
-  const posLabel = (team, grp) => {
+  const getStatus = (team, grp) => {
+    if (isLiveTeam(team)) return 'live';
     const pos = teamPos(team, grp);
-    const live = isLiveTeam(team);
-    if (live) return ['live', 'Live'];
-    if (!pos) return ['tbd', 'TBD'];
-    if (pos==='W') return ['thru', '1st'];
-    if (pos==='RU') return ['thru', '2nd'];
-    if (pos==='T3') return ['out', '3rd'];
-    return ['out', '4th'];
+    if (!pos) return 'tbd';
+    return (pos==='W'||pos==='RU') ? 'thru' : 'out';
   };
 
-  let html = '<div class="pop-grid">';
+  const MAX_PIPS = 10; // represents 23 entrants scaled to 10 pips
+
+  let html = '<div class="pop-wrapper">';
   Object.entries(GROUPS).forEach(([grp, teams]) => {
-    html += `<div class="pop-grp-label">Group ${grp}</div>`;
-    // Sort teams within group by pick count descending
     const sorted = [...teams].sort((a,b) => counts[b] - counts[a]);
+    html += `<div class="pop-grp-card"><div class="pop-grp-title">Group ${grp}</div>`;
     sorted.forEach(team => {
-      const count = counts[team];
-      const barW = maxCount > 0 ? ((count / maxCount) * 100).toFixed(0) : 0;
-      const [statusCls, statusTxt] = posLabel(team, grp);
-      const isMost = count === maxCount && count > 0;
-      html += `<div class="pop-team${isMost?' most':''}${count===0?' none':''}">
-        <span class="pop-team-name" title="${team}">${team}</span>
-        <div class="pop-bar-wrap"><div class="pop-bar-fill" style="width:${barW}%"></div></div>
-        <span class="pop-count${count===0?' zero':''}">${count}</span>
-        <span class="pop-status ${statusCls}">${statusTxt}</span>
+      const n = counts[team];
+      const status = getStatus(team, grp);
+      const filledPips = Math.round((n / 23) * MAX_PIPS);
+      const pipCls = status==='out' ? 'out' : status==='live' ? 'live' : '';
+      const pips = Array.from({length:MAX_PIPS}, (_,i) =>
+        `<div class="pop-pip${i < filledPips ? ` filled ${pipCls}` : ''}"></div>`
+      ).join('');
+      html += `<div class="pop-row">
+        <span class="pop-name" title="${team}">${team}</span>
+        <div class="pop-pip-wrap">${pips}</div>
+        <span class="pop-n${n===0?' zero':''}">${n}</span>
       </div>`;
     });
+    html += '</div>';
   });
   html += '</div>';
   document.getElementById('team-popularity').innerHTML = html;
