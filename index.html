@@ -62,7 +62,9 @@ table.gt td{padding:5px 4px;text-align:right;border-bottom:1px solid #f6f6f6}
 table.gt td:first-child{text-align:left;font-weight:600}
 table.gt tr.q td{color:#166534}
 table.gt tr.q td:first-child::before{content:"✓ ";font-size:10px;color:#4ade80}
-table.gt tr.lv td{background:#fff5f5}
+table.gt th[title]{cursor:help;border-bottom:1px dashed #ccc}
+table.gt td.cp-pos{color:#166534;font-weight:700}
+table.gt td.cp-zero{color:#bbb}
 
 /* Full leaderboard table */
 table.lb-full{width:100%;border-collapse:collapse;font-size:13px}
@@ -235,14 +237,14 @@ const ODDS = {
 };
 
 const GROUPS = {
-  A:['Mexico','Czechia','South Korea','South Africa'],
-  B:['Switzerland','Canada','Bosnia And Herzegovina','Qatar'],
-  C:['Brazil','Morocco','Scotland','Haiti'],
-  D:['USA','Turkiye','Paraguay','Australia'],
-  E:['Germany','Ecuador','Ivory Coast','Curacao'],
-  F:['Netherlands','Japan','Sweden','Tunisia'],
+  A:['Mexico','South Korea','South Africa','Czechia'],
+  B:['Switzerland','Canada','Qatar','Bosnia And Herzegovina'],
+  C:['Scotland','Morocco','Brazil','Haiti'],
+  D:['USA','Australia','Turkiye','Paraguay'],
+  E:['Germany','Ivory Coast','Ecuador','Curacao'],
+  F:['Sweden','Japan','Netherlands','Tunisia'],
   G:['Belgium','Egypt','Iran','New Zealand'],
-  H:['Spain','Uruguay','Saudi Arabia','Cape Verde'],
+  H:['Spain','Cape Verde','Uruguay','Saudi Arabia'],
   I:['France','Norway','Senegal','Iraq'],
   J:['Argentina','Austria','Algeria','Jordan'],
   K:['Portugal','Colombia','Dr Congo','Uzbekistan'],
@@ -269,7 +271,7 @@ const ALL_ENTRANTS = [
    picks:{A:['Mexico','South Korea'],B:['Switzerland','Canada'],C:['Morocco','Scotland'],D:['Turkiye','Paraguay'],E:['Ecuador','Curacao'],F:['Japan','Sweden'],G:['Egypt','Iran'],H:['Spain','Cape Verde'],I:['France','Norway'],J:['Argentina','Jordan'],K:['Colombia','Uzbekistan'],L:['Croatia','Panama']}},
   {name:'Max',   ai:true,  av:'av-max', color:'#22c55e', initials:'MW',
    picks:{A:['Mexico','South Korea'],B:['Switzerland','Canada'],C:['Brazil','Haiti'],D:['Turkiye','Paraguay'],E:['Ecuador','Curacao'],F:['Netherlands','Japan'],G:['Iran','New Zealand'],H:['Saudi Arabia','Cape Verde'],I:['France','Senegal'],J:['Austria','Jordan'],K:['Colombia','Uzbekistan'],L:['England','Panama']}},
-  {name:'Seb',   ai:true,  av:'av-seb', color:'#eab308', initials:'SF',
+  {name:'Seb',   ai:false, av:'av-seb', color:'#eab308', initials:'SF',
    picks:{A:['Czechia','South Korea'],B:['Canada','Bosnia And Herzegovina'],C:['Morocco','Scotland'],D:['USA','Australia'],E:['Ecuador','Ivory Coast'],F:['Japan','Sweden'],G:['Egypt','New Zealand'],H:['Saudi Arabia','Cape Verde'],I:['Norway','Senegal'],J:['Austria','Algeria'],K:['Colombia','Dr Congo'],L:['Croatia','Ghana']}},
   {name:'Dons',  ai:true,  picks:{A:['Mexico','Czechia'],B:['Switzerland','Canada'],C:['Brazil','Morocco'],D:['USA','Paraguay'],E:['Germany','Ecuador'],F:['Netherlands','Japan'],G:['Belgium','Iran'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
   {name:'Matt R',ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Canada'],C:['Brazil','Morocco'],D:['USA','Paraguay'],E:['Germany','Ivory Coast'],F:['Netherlands','Sweden'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
@@ -281,7 +283,7 @@ const ALL_ENTRANTS = [
 
 // Confirmed completed results
 const CONFIRMED = [
-  // Matchday 1 — Jun 11
+  // Jun 11
   {g:'A',h:'Mexico',      a:'South Africa',           hg:2,ag:0,ft:true},
   {g:'A',h:'South Korea', a:'Czechia',                hg:2,ag:1,ft:true},
   // Jun 12
@@ -297,16 +299,18 @@ const CONFIRMED = [
   {g:'F',h:'Netherlands', a:'Japan',                  hg:2,ag:2,ft:true},
   {g:'E',h:'Ivory Coast', a:'Ecuador',                hg:1,ag:0,ft:true},
   {g:'F',h:'Sweden',      a:'Tunisia',                hg:5,ag:1,ft:true},
+  // Jun 15
+  {g:'H',h:'Spain',       a:'Cape Verde',             hg:0,ag:0,ft:true},
+  {g:'G',h:'Belgium',     a:'Egypt',                  hg:1,ag:1,ft:true},
 ];
 
-// No live matches right now — Jun 15 fixtures start later today
-let LIVE = [];
+// Live now / tonight
+let LIVE = [
+  {g:'H',h:'Saudi Arabia',a:'Uruguay',    hg:0,ag:0,live:true, ft:false,min:'KO 22:00 BST'},
+  {g:'G',h:'Iran',        a:'New Zealand',hg:0,ag:0,live:false,ft:false,min:'01:00 BST'},
+];
 
 const UPCOMING = [
-  // Matchday 1 continued
-  {date:'Jun 15', h:'Spain',        a:'Cape Verde',             g:'H'},
-  {date:'Jun 15', h:'Belgium',      a:'Egypt',                  g:'G'},
-  {date:'Jun 15', h:'Saudi Arabia', a:'Uruguay',                g:'H'},
   {date:'Jun 15', h:'Iran',         a:'New Zealand',            g:'G'},
   {date:'Jun 16', h:'France',       a:'Senegal',                g:'I'},
   {date:'Jun 16', h:'Iraq',         a:'Norway',                 g:'I'},
@@ -316,7 +320,6 @@ const UPCOMING = [
   {date:'Jun 17', h:'England',      a:'Croatia',                g:'L'},
   {date:'Jun 17', h:'Ghana',        a:'Panama',                 g:'L'},
   {date:'Jun 17', h:'Uzbekistan',   a:'Colombia',               g:'K'},
-  // Matchday 2
   {date:'Jun 18', h:'Czechia',      a:'South Africa',           g:'A', md:'MD2'},
   {date:'Jun 18', h:'Switzerland',  a:'Bosnia And Herzegovina', g:'B', md:'MD2'},
   {date:'Jun 18', h:'Canada',       a:'Qatar',                  g:'B', md:'MD2'},
@@ -523,11 +526,15 @@ function renderAll() {
     const tbl=buildTable(grp);
     return `<div class="card">
       <div class="grp-head">Group ${grp}</div>
-      <table class="gt"><tr><th>Team</th><th>P</th><th>GD</th><th>Pts</th></tr>
+      <table class="gt"><tr><th>Team</th><th>P</th><th>GD</th><th>Pts</th><th title="Competition Points earned in this group">CP</th></tr>
       ${tbl.map(([team,s],i)=>{
         const gd=s.GF-s.GA;
+        const pos=['W','RU','T3','F4'][i];
+        const cp = s.P>0 ? (ODDS[team]||0)*MULT[pos] : null;
+        const cpStr = cp!=null ? cp.toFixed(2) : '—';
+        const cpCls = cp!=null && cp>0 ? 'cp-pos' : 'cp-zero';
         return `<tr class="${i<2?'q':''} ${s.live?'lv':''}">
-          <td>${team}${s.live?' 🔴':''}</td><td>${s.P}</td><td>${gd>0?'+':''}${gd}</td><td><b>${s.Pts}</b></td>
+          <td>${team}${s.live?' 🔴':''}</td><td>${s.P}</td><td>${gd>0?'+':''}${gd}</td><td><b>${s.Pts}</b></td><td class="${cpCls}">${cpStr}</td>
         </tr>`;
       }).join('')}
       </table></div>`;
@@ -569,19 +576,110 @@ function renderAll() {
 async function refreshAll() {
   const btn = document.getElementById('refresh-btn');
   btn.disabled = true; btn.textContent = '↻ Updating...';
+
+  let gotStandings = false;
+  let gotScores = false;
+
+  // ── 1. Try worldcup26.ir free API for live group standings (no auth needed)
   try {
-    // Try football-data.org free API
-    const r = await fetch('https://api.football-data.org/v4/competitions/WC/matches?season=2026&status=IN_PLAY,FINISHED&matchday=1');
-    if(r.ok) {
+    const r = await fetch('https://worldcup26.ir/get/groups', {cache:'no-store'});
+    if (r.ok) {
       const data = await r.json();
-      if(data.matches) updateLiveFromAPI(data.matches);
+      if (data && data.length) {
+        applyGroupStandings(data);
+        gotStandings = true;
+      }
     }
-  } catch(e) { /* use seeded data */ }
+  } catch(e) {}
+
+  // ── 2. Try worldcup26.ir for live match scores
+  try {
+    const r = await fetch('https://worldcup26.ir/get/games', {cache:'no-store'});
+    if (r.ok) {
+      const data = await r.json();
+      if (data && data.length) {
+        applyLiveScores(data);
+        gotScores = true;
+      }
+    }
+  } catch(e) {}
+
+  // ── 3. Fallback: football-data.org for scores only
+  if (!gotScores) {
+    try {
+      const r = await fetch('https://api.football-data.org/v4/competitions/WC/matches?season=2026&status=IN_PLAY,FINISHED');
+      if (r.ok) {
+        const data = await r.json();
+        if (data.matches) { updateLiveFromAPI(data.matches); gotScores = true; }
+      }
+    } catch(e) {}
+  }
+
   renderAll();
   const now = new Date();
+  const src = gotStandings ? 'standings + scores live' : gotScores ? 'scores live, standings seeded' : 'seeded data';
   document.getElementById('last-updated').innerHTML =
-    `Updated ${now.toLocaleTimeString('en-GB')} &nbsp;<span class="live-badge">LIVE</span>`;
+    `Updated ${now.toLocaleTimeString('en-GB')} &nbsp;<span class="live-badge">LIVE</span>&nbsp;<span style="font-size:10px;color:#aaa">(${src})</span>`;
   btn.disabled = false; btn.textContent = '↻ Refresh scores';
+}
+
+// Map API group names to our internal names
+const TEAM_NAME_MAP = {
+  'iran (islamic republic of)':'Iran','korea republic':'South Korea','usa':'USA',
+  'united states':'USA','côte d\'ivoire':'Ivory Coast',"cote d'ivoire":'Ivory Coast',
+  'dr congo':'Dr Congo','congo dr':'Dr Congo','curaçao':'Curacao','türkiye':'Turkiye',
+  'czechia':'Czechia','czech republic':'Czechia','bosnia and herzegovina':'Bosnia And Herzegovina',
+  'bosnia & herzegovina':'Bosnia And Herzegovina','cape verde':'Cape Verde',
+  'new zealand':'New Zealand','saudi arabia':'Saudi Arabia','south africa':'South Africa',
+  'south korea':'South Korea'
+};
+
+function normTeam(name) {
+  if (!name) return '';
+  const lower = name.toLowerCase().trim();
+  return TEAM_NAME_MAP[lower] || name.split(' ').map(w => w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+}
+
+function applyGroupStandings(groups) {
+  // groups is array of group objects: {name, teams:[{name, played, won, drawn, lost, goalsFor, goalsAgainst, points}]}
+  groups.forEach(grp => {
+    const letter = grp.name?.replace(/group\s*/i,'').trim().toUpperCase();
+    if (!letter || !GROUPS[letter]) return;
+    // Sort teams by points desc, then GD desc, then GF desc
+    const sorted = [...(grp.teams||[])].sort((a,b) => {
+      const ptsDiff = (b.points||b.pts||0) - (a.points||a.pts||0);
+      if (ptsDiff !== 0) return ptsDiff;
+      const gdA = (a.goalsFor||a.gf||0) - (a.goalsAgainst||a.ga||0);
+      const gdB = (b.goalsFor||b.gf||0) - (b.goalsAgainst||b.ga||0);
+      if (gdB !== gdA) return gdB - gdA;
+      return (b.goalsFor||b.gf||0) - (a.goalsFor||a.gf||0);
+    });
+    const teamNames = sorted.map(t => normTeam(t.name||t.team));
+    // Only update if all 4 teams recognised
+    if (teamNames.every(n => GROUPS[letter].includes(n))) {
+      GROUPS[letter] = teamNames;
+    }
+  });
+}
+
+function applyLiveScores(games) {
+  // games: [{home, away, homeScore, awayScore, status, minute}]
+  LIVE = LIVE.map(lr => {
+    const m = games.find(g => {
+      const h = normTeam(g.home||g.homeTeam||'');
+      const a = normTeam(g.away||g.awayTeam||'');
+      return (h===lr.h||h.includes(lr.h.split(' ')[0])||lr.h.includes(h.split(' ')[0])) &&
+             (a===lr.a||a.includes(lr.a.split(' ')[0])||lr.a.includes(a.split(' ')[0]));
+    });
+    if (!m) return lr;
+    const hg = m.homeScore ?? m.home_score ?? m.score?.home ?? lr.hg;
+    const ag = m.awayScore ?? m.away_score ?? m.score?.away ?? lr.ag;
+    const status = (m.status||m.state||'').toLowerCase();
+    const isLive = status.includes('live')||status.includes('in_play')||status.includes('progress');
+    const isFT = status.includes('ft')||status.includes('finish')||status.includes('ended');
+    const min = m.minute||m.time||'';
+    return {...lr, hg, ag, live:isLive, ft:isFT, min:isLive?(min?min+"'":'LIVE'):(isFT?'FT':lr.min)};
+  });
 }
 
 function updateLiveFromAPI(matches) {
@@ -670,7 +768,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 15 — all Matchday 1 results confirmed. Jun 15 fixtures start today from 17:00 BST.';
+  'Updated Jun 15 — standings verified from FIFA.com (Groups B, C, F, G, H corrected). Saudi Arabia vs Uruguay &amp; Iran vs New Zealand results pending.';
 setInterval(refreshAll, 60000);
 refreshAll();
 </script>
