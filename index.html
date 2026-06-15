@@ -152,6 +152,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 .pop-pip.filled.live{background:#ef4444}
 .pop-n{font-size:11px;font-weight:700;color:#374151;min-width:14px;text-align:right;flex-shrink:0}
 .pop-n.zero{color:#d1d5db}
+.pop-odds{font-size:10px;color:#aaa;flex-shrink:0;min-width:32px;text-align:right}
 
 @media(max-width:720px){.grid3,.grid4{grid-template-columns:1fr}.modal-grp-grid{grid-template-columns:repeat(2,1fr)}.pop-wrapper{grid-template-columns:repeat(2,1fr)}}
 </style>
@@ -162,7 +163,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Matchday 1 complete · Jun 14 ongoing (Germany 7–1 Curaçao FT, Netherlands vs Japan live)</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Matchday 1 complete (all groups)</p>
     <div class="last-updated" id="last-updated">Loading live scores...</div>
   </div>
   <button class="refresh-btn" id="refresh-btn" onclick="refreshAll()">↻ Refresh scores</button>
@@ -180,21 +181,6 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <!-- ═══ TEAM POPULARITY ═══════════════════════════════════════════════════ -->
 <h2>🌍 Team popularity — how many entrants selected each team</h2>
 <div class="card" id="team-popularity"></div>
-
-<hr class="section-divider">
-
-<!-- ═══ TOP 3 DETAILED ════════════════════════════════════════════════════ -->
-<h2>Detailed analysis — Dan, Maxwell & Sebastian</h2>
-<div class="grid3" id="lb3"></div>
-
-<h2>Their 24 picks</h2>
-<div class="legend">
-  <div class="leg"><div class="legdot" style="background:#4ade80"></div>Progressing</div>
-  <div class="leg"><div class="legdot" style="background:#fcd34d"></div>Yet to play</div>
-  <div class="leg"><div class="legdot" style="background:#fca5a5"></div>3rd/4th</div>
-  <div class="leg"><div class="legdot" style="background:#ef4444"></div>Live now</div>
-</div>
-<div class="grid3" id="picks3"></div>
 
 <hr class="section-divider">
 
@@ -295,47 +281,54 @@ const ALL_ENTRANTS = [
 
 // Confirmed completed results
 const CONFIRMED = [
-  // Jun 11 — Matchday 1
-  {g:'A',h:'Mexico',     a:'South Africa',          hg:2,ag:0,ft:true},
-  {g:'A',h:'South Korea',a:'Czechia',               hg:2,ag:1,ft:true},
+  // Matchday 1 — Jun 11
+  {g:'A',h:'Mexico',      a:'South Africa',           hg:2,ag:0,ft:true},
+  {g:'A',h:'South Korea', a:'Czechia',                hg:2,ag:1,ft:true},
   // Jun 12
-  {g:'B',h:'Canada',     a:'Bosnia And Herzegovina',hg:1,ag:1,ft:true},
-  {g:'D',h:'USA',        a:'Paraguay',              hg:4,ag:1,ft:true},
+  {g:'B',h:'Canada',      a:'Bosnia And Herzegovina', hg:1,ag:1,ft:true},
+  {g:'D',h:'USA',         a:'Paraguay',               hg:4,ag:1,ft:true},
   // Jun 13
-  {g:'B',h:'Qatar',      a:'Switzerland',           hg:1,ag:1,ft:true},
-  {g:'C',h:'Brazil',     a:'Morocco',               hg:1,ag:1,ft:true},
-  {g:'C',h:'Scotland',   a:'Haiti',                 hg:1,ag:0,ft:true},
-  {g:'D',h:'Australia',  a:'Turkiye',               hg:2,ag:0,ft:true},
-  // Jun 14 — completed
-  {g:'E',h:'Germany',    a:'Curacao',               hg:7,ag:1,ft:true},
+  {g:'B',h:'Qatar',       a:'Switzerland',            hg:1,ag:1,ft:true},
+  {g:'C',h:'Brazil',      a:'Morocco',                hg:1,ag:1,ft:true},
+  {g:'C',h:'Scotland',    a:'Haiti',                  hg:1,ag:0,ft:true},
+  {g:'D',h:'Australia',   a:'Turkiye',                hg:2,ag:0,ft:true},
+  // Jun 14
+  {g:'E',h:'Germany',     a:'Curacao',                hg:7,ag:1,ft:true},
+  {g:'F',h:'Netherlands', a:'Japan',                  hg:2,ag:2,ft:true},
+  {g:'E',h:'Ivory Coast', a:'Ecuador',                hg:1,ag:0,ft:true},
+  {g:'F',h:'Sweden',      a:'Tunisia',                hg:5,ag:1,ft:true},
 ];
 
-// Live / still to play today (Jun 14)
-let LIVE = [
-  {g:'F',h:'Netherlands',a:'Japan',       hg:0,ag:0,live:true, ft:false,min:'Live'},
-  {g:'E',h:'Ivory Coast',a:'Ecuador',     hg:0,ag:0,live:false,ft:false,min:'upcoming'},
-  {g:'F',h:'Sweden',     a:'Tunisia',     hg:0,ag:0,live:false,ft:false,min:'upcoming'},
-];
+// No live matches right now — Jun 15 fixtures start later today
+let LIVE = [];
 
 const UPCOMING = [
-  {date:'Jun 14', h:'Ivory Coast', a:'Ecuador',              g:'E'},
-  {date:'Jun 14', h:'Sweden',      a:'Tunisia',              g:'F'},
-  {date:'Jun 15', h:'Spain',       a:'Cape Verde',           g:'H'},
-  {date:'Jun 15', h:'Belgium',     a:'Egypt',                g:'G'},
-  {date:'Jun 15', h:'Saudi Arabia',a:'Uruguay',              g:'H'},
-  {date:'Jun 15', h:'Iran',        a:'New Zealand',          g:'G'},
-  {date:'Jun 16', h:'France',      a:'Senegal',              g:'I'},
-  {date:'Jun 16', h:'Iraq',        a:'Norway',               g:'I'},
-  {date:'Jun 16', h:'Argentina',   a:'Algeria',              g:'J'},
-  {date:'Jun 17', h:'Austria',     a:'Jordan',               g:'J'},
-  {date:'Jun 17', h:'Portugal',    a:'Dr Congo',             g:'K'},
-  {date:'Jun 17', h:'England',     a:'Croatia',              g:'L'},
-  {date:'Jun 17', h:'Ghana',       a:'Panama',               g:'L'},
-  {date:'Jun 17', h:'Uzbekistan',  a:'Colombia',             g:'K'},
-  {date:'Jun 18', h:'Czechia',     a:'South Africa',         g:'A', md:'MD2'},
-  {date:'Jun 18', h:'Switzerland', a:'Bosnia And Herzegovina',g:'B',md:'MD2'},
-  {date:'Jun 18', h:'Canada',      a:'Qatar',                g:'B', md:'MD2'},
-  {date:'Jun 18', h:'Mexico',      a:'South Korea',          g:'A', md:'MD2'},
+  // Matchday 1 continued
+  {date:'Jun 15', h:'Spain',        a:'Cape Verde',             g:'H'},
+  {date:'Jun 15', h:'Belgium',      a:'Egypt',                  g:'G'},
+  {date:'Jun 15', h:'Saudi Arabia', a:'Uruguay',                g:'H'},
+  {date:'Jun 15', h:'Iran',         a:'New Zealand',            g:'G'},
+  {date:'Jun 16', h:'France',       a:'Senegal',                g:'I'},
+  {date:'Jun 16', h:'Iraq',         a:'Norway',                 g:'I'},
+  {date:'Jun 16', h:'Argentina',    a:'Algeria',                g:'J'},
+  {date:'Jun 17', h:'Austria',      a:'Jordan',                 g:'J'},
+  {date:'Jun 17', h:'Portugal',     a:'Dr Congo',               g:'K'},
+  {date:'Jun 17', h:'England',      a:'Croatia',                g:'L'},
+  {date:'Jun 17', h:'Ghana',        a:'Panama',                 g:'L'},
+  {date:'Jun 17', h:'Uzbekistan',   a:'Colombia',               g:'K'},
+  // Matchday 2
+  {date:'Jun 18', h:'Czechia',      a:'South Africa',           g:'A', md:'MD2'},
+  {date:'Jun 18', h:'Switzerland',  a:'Bosnia And Herzegovina', g:'B', md:'MD2'},
+  {date:'Jun 18', h:'Canada',       a:'Qatar',                  g:'B', md:'MD2'},
+  {date:'Jun 18', h:'Mexico',       a:'South Korea',            g:'A', md:'MD2'},
+  {date:'Jun 19', h:'USA',          a:'Australia',              g:'D', md:'MD2'},
+  {date:'Jun 19', h:'Turkiye',      a:'Paraguay',               g:'D', md:'MD2'},
+  {date:'Jun 19', h:'Morocco',      a:'Scotland',               g:'C', md:'MD2'},
+  {date:'Jun 19', h:'Brazil',       a:'Haiti',                  g:'C', md:'MD2'},
+  {date:'Jun 20', h:'Germany',      a:'Ivory Coast',            g:'E', md:'MD2'},
+  {date:'Jun 20', h:'Ecuador',      a:'Curacao',                g:'E', md:'MD2'},
+  {date:'Jun 20', h:'Japan',        a:'Sweden',                 g:'F', md:'MD2'},
+  {date:'Jun 21', h:'Netherlands',  a:'Tunisia',                g:'F', md:'MD2'},
 ];
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -399,6 +392,37 @@ function renderTeamPopularity(scored) {
   Object.keys(GROUPS).forEach(g => GROUPS[g].forEach(t => counts[t] = 0));
   ALL_ENTRANTS.forEach(e => Object.values(e.picks).flat().forEach(t => { if(counts[t]!==undefined) counts[t]++; }));
 
+  // Format odds as fractional string e.g. 0.909 -> "10/11", 3.0 -> "3/1"
+  function fmtOdds(dec) {
+    const map = {
+      0.909:'10/11',3:'3/1',10:'10/1',0.8:'4/5',2.25:'9/4',3.5:'7/2',25:'25/1',
+      0.286:'2/7',8:'8/1',50:'50/1',1.3:'13/10',1.75:'7/4',9:'9/1',
+      0.3:'3/10',7.5:'15/2',66:'66/1',0.727:'8/11',4:'4/1',9:'9/1',
+      0.364:'4/11',4.5:'9/2',5.5:'11/2',20:'20/1',0.25:'1/4',
+      3:'3/1',40:'40/1',0.4:'2/5',2.75:'11/4',7:'7/1',
+      0.333:'1/3',33:'33/1',9:'9/1',2.5:'5/2',
+      0.3:'3/10',3.5:'7/2',9:'9/1',33:'33/1'
+    };
+    // Use a lookup table keyed by team name for precision
+    return map[dec] || dec.toFixed(2);
+  }
+
+  // Team name -> fractional odds string
+  const ODDS_FRAC = {
+    'Mexico':'10/11','Czechia':'3/1','South Korea':'3/1','South Africa':'10/1',
+    'Switzerland':'4/5','Canada':'9/4','Bosnia And Herzegovina':'7/2','Qatar':'25/1',
+    'Brazil':'2/7','Morocco':'7/2','Scotland':'8/1','Haiti':'50/1',
+    'USA':'13/10','Turkiye':'7/4','Paraguay':'7/2','Australia':'9/1',
+    'Germany':'3/10','Ecuador':'7/2','Ivory Coast':'15/2','Curacao':'66/1',
+    'Netherlands':'8/11','Japan':'3/1','Sweden':'4/1','Tunisia':'9/1',
+    'Belgium':'4/11','Egypt':'9/2','Iran':'11/2','New Zealand':'20/1',
+    'Spain':'1/4','Uruguay':'3/1','Saudi Arabia':'20/1','Cape Verde':'40/1',
+    'France':'2/5','Norway':'11/4','Senegal':'7/1','Iraq':'50/1',
+    'Argentina':'1/3','Austria':'9/2','Algeria':'11/2','Jordan':'33/1',
+    'Portugal':'2/5','Colombia':'5/2','Dr Congo':'9/1','Uzbekistan':'40/1',
+    'England':'3/10','Croatia':'7/2','Ghana':'9/1','Panama':'33/1'
+  };
+
   const getStatus = (team, grp) => {
     if (isLiveTeam(team)) return 'live';
     const pos = teamPos(team, grp);
@@ -406,7 +430,7 @@ function renderTeamPopularity(scored) {
     return (pos==='W'||pos==='RU') ? 'thru' : 'out';
   };
 
-  const MAX_PIPS = 10; // represents 23 entrants scaled to 10 pips
+  const MAX_PIPS = 10;
 
   let html = '<div class="pop-wrapper">';
   Object.entries(GROUPS).forEach(([grp, teams]) => {
@@ -420,8 +444,10 @@ function renderTeamPopularity(scored) {
       const pips = Array.from({length:MAX_PIPS}, (_,i) =>
         `<div class="pop-pip${i < filledPips ? ` filled ${pipCls}` : ''}"></div>`
       ).join('');
+      const odds = ODDS_FRAC[team] || '';
       html += `<div class="pop-row">
         <span class="pop-name" title="${team}">${team}</span>
+        <span class="pop-odds">${odds}</span>
         <div class="pop-pip-wrap">${pips}</div>
         <span class="pop-n${n===0?' zero':''}">${n}</span>
       </div>`;
@@ -486,43 +512,6 @@ function renderAll() {
         <td class="pts" style="color:#ef4444;font-size:12px">${gap}</td>
       </tr>`;
     }).join('') + '</tbody>';
-
-  // ── Top 3 AI detailed cards
-  const ai3 = scored.filter(e=>e.ai&&['Dan','Max','Seb'].includes(e.name));
-  document.getElementById('lb3').innerHTML = ai3.map((e,i)=>{
-    const rank = scored.findIndex(s=>s.name===e.name);
-    const topTeams = Object.entries(e.detail).filter(([,v])=>v.pts>0).sort((a,b)=>b[1].pts-a[1].pts).slice(0,5)
-      .map(([t,v])=>`${t}: <b>+${v.pts.toFixed(3)}</b>`).join('<br>');
-    const bw = ((e.total/maxPts)*100).toFixed(1);
-    return `<div class="lb${rank===0?' first':''}">
-      <span class="medal">${medals[rank]||''}</span>
-      <div class="lb-av ${e.av}">${e.initials}</div>
-      <div class="lb-name">${e.name}</div>
-      <div class="lb-sub">Rank ${rank+1} of 23</div>
-      <div class="lb-pts">${e.total.toFixed(2)}</div>
-      <div class="lb-ptslbl">competition points</div>
-      <div class="barwrap"><div class="bar" style="width:${bw}%;background:${e.color}"></div></div>
-      <div class="lb-top"><b>Top picks:</b><br>${topTeams||'—'}</div>
-    </div>`;
-  }).join('');
-
-  // ── Picks chips (Dan, Max, Seb only)
-  const ai3picks = ALL_ENTRANTS.filter(e=>e.ai&&['Dan','Max','Seb'].includes(e.name));
-  document.getElementById('picks3').innerHTML = ai3picks.map(e=>{
-    const sc = scored.find(s=>s.name===e.name);
-    const chips = Object.keys(GROUPS).map(grp=>(e.picks[grp]||[]).map(team=>{
-      const d=sc.detail[team]||{};
-      const live=isLiveTeam(team);
-      let cls=live?'live':'tbd';
-      if(!live){if(d.pos==='W'||d.pos==='RU')cls='thru';else if(d.pos==='T3'||d.pos==='F4')cls='out';}
-      const posLbl={W:'1st',RU:'2nd',T3:'3rd',F4:'4th'}[d.pos]||(live?'LIVE':'TBD');
-      return `<span class="chip ${cls}" title="Grp ${grp} | ${posLbl} | ${(d.pts||0).toFixed(3)} pts">${team}</span>`;
-    }).join('')).join('');
-    return `<div class="card">
-      <div style="font-weight:700;font-size:15px;margin-bottom:10px">${e.name} <span style="font-weight:400;font-size:13px;color:#888">${sc.total.toFixed(2)} pts</span></div>
-      <div class="chips">${chips}</div>
-    </div>`;
-  }).join('');
 
   // ── Team popularity
   renderTeamPopularity(scored);
@@ -681,7 +670,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 14 ~21:00 BST — Germany 7–1 Curaçao (FT). Netherlands vs Japan live. Click <b>↻ Refresh</b> for latest.';
+  'Updated Jun 15 — all Matchday 1 results confirmed. Jun 15 fixtures start today from 17:00 BST.';
 setInterval(refreshAll, 60000);
 refreshAll();
 </script>
