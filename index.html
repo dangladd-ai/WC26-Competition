@@ -165,7 +165,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Matchday 1 complete (all groups)</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Groups A–H complete (Matchday 1). Groups I–L start Jun 16.</p>
     <div class="last-updated" id="last-updated">Loading live scores...</div>
   </div>
   <button class="refresh-btn" id="refresh-btn" onclick="refreshAll()">↻ Refresh scores</button>
@@ -243,8 +243,8 @@ const GROUPS = {
   D:['USA','Australia','Turkiye','Paraguay'],
   E:['Germany','Ivory Coast','Ecuador','Curacao'],
   F:['Sweden','Japan','Netherlands','Tunisia'],
-  G:['Belgium','Egypt','Iran','New Zealand'],
-  H:['Spain','Cape Verde','Uruguay','Saudi Arabia'],
+  G:['New Zealand','Iran','Belgium','Egypt'],
+  H:['Uruguay','Saudi Arabia','Spain','Cape Verde'],
   I:['France','Norway','Senegal','Iraq'],
   J:['Argentina','Austria','Algeria','Jordan'],
   K:['Portugal','Colombia','Dr Congo','Uzbekistan'],
@@ -299,16 +299,15 @@ const CONFIRMED = [
   {g:'F',h:'Netherlands', a:'Japan',                  hg:2,ag:2,ft:true},
   {g:'E',h:'Ivory Coast', a:'Ecuador',                hg:1,ag:0,ft:true},
   {g:'F',h:'Sweden',      a:'Tunisia',                hg:5,ag:1,ft:true},
-  // Jun 15
-  {g:'H',h:'Spain',       a:'Cape Verde',             hg:0,ag:0,ft:true},
-  {g:'G',h:'Belgium',     a:'Egypt',                  hg:1,ag:1,ft:true},
+  // Jun 15 — Groups G & H
+  {g:'H',h:'Spain',        a:'Cape Verde',    hg:0,ag:0,ft:true},
+  {g:'G',h:'Belgium',      a:'Egypt',         hg:1,ag:1,ft:true},
+  {g:'H',h:'Saudi Arabia', a:'Uruguay',       hg:1,ag:1,ft:true},
+  {g:'G',h:'Iran',         a:'New Zealand',   hg:2,ag:2,ft:true},
 ];
 
-// Live now / tonight
-let LIVE = [
-  {g:'H',h:'Saudi Arabia',a:'Uruguay',    hg:0,ag:0,live:true, ft:false,min:'KO 22:00 BST'},
-  {g:'G',h:'Iran',        a:'New Zealand',hg:0,ag:0,live:false,ft:false,min:'01:00 BST'},
-];
+// No live matches right now
+let LIVE = [];
 
 const UPCOMING = [
   {date:'Jun 15', h:'Iran',         a:'New Zealand',            g:'G'},
@@ -768,7 +767,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 15 — standings verified from FIFA.com (Groups B, C, F, G, H corrected). Saudi Arabia vs Uruguay &amp; Iran vs New Zealand results pending.';
+  'Updated Jun 16 — Saudi Arabia 1–1 Uruguay, Iran 2–2 New Zealand added. Groups A–H standings verified from FIFA.com. France vs Senegal, Iraq vs Norway, Argentina vs Algeria up next.';
 setInterval(refreshAll, 60000);
 refreshAll();
 </script>
