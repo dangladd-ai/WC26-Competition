@@ -150,6 +150,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 .pop-pip-wrap{display:flex;gap:2px;flex-shrink:0}
 .pop-pip{width:7px;height:7px;border-radius:2px;background:#e5e7eb}
 .pop-pip.filled{background:#4ade80}
+.pop-pip.filled.border{background:#fbbf24}
 .pop-pip.filled.out{background:#fca5a5}
 .pop-pip.filled.live{background:#ef4444}
 .pop-n{font-size:11px;font-weight:700;color:#374151;min-width:14px;text-align:right;flex-shrink:0}
@@ -166,6 +167,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
     <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Groups A–J complete (Matchday 1). Groups K–L start Jun 17.</p>
+    <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
     <div class="last-updated" id="last-updated">Loading live scores...</div>
   </div>
   <button class="refresh-btn" id="refresh-btn" onclick="refreshAll()">↻ Refresh scores</button>
@@ -182,12 +184,19 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 
 <!-- ═══ TEAM POPULARITY ═══════════════════════════════════════════════════ -->
 <h2>🌍 Team popularity — how many entrants selected each team</h2>
+<div class="legend">
+  <div class="leg"><div class="legdot" style="background:#4ade80"></div>Progressing (1st/2nd) or yet to play</div>
+  <div class="leg"><div class="legdot" style="background:#fbbf24"></div>3rd place — still alive (best 8 third-placed teams qualify)</div>
+  <div class="leg"><div class="legdot" style="background:#fca5a5"></div>Eliminated (4th place)</div>
+  <div class="leg"><div class="legdot" style="background:#ef4444"></div>Currently live</div>
+</div>
 <div class="card" id="team-popularity"></div>
 
 <hr class="section-divider">
 
 <!-- ═══ GROUP TABLES ══════════════════════════════════════════════════════ -->
 <h2>Group tables</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px"><b>CP</b> = Competition Points — the points a team is currently worth in this fantasy competition, calculated as (odds to win the group) × (multiplier for their current position: 1st ×1.0, 2nd ×0.5, 3rd ×0.25, 4th ×0).</p>
 <div class="grid4" id="grptables"></div>
 <p id="grppending" style="font-size:12px;color:#aaa;margin-top:8px"></p>
 
@@ -429,7 +438,9 @@ function renderTeamPopularity(scored) {
     if (isLiveTeam(team)) return 'live';
     const pos = teamPos(team, grp);
     if (!pos) return 'tbd';
-    return (pos==='W'||pos==='RU') ? 'thru' : 'out';
+    if (pos==='W'||pos==='RU') return 'thru';
+    if (pos==='T3') return 'border';
+    return 'out';
   };
 
   const MAX_PIPS = 10;
@@ -442,7 +453,7 @@ function renderTeamPopularity(scored) {
       const n = counts[team];
       const status = getStatus(team, grp);
       const filledPips = Math.round((n / 23) * MAX_PIPS);
-      const pipCls = status==='out' ? 'out' : status==='live' ? 'live' : '';
+      const pipCls = status==='out' ? 'out' : status==='border' ? 'border' : status==='live' ? 'live' : '';
       const pips = Array.from({length:MAX_PIPS}, (_,i) =>
         `<div class="pop-pip${i < filledPips ? ` filled ${pipCls}` : ''}"></div>`
       ).join('');
