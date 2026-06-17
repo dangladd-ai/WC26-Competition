@@ -165,6 +165,8 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
   table.lb-full th,table.lb-full td{padding:8px 6px;font-size:12px}
   table.lb-full td.name-cell{font-size:13px}
   .card{padding:12px 10px}
+  table.gt{font-size:11px}
+  table.gt th,table.gt td{padding:4px 2px}
 }
 </style>
 </head>
@@ -190,6 +192,14 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <h2>🏆 Full competition leaderboard — all 23 entrants</h2>
 <div class="card"><table class="lb-full" id="full-lb"></table></div>
 
+<!-- ═══ GROUP TABLES ══════════════════════════════════════════════════════ -->
+<h2>Group tables</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px"><b>Odds</b> = decimal odds to win the group. <b>Multi</b> = position multiplier, applied to the odds depending on where a team finishes in the group (1st ×1.0, 2nd ×0.5, 3rd ×0.25, 4th ×0). <b>CP</b> = Competition Points currently earned, calculated as Odds × Multi.</p>
+<div class="grid4" id="grptables"></div>
+<p id="grppending" style="font-size:12px;color:#aaa;margin-top:8px"></p>
+
+<hr class="section-divider">
+
 <!-- ═══ TEAM POPULARITY ═══════════════════════════════════════════════════ -->
 <h2>🌍 Team popularity — how many entrants selected each team</h2>
 <div class="legend">
@@ -201,12 +211,6 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="card" id="team-popularity"></div>
 
 <hr class="section-divider">
-
-<!-- ═══ GROUP TABLES ══════════════════════════════════════════════════════ -->
-<h2>Group tables</h2>
-<p style="font-size:12px;color:#888;margin-bottom:10px"><b>Odds</b> = decimal odds to win the group. <b>CP</b> = Competition Points currently earned, calculated as Odds × position multiplier (1st ×1.0, 2nd ×0.5, 3rd ×0.25, 4th ×0).</p>
-<div class="grid4" id="grptables"></div>
-<p id="grppending" style="font-size:12px;color:#aaa;margin-top:8px"></p>
 
 <!-- ═══ RESULTS ═══════════════════════════════════════════════════════════ -->
 <h2>Results</h2>
@@ -544,16 +548,18 @@ function renderAll() {
     const tbl=buildTable(grp);
     return `<div class="card">
       <div class="grp-head">Group ${grp}</div>
-      <table class="gt"><tr><th>Team</th><th>P</th><th>GD</th><th>Pts</th><th title="Decimal odds to win the group">Odds</th><th title="Competition Points earned in this group">CP</th></tr>
+      <table class="gt"><tr><th>Team</th><th>P</th><th>GD</th><th>Pts</th><th title="Decimal odds to win the group">Odds</th><th title="Position multiplier — see note above">Multi</th><th title="Competition Points earned in this group">CP</th></tr>
       ${tbl.map(([team,s],i)=>{
         const gd=s.GF-s.GA;
         const pos=['W','RU','T3','F4'][i];
         const odds = ODDS[team]||0;
-        const cp = s.P>0 ? odds*MULT[pos] : null;
+        const multi = MULT[pos];
+        const cp = s.P>0 ? odds*multi : null;
         const cpStr = cp!=null ? cp.toFixed(2) : '—';
         const cpCls = cp!=null && cp>0 ? 'cp-pos' : 'cp-zero';
+        const multiStr = s.P>0 ? `×${multi.toFixed(2)}` : '—';
         return `<tr class="${i<2?'q':''} ${s.live?'lv':''}">
-          <td>${team}${s.live?' 🔴':''}</td><td>${s.P}</td><td>${gd>0?'+':''}${gd}</td><td><b>${s.Pts}</b></td><td style="color:#999">${odds.toFixed(3)}</td><td class="${cpCls}">${cpStr}</td>
+          <td>${team}${s.live?' 🔴':''}</td><td>${s.P}</td><td>${gd>0?'+':''}${gd}</td><td><b>${s.Pts}</b></td><td style="color:#999">${odds.toFixed(3)}</td><td style="color:#999">${multiStr}</td><td class="${cpCls}">${cpStr}</td>
         </tr>`;
       }).join('')}
       </table></div>`;
