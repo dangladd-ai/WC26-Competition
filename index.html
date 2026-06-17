@@ -6,8 +6,8 @@
 <title>World Cup 2026 — Fantasy Dashboard</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f2f3f5;color:#111;font-size:14px;line-height:1.5}
-.page{max-width:1200px;margin:0 auto;padding:24px 16px 48px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f2f3f5;color:#111;font-size:14px;line-height:1.5;overflow-x:hidden}
+.page{max-width:1200px;margin:0 auto;padding:24px 16px 48px;overflow-x:hidden}
 .header{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .header h1{font-size:22px;font-weight:700;margin-bottom:2px}
 .header p{font-size:12px;color:#777}
@@ -18,7 +18,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999;margin:24px 0 10px}
-.card{background:#fff;border:1px solid #e4e4e4;border-radius:12px;padding:16px 18px}
+.card{background:#fff;border:1px solid #e4e4e4;border-radius:12px;padding:16px 18px;overflow-x:auto;max-width:100%}
+.card table{min-width:480px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 
@@ -61,7 +62,6 @@ table.gt th:first-child{text-align:left}
 table.gt td{padding:5px 4px;text-align:right;border-bottom:1px solid #f6f6f6}
 table.gt td:first-child{text-align:left;font-weight:600}
 table.gt tr.q td{color:#166534}
-table.gt tr.q td:first-child::before{content:"✓ ";font-size:10px;color:#4ade80}
 table.gt th[title]{cursor:help;border-bottom:1px dashed #ccc}
 table.gt td.cp-pos{color:#166534;font-weight:700}
 table.gt td.cp-zero{color:#bbb}
@@ -158,6 +158,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 .pop-odds{font-size:10px;color:#aaa;flex-shrink:0;min-width:32px;text-align:right}
 
 @media(max-width:720px){.grid3,.grid4{grid-template-columns:1fr}.modal-grp-grid{grid-template-columns:repeat(2,1fr)}.pop-wrapper{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.pop-wrapper{grid-template-columns:1fr}.pop-pip-wrap{display:none}.pop-name{font-size:12px}}
 </style>
 </head>
 <body>
