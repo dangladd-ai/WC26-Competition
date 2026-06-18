@@ -176,7 +176,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Groups A–J complete (Matchday 1). Groups K–L start Jun 17.</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Matchday 1 complete — all 12 groups (A–L). Matchday 2 starts Jun 18.</p>
     <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
     <div class="last-updated" id="last-updated">Loading live scores...</div>
   </div>
@@ -268,8 +268,8 @@ const GROUPS = {
   H:['Uruguay','Saudi Arabia','Spain','Cape Verde'],
   I:['Norway','France','Senegal','Iraq'],
   J:['Argentina','Austria','Algeria','Jordan'],
-  K:['Portugal','Colombia','Dr Congo','Uzbekistan'],
-  L:['England','Croatia','Ghana','Panama']
+  K:['Colombia','Dr Congo','Portugal','Uzbekistan'],
+  L:['England','Ghana','Croatia','Panama']
 };
 
 // All 23 entrants — picks parsed directly from PDF column positions
@@ -330,16 +330,17 @@ const CONFIRMED = [
   {g:'I',h:'Norway',       a:'Iraq',          hg:4,ag:1,ft:true},
   {g:'J',h:'Argentina',    a:'Algeria',       hg:3,ag:0,ft:true},
   {g:'J',h:'Austria',      a:'Jordan',        hg:3,ag:1,ft:true},
+  // Jun 17 — Groups K & L
+  {g:'K',h:'Portugal',     a:'Dr Congo',      hg:1,ag:1,ft:true},
+  {g:'L',h:'England',      a:'Croatia',       hg:4,ag:2,ft:true},
+  {g:'L',h:'Ghana',        a:'Panama',        hg:1,ag:0,ft:true},
+  {g:'K',h:'Uzbekistan',   a:'Colombia',      hg:1,ag:3,ft:true},
 ];
 
 // No live matches right now
 let LIVE = [];
 
 const UPCOMING = [
-  {date:'Jun 17', h:'Portugal',     a:'Dr Congo',               g:'K'},
-  {date:'Jun 17', h:'England',      a:'Croatia',                g:'L'},
-  {date:'Jun 17', h:'Ghana',        a:'Panama',                 g:'L'},
-  {date:'Jun 17', h:'Uzbekistan',   a:'Colombia',               g:'K'},
   {date:'Jun 18', h:'Czechia',      a:'South Africa',           g:'A', md:'MD2'},
   {date:'Jun 18', h:'Switzerland',  a:'Bosnia And Herzegovina', g:'B', md:'MD2'},
   {date:'Jun 18', h:'Canada',       a:'Qatar',                  g:'B', md:'MD2'},
