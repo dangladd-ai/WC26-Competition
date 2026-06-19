@@ -146,6 +146,8 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 .pop-row{display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #f0f0f0}
 .pop-row:last-child{border-bottom:none}
 .pop-name{font-size:11px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#111}
+.pop-name-click{cursor:pointer;color:#1d4ed8;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px}
+.pop-name-click:hover{color:#1e40af}
 .pop-pip-wrap{display:flex;gap:2px;flex-shrink:0}
 .pop-pip{width:7px;height:7px;border-radius:2px;background:#e5e7eb}
 .pop-pip.filled{background:#4ade80}
@@ -507,7 +509,7 @@ function renderTeamPopularity(scored) {
       ).join('');
       const odds = ODDS_FRAC[team] || '';
       html += `<div class="pop-row">
-        <span class="pop-name" title="${team}">${team}</span>
+        <span class="pop-name pop-name-click" title="Click to see who picked ${team}" onclick="openTeamModal('${team}')">${team}</span>
         <span class="pop-odds">${odds}</span>
         <div class="pop-pip-wrap">${pips}</div>
         <span class="pop-n${n===0?' zero':''}">${n}</span>
@@ -844,6 +846,48 @@ function openModal(name) {
           }).join('')}
         </div>`;
       }).join('')}
+    </div>`;
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function openTeamModal(team) {
+  // Find the team's group
+  let grp = null;
+  Object.entries(GROUPS).forEach(([g, teams]) => { if (teams.includes(team)) grp = g; });
+  if (!grp) return;
+
+  const pos = teamPos(team, grp);
+  const live = isLiveTeam(team);
+  const odds = ODDS[team] || 0;
+  const multi = pos ? MULT[pos] : null;
+  const cp = pos ? odds * multi : null;
+
+  const posLabel = live ? 'LIVE' : pos ? {W:'1st',RU:'2nd',T3:'3rd',F4:'4th'}[pos] : 'Yet to play';
+  const statusCls = live ? 'mtp-live' : pos==='W'||pos==='RU' ? 'mtp-thru' : pos==='T3' ? 'mtp-out' : pos==='F4' ? 'mtp-out' : 'mtp-tbd';
+
+  // Find every entrant who picked this team
+  const pickers = ALL_ENTRANTS.filter(e => (e.picks[grp]||[]).includes(team));
+
+  document.getElementById('modal-title').textContent = `${team}`;
+  document.getElementById('modal-sub').textContent = `Group ${grp}  ·  ${posLabel}  ·  Odds ${odds.toFixed(3)}  ·  Picked by ${pickers.length} of 23 entrants`;
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-summary">
+      <div class="modal-stat"><span class="modal-stat-val">${pickers.length}</span><span class="modal-stat-lbl">Entrants picked this team</span></div>
+      <div class="modal-stat"><span class="modal-stat-val ${statusCls==='mtp-out'?'':''}" style="font-size:18px">${posLabel}</span><span class="modal-stat-lbl">Current group position</span></div>
+      <div class="modal-stat"><span class="modal-stat-val">${odds.toFixed(3)}</span><span class="modal-stat-lbl">Odds to win group</span></div>
+      <div class="modal-stat"><span class="modal-stat-val">${cp!=null?cp.toFixed(2):'—'}</span><span class="modal-stat-lbl">Competition points each</span></div>
+    </div>
+    <div class="modal-grp-grid">
+      <div class="modal-grp-card" style="grid-column:1/-1">
+        <div class="modal-grp-label">Entrants who selected ${team}</div>
+        ${pickers.length ? pickers.map(e => `<div class="modal-team">
+          <span class="modal-team-name">${e.name}${e.ai?'<span class="ai-badge" style="margin-left:5px">AI</span>':''}</span>
+          <span class="modal-team-pts ${statusCls}">${cp!=null?'+'+cp.toFixed(2):posLabel}</span>
+        </div>`).join('') : '<div class="modal-team"><span class="modal-team-name" style="color:#aaa">Nobody picked this team</span></div>'}
+      </div>
     </div>`;
 
   document.getElementById('modal-overlay').classList.add('open');
