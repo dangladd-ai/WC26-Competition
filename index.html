@@ -198,6 +198,11 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="grid4" id="grptables"></div>
 <p id="grppending" style="font-size:12px;color:#aaa;margin-top:8px"></p>
 
+<h2>🥉 Best 3rd-place teams — who's currently in the Round of 32?</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">The top 8 third-placed teams across all 12 groups qualify for the knockout stage alongside the 24 group winners and runners-up. This table ranks all currently-3rd teams by points, then goal difference, then goals scored — exactly as FIFA does.</p>
+<div class="card"><table class="lb-full" id="third-place-table"></table></div>
+<p style="font-size:11px;color:#aaa;margin-top:8px">Green line marks the cutoff — teams above qualify for the Round of 32, teams below are currently eliminated. Only groups with at least one match played are included; this updates automatically as more groups kick off.</p>
+
 <hr class="section-divider">
 
 <!-- ═══ TEAM POPULARITY ═══════════════════════════════════════════════════ -->
@@ -393,6 +398,35 @@ function isLiveTeam(team) {
   return LIVE.some(r=>r.live&&(r.h===team||r.a===team));
 }
 
+// Returns the 3rd-place team from each group that has played at least one game,
+// ranked by Pts, GD, GF (standard FIFA third-place ranking tiebreakers)
+function getThirdPlaceRanking() {
+  const thirds = [];
+  Object.keys(GROUPS).forEach(grp => {
+    const tbl = buildTable(grp);
+    if (tbl.length < 3) return;
+    const [team, s] = tbl[2]; // index 2 = 3rd place
+    if (s.P === 0) return; // group hasn't started
+    thirds.push({ team, grp, ...s, GD: s.GF - s.GA });
+  });
+  thirds.sort((a,b) => (b.Pts-a.Pts) || (b.GD-a.GD) || (b.GF-a.GF));
+  return thirds;
+}
+
+// Counts how many of an entrant's 24 picks currently sit in a qualifying spot
+// (1st, 2nd, or 3rd-and-in-the-best-8) — i.e. "through to Round of 32" right now
+function countTeamsThrough(picks, thirdPlaceQualifiers) {
+  let count = 0;
+  Object.keys(GROUPS).forEach(grp => {
+    (picks[grp]||[]).forEach(team => {
+      const pos = teamPos(team, grp);
+      if (pos === 'W' || pos === 'RU') count++;
+      else if (pos === 'T3' && thirdPlaceQualifiers.has(team)) count++;
+    });
+  });
+  return count;
+}
+
 function calcEntrant(picks) {
   let total=0;
   const detail={};
@@ -510,6 +544,10 @@ function renderAll() {
     liveBar.style.display='none';
   }
 
+  // ── Third-place qualifiers (best 8) — used for "teams through" count
+  const thirdRanking = getThirdPlaceRanking();
+  const thirdPlaceQualifiers = new Set(thirdRanking.slice(0,8).map(t=>t.team));
+
   // ── Full leaderboard table
   const medals = {0:'🥇',1:'🥈',2:'🥉'};
   document.getElementById('full-lb').innerHTML = `
@@ -517,7 +555,7 @@ function renderAll() {
       <th style="width:40px">Pos</th>
       <th>Entrant</th>
       <th class="num">Points</th>
-      <th class="hide-mobile" style="min-width:120px">Progress</th>
+      <th class="num hide-mobile" title="Teams currently in a qualifying spot (1st, 2nd, or best-8 3rd place)">Through</th>
       <th class="num hide-mobile" style="color:#4ade80">Best team</th>
       <th class="num hide-mobile">vs leader</th>
     </tr></thead>
@@ -527,14 +565,14 @@ function renderAll() {
       const gap = i===0 ? '—' : `–${(scored[0].total - e.total).toFixed(2)}`;
       const best = Object.entries(e.detail).filter(([,v])=>v.pts>0).sort((a,b)=>b[1].pts-a[1].pts)[0];
       const bestStr = best ? `${best[0]} (+${best[1].pts.toFixed(2)})` : '—';
-      const barW = ((e.total/maxPts)*100).toFixed(1);
+      const through = countTeamsThrough(e.picks, thirdPlaceQualifiers);
       const rankCell = i<3 ? `<span class="rank-${i+1}">${medals[i]}</span>` : `<span style="color:#bbb">${i+1}</span>`;
       const hlClass = isAI&&(e.name==='Dan'||e.name==='Max'||e.name==='Seb') ? ' highlight' : '';
       return `<tr class="${hlClass}" onclick="openModal('${e.name}')" title="Click to see ${e.name}'s picks">
         <td class="rank">${rankCell}</td>
         <td class="name-cell">${e.name}${isAI?'<span class="ai-badge">AI</span>':''}</td>
         <td class="pts">${e.total.toFixed(2)}</td>
-        <td class="hide-mobile"><div class="pts-bar-mini"><div class="pts-bar-mini-fill" style="width:${barW}%"></div></div></td>
+        <td class="pts hide-mobile" style="color:#166534;font-weight:700">${through}/24</td>
         <td class="pts hide-mobile" style="font-weight:400;font-size:12px;color:#666">${bestStr}</td>
         <td class="pts hide-mobile" style="color:#ef4444;font-size:12px">${gap}</td>
       </tr>`;
@@ -567,6 +605,37 @@ function renderAll() {
       </table></div>`;
   }).join('');
   document.getElementById('grppending').textContent = pendingGroups.length ? `Groups ${pendingGroups.join(', ')} yet to start` : '';
+
+  // ── Best 3rd-place teams table
+  document.getElementById('third-place-table').innerHTML = `
+    <thead><tr>
+      <th style="width:30px">Pos</th>
+      <th>Team</th>
+      <th class="num">Grp</th>
+      <th class="num hide-mobile">P</th>
+      <th class="num hide-mobile">GD</th>
+      <th class="num hide-mobile">GF</th>
+      <th class="num">Pts</th>
+      <th class="num">Status</th>
+    </tr></thead>
+    <tbody>` +
+    thirdRanking.map((t,i) => {
+      const qualifying = i < 8;
+      const rankCell = qualifying ? `<span style="color:#166534;font-weight:700">${i+1}</span>` : `<span style="color:#bbb">${i+1}</span>`;
+      const statusBadge = qualifying
+        ? '<span class="rbadge ft" style="background:#f0fdf4;color:#166534">Qualifying</span>'
+        : '<span class="rbadge" style="background:#fef2f2;color:#991b1b">Eliminated</span>';
+      return `<tr class="${qualifying?'highlight':''}" style="${i===7?'border-bottom:2px solid #4ade80':''}">
+        <td class="rank">${rankCell}</td>
+        <td class="name-cell">${t.team}</td>
+        <td class="pts">${t.grp}</td>
+        <td class="pts hide-mobile">${t.P}</td>
+        <td class="pts hide-mobile">${t.GD>0?'+':''}${t.GD}</td>
+        <td class="pts hide-mobile">${t.GF}</td>
+        <td class="pts"><b>${t.Pts}</b></td>
+        <td class="pts">${statusBadge}</td>
+      </tr>`;
+    }).join('') + '</tbody>';
 
   // ── Results
   const confirmedHTML = CONFIRMED.map(r=>`<div class="rrow">
