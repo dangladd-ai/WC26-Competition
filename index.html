@@ -176,7 +176,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Matchday 1 complete — all 12 groups (A–L). Matchday 2 starts Jun 18.</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Matchday 2 underway — Groups A &amp; B played. Mexico through to Round of 32!</p>
     <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
     <div class="last-updated" id="last-updated">Loading live scores...</div>
   </div>
@@ -258,8 +258,8 @@ const ODDS = {
 };
 
 const GROUPS = {
-  A:['Mexico','South Korea','South Africa','Czechia'],
-  B:['Switzerland','Canada','Qatar','Bosnia And Herzegovina'],
+  A:['Mexico','South Korea','Czechia','South Africa'],
+  B:['Canada','Switzerland','Bosnia And Herzegovina','Qatar'],
   C:['Scotland','Morocco','Brazil','Haiti'],
   D:['USA','Australia','Turkiye','Paraguay'],
   E:['Germany','Ivory Coast','Ecuador','Curacao'],
@@ -335,16 +335,17 @@ const CONFIRMED = [
   {g:'L',h:'England',      a:'Croatia',       hg:4,ag:2,ft:true},
   {g:'L',h:'Ghana',        a:'Panama',        hg:1,ag:0,ft:true},
   {g:'K',h:'Uzbekistan',   a:'Colombia',      hg:1,ag:3,ft:true},
+  // Jun 18 — Matchday 2, Groups A & B
+  {g:'A',h:'Czechia',      a:'South Africa',  hg:1,ag:1,ft:true},
+  {g:'A',h:'Mexico',       a:'South Korea',   hg:1,ag:0,ft:true},
+  {g:'B',h:'Switzerland',  a:'Bosnia And Herzegovina', hg:4,ag:1,ft:true},
+  {g:'B',h:'Canada',       a:'Qatar',         hg:6,ag:0,ft:true},
 ];
 
 // No live matches right now
 let LIVE = [];
 
 const UPCOMING = [
-  {date:'Jun 18', h:'Czechia',      a:'South Africa',           g:'A', md:'MD2'},
-  {date:'Jun 18', h:'Switzerland',  a:'Bosnia And Herzegovina', g:'B', md:'MD2'},
-  {date:'Jun 18', h:'Canada',       a:'Qatar',                  g:'B', md:'MD2'},
-  {date:'Jun 18', h:'Mexico',       a:'South Korea',            g:'A', md:'MD2'},
   {date:'Jun 19', h:'USA',          a:'Australia',              g:'D', md:'MD2'},
   {date:'Jun 19', h:'Turkiye',      a:'Paraguay',               g:'D', md:'MD2'},
   {date:'Jun 19', h:'Morocco',      a:'Scotland',               g:'C', md:'MD2'},
@@ -794,7 +795,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 17 — France 3–1 Senegal, Norway 4–1 Iraq, Argentina 3–0 Algeria, Austria 3–1 Jordan added. Groups I &amp; J standings verified. Portugal vs DR Congo, England vs Croatia up next.';
+  'Updated Jun 19 — Czechia 1–1 South Africa, Mexico 1–0 South Korea, Switzerland 4–1 Bosnia, Canada 6–0 Qatar added. Groups A &amp; B standings updated for Matchday 2. Mexico through to knockouts.';
 setInterval(refreshAll, 60000);
 refreshAll();
 </script>
