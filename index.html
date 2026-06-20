@@ -178,7 +178,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Matchday 2 underway — Groups A &amp; B played. Mexico through to Round of 32!</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Matchday 2 underway — Groups A–D played. USA, Mexico through!</p>
     <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
     <div class="last-updated" id="last-updated">Loading live scores...</div>
   </div>
@@ -358,10 +358,6 @@ const CONFIRMED = [
 let LIVE = [];
 
 const UPCOMING = [
-  {date:'Jun 19', h:'USA',          a:'Australia',              g:'D', md:'MD2'},
-  {date:'Jun 19', h:'Turkiye',      a:'Paraguay',               g:'D', md:'MD2'},
-  {date:'Jun 19', h:'Morocco',      a:'Scotland',               g:'C', md:'MD2'},
-  {date:'Jun 19', h:'Brazil',       a:'Haiti',                  g:'C', md:'MD2'},
   {date:'Jun 20', h:'Germany',      a:'Ivory Coast',            g:'E', md:'MD2'},
   {date:'Jun 20', h:'Ecuador',      a:'Curacao',                g:'E', md:'MD2'},
   {date:'Jun 20', h:'Japan',        a:'Sweden',                 g:'F', md:'MD2'},
@@ -816,16 +812,18 @@ function openModal(name) {
   document.getElementById('modal-title').textContent = `${medals[rank]||'#'+rank}  ${name}${entrant.ai ? ' (AI)' : ''}`;
   document.getElementById('modal-sub').textContent = `Rank ${rank} of 23  ·  ${sc.total.toFixed(2)} pts`;
 
-  // Summary stats
+  // Summary stats — "Teams progressing" must match the leaderboard's "Teams Through" logic
+  const thirdRanking = getThirdPlaceRanking();
+  const thirdPlaceQualifiers = new Set(thirdRanking.slice(0,8).map(t=>t.team));
   const teamsScoring = Object.values(sc.detail).filter(d=>d.pts>0).length;
-  const teamsProgressing = Object.values(sc.detail).filter(d=>d.pos==='W'||d.pos==='RU').length;
+  const teamsProgressing = countTeamsThrough(entrant.picks, thirdPlaceQualifiers);
   const teamsLive = Object.values(sc.detail).filter(d=>isLiveTeam(Object.keys(sc.detail).find(k=>sc.detail[k]===d))).length;
   const bestTeam = Object.entries(sc.detail).filter(([,v])=>v.pts>0).sort((a,b)=>b[1].pts-a[1].pts)[0];
 
   document.getElementById('modal-body').innerHTML = `
     <div class="modal-summary">
       <div class="modal-stat"><span class="modal-stat-val">${sc.total.toFixed(2)}</span><span class="modal-stat-lbl">Total points</span></div>
-      <div class="modal-stat"><span class="modal-stat-val">${teamsProgressing}</span><span class="modal-stat-lbl">Teams progressing</span></div>
+      <div class="modal-stat"><span class="modal-stat-val">${teamsProgressing}/24</span><span class="modal-stat-lbl">Teams through</span></div>
       <div class="modal-stat"><span class="modal-stat-val">${teamsScoring}</span><span class="modal-stat-lbl">Teams scoring</span></div>
       ${bestTeam ? `<div class="modal-stat"><span class="modal-stat-val" style="font-size:16px">${bestTeam[0]}</span><span class="modal-stat-lbl">Best pick (+${bestTeam[1].pts.toFixed(2)} pts)</span></div>` : ''}
     </div>
@@ -841,7 +839,11 @@ function openModal(name) {
             let cls = 'mtp-tbd', label = 'TBD';
             if (live) { cls='mtp-live'; label='LIVE'; }
             else if (pos==='W'||pos==='RU') { cls='mtp-thru'; label={W:'1st',RU:'2nd'}[pos]; }
-            else if (pos==='T3') { cls='mtp-out'; label='3rd'; }
+            else if (pos==='T3') {
+              const qualifying = thirdPlaceQualifiers.has(team);
+              cls = qualifying ? 'mtp-thru' : 'mtp-out';
+              label = qualifying ? '3rd (Q)' : '3rd';
+            }
             else if (pos==='F4') { cls='mtp-out'; label='4th'; }
             const ptsStr = d.pts > 0 ? `+${d.pts.toFixed(2)}` : pos==='F4' ? '0.00' : '';
             return `<div class="modal-team">
@@ -913,7 +915,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 19 — Czechia 1–1 South Africa, Mexico 1–0 South Korea, Switzerland 4–1 Bosnia, Canada 6–0 Qatar added. Groups A &amp; B standings updated for Matchday 2. Mexico through to knockouts.';
+  'Updated Jun 20 — USA 2–0 Australia, Morocco 1–0 Scotland, Brazil 3–0 Haiti, Paraguay 1–0 Turkiye added. Groups C &amp; D updated. USA and Mexico through to knockouts; Turkiye eliminated.';
 setInterval(refreshAll, 60000);
 refreshAll();
 </script>
