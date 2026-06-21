@@ -178,7 +178,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Matchday 2 underway — Groups A–D played. USA, Mexico through!</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Matchday 2 underway — Groups A–F played. Germany, USA, Mexico through!</p>
     <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
     <div class="last-updated" id="last-updated">Loading live scores...</div>
   </div>
@@ -270,7 +270,7 @@ const GROUPS = {
   C:['Brazil','Morocco','Scotland','Haiti'],
   D:['USA','Paraguay','Australia','Turkiye'],
   E:['Germany','Ivory Coast','Ecuador','Curacao'],
-  F:['Sweden','Japan','Netherlands','Tunisia'],
+  F:['Netherlands','Japan','Sweden','Tunisia'],
   G:['New Zealand','Iran','Belgium','Egypt'],
   H:['Uruguay','Saudi Arabia','Spain','Cape Verde'],
   I:['Norway','France','Senegal','Iraq'],
@@ -352,16 +352,21 @@ const CONFIRMED = [
   {g:'C',h:'Morocco',      a:'Scotland',      hg:1,ag:0,ft:true},
   {g:'C',h:'Brazil',       a:'Haiti',         hg:3,ag:0,ft:true},
   {g:'D',h:'Paraguay',     a:'Turkiye',       hg:1,ag:0,ft:true},
+  // Jun 20 — Matchday 2, Groups E & F
+  {g:'E',h:'Germany',      a:'Ivory Coast',   hg:2,ag:1,ft:true},
+  {g:'E',h:'Ecuador',      a:'Curacao',       hg:0,ag:0,ft:true},
+  {g:'F',h:'Netherlands',  a:'Sweden',        hg:5,ag:1,ft:true},
+  {g:'F',h:'Japan',        a:'Tunisia',       hg:4,ag:0,ft:true},
 ];
 
 // No live matches right now
 let LIVE = [];
 
 const UPCOMING = [
-  {date:'Jun 20', h:'Germany',      a:'Ivory Coast',            g:'E', md:'MD2'},
-  {date:'Jun 20', h:'Ecuador',      a:'Curacao',                g:'E', md:'MD2'},
-  {date:'Jun 20', h:'Japan',        a:'Sweden',                 g:'F', md:'MD2'},
-  {date:'Jun 21', h:'Netherlands',  a:'Tunisia',                g:'F', md:'MD2'},
+  {date:'Jun 21', h:'Belgium',      a:'Iran',                   g:'G', md:'MD3'},
+  {date:'Jun 21', h:'New Zealand',  a:'Egypt',                  g:'G', md:'MD3'},
+  {date:'Jun 21', h:'Uruguay',      a:'Spain',                  g:'H', md:'MD3'},
+  {date:'Jun 21', h:'Cape Verde',   a:'Saudi Arabia',           g:'H', md:'MD3'},
 ];
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -915,7 +920,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 20 — USA 2–0 Australia, Morocco 1–0 Scotland, Brazil 3–0 Haiti, Paraguay 1–0 Turkiye added. Groups C &amp; D updated. USA and Mexico through to knockouts; Turkiye eliminated.';
+  'Updated Jun 21 — Germany 2–1 Ivory Coast, Ecuador 0–0 Curaçao, Netherlands 5–1 Sweden, Japan 4–0 Tunisia added. Groups E &amp; F updated. Germany through; Tunisia eliminated.';
 setInterval(refreshAll, 60000);
 refreshAll();
 </script>
