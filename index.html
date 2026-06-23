@@ -178,7 +178,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Matchday 3 underway — Groups G &amp; H played. Egypt and Spain through!</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Matchday 3 underway — Groups I &amp; J played. France, Norway, Argentina through!</p>
     <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
     <div class="last-updated" id="last-updated">Loading live scores...</div>
   </div>
@@ -273,7 +273,7 @@ const GROUPS = {
   F:['Netherlands','Japan','Sweden','Tunisia'],
   G:['Egypt','Iran','Belgium','New Zealand'],
   H:['Spain','Uruguay','Cape Verde','Saudi Arabia'],
-  I:['Norway','France','Senegal','Iraq'],
+  I:['France','Norway','Senegal','Iraq'],
   J:['Argentina','Austria','Algeria','Jordan'],
   K:['Colombia','Dr Congo','Portugal','Uzbekistan'],
   L:['England','Ghana','Croatia','Panama']
@@ -362,16 +362,21 @@ const CONFIRMED = [
   {g:'G',h:'Egypt',        a:'New Zealand',   hg:3,ag:1,ft:true},
   {g:'H',h:'Spain',        a:'Saudi Arabia',  hg:4,ag:0,ft:true},
   {g:'H',h:'Uruguay',      a:'Cape Verde',    hg:2,ag:2,ft:true},
+  // Jun 22 — Matchday 3, Groups I & J
+  {g:'I',h:'France',       a:'Iraq',          hg:3,ag:0,ft:true},
+  {g:'I',h:'Norway',       a:'Senegal',       hg:3,ag:2,ft:true},
+  {g:'J',h:'Argentina',    a:'Austria',       hg:2,ag:0,ft:true},
+  {g:'J',h:'Algeria',      a:'Jordan',        hg:2,ag:1,ft:true},
 ];
 
 // No live matches right now
 let LIVE = [];
 
 const UPCOMING = [
-  {date:'Jun 22', h:'France',       a:'Iraq',                   g:'I', md:'MD3'},
-  {date:'Jun 22', h:'Norway',       a:'Senegal',                g:'I', md:'MD3'},
-  {date:'Jun 22', h:'Argentina',    a:'Jordan',                 g:'J', md:'MD3'},
-  {date:'Jun 22', h:'Austria',      a:'Algeria',                g:'J', md:'MD3'},
+  {date:'Jun 23', h:'Portugal',     a:'Uzbekistan',             g:'K', md:'MD3'},
+  {date:'Jun 23', h:'Colombia',     a:'Dr Congo',               g:'K', md:'MD3'},
+  {date:'Jun 23', h:'England',      a:'Ghana',                  g:'L', md:'MD3'},
+  {date:'Jun 23', h:'Panama',       a:'Croatia',                g:'L', md:'MD3'},
 ];
 
 // ══════════════════════════════════════════════════════════════════════════════
