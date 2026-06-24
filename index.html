@@ -178,7 +178,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Matchday 3 underway — Groups I &amp; J played. France, Norway, Argentina through!</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; All teams have played twice. Matchday 3 (final group games) runs Jun 24–27.</p>
     <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
     <div class="last-updated" id="last-updated">Loading live scores...</div>
   </div>
@@ -275,7 +275,7 @@ const GROUPS = {
   H:['Spain','Uruguay','Cape Verde','Saudi Arabia'],
   I:['France','Norway','Senegal','Iraq'],
   J:['Argentina','Austria','Algeria','Jordan'],
-  K:['Colombia','Dr Congo','Portugal','Uzbekistan'],
+  K:['Colombia','Portugal','Dr Congo','Uzbekistan'],
   L:['England','Ghana','Croatia','Panama']
 };
 
@@ -367,16 +367,41 @@ const CONFIRMED = [
   {g:'I',h:'Norway',       a:'Senegal',       hg:3,ag:2,ft:true},
   {g:'J',h:'Argentina',    a:'Austria',       hg:2,ag:0,ft:true},
   {g:'J',h:'Algeria',      a:'Jordan',        hg:2,ag:1,ft:true},
+  // Jun 23 — Matchday 2, Groups K & L
+  {g:'K',h:'Portugal',     a:'Uzbekistan',    hg:5,ag:0,ft:true},
+  {g:'K',h:'Colombia',     a:'Dr Congo',      hg:1,ag:0,ft:true},
+  {g:'L',h:'England',      a:'Ghana',         hg:0,ag:0,ft:true},
+  {g:'L',h:'Croatia',      a:'Panama',        hg:1,ag:0,ft:true},
 ];
 
 // No live matches right now
 let LIVE = [];
 
 const UPCOMING = [
-  {date:'Jun 23', h:'Portugal',     a:'Uzbekistan',             g:'K', md:'MD3'},
-  {date:'Jun 23', h:'Colombia',     a:'Dr Congo',               g:'K', md:'MD3'},
-  {date:'Jun 23', h:'England',      a:'Ghana',                  g:'L', md:'MD3'},
-  {date:'Jun 23', h:'Panama',       a:'Croatia',                g:'L', md:'MD3'},
+  {date:'Jun 24', h:'Czechia',      a:'Mexico',                 g:'A', md:'MD3'},
+  {date:'Jun 24', h:'South Africa', a:'South Korea',            g:'A', md:'MD3'},
+  {date:'Jun 24', h:'Switzerland',  a:'Canada',                 g:'B', md:'MD3'},
+  {date:'Jun 24', h:'Bosnia And Herzegovina', a:'Qatar',        g:'B', md:'MD3'},
+  {date:'Jun 24', h:'Scotland',     a:'Brazil',                 g:'C', md:'MD3'},
+  {date:'Jun 24', h:'Morocco',      a:'Haiti',                  g:'C', md:'MD3'},
+  {date:'Jun 25', h:'Turkiye',      a:'USA',                    g:'D', md:'MD3'},
+  {date:'Jun 25', h:'Paraguay',     a:'Australia',               g:'D', md:'MD3'},
+  {date:'Jun 25', h:'Curacao',      a:'Germany',                g:'E', md:'MD3'},
+  {date:'Jun 25', h:'Ecuador',      a:'Ivory Coast',            g:'E', md:'MD3'},
+  {date:'Jun 25', h:'Japan',        a:'Sweden',                 g:'F', md:'MD3'},
+  {date:'Jun 25', h:'Tunisia',      a:'Netherlands',             g:'F', md:'MD3'},
+  {date:'Jun 26', h:'Egypt',        a:'Iran',                   g:'G', md:'MD3'},
+  {date:'Jun 26', h:'New Zealand',  a:'Belgium',                g:'G', md:'MD3'},
+  {date:'Jun 26', h:'Cape Verde',   a:'Saudi Arabia',           g:'H', md:'MD3'},
+  {date:'Jun 26', h:'Uruguay',      a:'Spain',                  g:'H', md:'MD3'},
+  {date:'Jun 26', h:'Norway',       a:'France',                 g:'I', md:'MD3'},
+  {date:'Jun 26', h:'Senegal',      a:'Iraq',                   g:'I', md:'MD3'},
+  {date:'Jun 27', h:'Jordan',       a:'Argentina',              g:'J', md:'MD3'},
+  {date:'Jun 27', h:'Algeria',      a:'Austria',                g:'J', md:'MD3'},
+  {date:'Jun 27', h:'Colombia',     a:'Portugal',               g:'K', md:'MD3'},
+  {date:'Jun 27', h:'Dr Congo',     a:'Uzbekistan',              g:'K', md:'MD3'},
+  {date:'Jun 27', h:'Panama',       a:'England',                g:'L', md:'MD3'},
+  {date:'Jun 27', h:'Croatia',      a:'Ghana',                  g:'L', md:'MD3'},
 ];
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -930,7 +955,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 22 — Belgium 0–0 Iran, Egypt 3–1 New Zealand, Spain 4–0 Saudi Arabia, Uruguay 2–2 Cape Verde added. Groups G &amp; H updated. Egypt and Spain through to knockouts.';
+  'Updated Jun 23 — France 3–0 Iraq, Norway 3–2 Senegal, Argentina 2–0 Austria, Algeria 2–1 Jordan added. Groups I &amp; J updated. France, Norway and Argentina through; Jordan eliminated.';
 setInterval(refreshAll, 60000);
 refreshAll();
 </script>
