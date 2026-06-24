@@ -36,6 +36,10 @@ h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
 .lb.first{border-color:#4ade80}
 .lb-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-bottom:10px}
 .av-dan{background:#dbeafe;color:#1d4ed8}.av-max{background:#dcfce7;color:#166534}.av-seb{background:#fef9c3;color:#854d0e}
+.av-hypo1{background:#ede9fe;color:#6d28d9}.av-hypo2{background:#fce7f3;color:#9d174d}
+table.lb-full tr.hypo-row td{background:#fafaff}
+table.lb-full tr.hypo-row:hover td{background:#f5f3ff !important}
+.hypo-badge{display:inline-block;font-size:10px;background:#ede9fe;color:#6d28d9;padding:1px 6px;border-radius:4px;margin-left:5px;font-weight:500}
 .lb-name{font-size:16px;font-weight:700}
 .lb-sub{font-size:12px;color:#999;margin-bottom:10px}
 .lb-pts{font-size:38px;font-weight:800;line-height:1}
@@ -194,6 +198,10 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <h2>🏆 Full competition leaderboard — all 23 entrants</h2>
 <div class="card"><table class="lb-full" id="full-lb"></table></div>
 
+<h2>💭 Hypothetical leaderboard</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">Two reference benchmarks to compare against the real entrants — click either row to see their 24 picks.</p>
+<div class="card"><table class="lb-full" id="hypo-lb"></table></div>
+
 <!-- ═══ GROUP TABLES ══════════════════════════════════════════════════════ -->
 <h2>Group tables</h2>
 <p style="font-size:12px;color:#888;margin-bottom:10px"><b>Odds</b> = decimal odds to win the group. <b>Multi</b> = position multiplier, applied to the odds depending on where a team finishes in the group (1st ×1.0, 2nd ×0.5, 3rd ×0.25, 4th ×0). <b>CP</b> = Competition Points currently earned, calculated as Odds × Multi.</p>
@@ -303,7 +311,7 @@ const ALL_ENTRANTS = [
    picks:{A:['Czechia','South Korea'],B:['Canada','Bosnia And Herzegovina'],C:['Morocco','Scotland'],D:['USA','Australia'],E:['Ecuador','Ivory Coast'],F:['Japan','Sweden'],G:['Egypt','New Zealand'],H:['Saudi Arabia','Cape Verde'],I:['Norway','Senegal'],J:['Austria','Algeria'],K:['Colombia','Dr Congo'],L:['Croatia','Ghana']}},
   {name:'Dons',  ai:true,  picks:{A:['Mexico','Czechia'],B:['Switzerland','Canada'],C:['Brazil','Morocco'],D:['USA','Paraguay'],E:['Germany','Ecuador'],F:['Netherlands','Japan'],G:['Belgium','Iran'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
   {name:'Matt R',ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Canada'],C:['Brazil','Morocco'],D:['USA','Paraguay'],E:['Germany','Ivory Coast'],F:['Netherlands','Sweden'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
-  {name:'Matt P',ai:false, picks:{A:['Mexico','Czechia'],B:['Switzerland','Canada'],C:['Brazil','Morocco'],D:['USA','Turkiye'],E:['Germany','Ecuador'],F:['Netherlands','Japan'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
+  {name:'Matt P',ai:false, picks:{A:['Mexico','Czechia'],B:['Switzerland','Bosnia And Herzegovina'],C:['Brazil','Morocco'],D:['USA','Turkiye'],E:['Germany','Ecuador'],F:['Netherlands','Japan'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Algeria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
   {name:'Dave',  ai:false, picks:{A:['Mexico','Czechia'],B:['Switzerland','Canada'],C:['Brazil','Morocco'],D:['USA','Paraguay'],E:['Germany','Ecuador'],F:['Netherlands','Japan'],G:['Egypt','Iran'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
   {name:'Lynne', ai:false, picks:{A:['Czechia','South Korea'],B:['Switzerland','Bosnia And Herzegovina'],C:['Brazil','Morocco'],D:['Turkiye','Paraguay'],E:['Germany','Ivory Coast'],F:['Netherlands','Japan'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Algeria'],K:['Colombia','Dr Congo'],L:['England','Croatia']}},
   {name:'Martin',ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Canada'],C:['Brazil','Morocco'],D:['Turkiye','Paraguay'],E:['Germany','Ecuador'],F:['Netherlands','Sweden'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Norway'],J:['Argentina','Algeria'],K:['Portugal','Colombia'],L:['England','Ghana']}}
@@ -485,6 +493,58 @@ function calcEntrant(picks) {
   return {total,detail};
 }
 
+// "Max Possible" — for each group, picks whichever 2 teams generate the most
+// Competition Points right now. A team in 3rd place can score more than a team
+// in 1st or 2nd if its odds are long enough (odds × 0.25 can exceed odds × 1.0
+// or odds × 0.5 for shorter-priced teams), so every team's actual current CP
+// must be compared — not just their league position. 4th place always scores
+// zero, so it's never worth picking once a group has played at least one game.
+function buildMaxPossiblePicks() {
+  const picks = {};
+  Object.entries(GROUPS).forEach(([grp, teams]) => {
+    const tbl = buildTable(grp);
+    const played = tbl.length && tbl[0][1].P > 0;
+    if (played) {
+      // Compute actual CP for every team at their current position, then take the top 2
+      const withCP = tbl.map(([team], i) => {
+        const pos = ['W','RU','T3','F4'][i];
+        const cp = (ODDS[team]||0) * MULT[pos];
+        return { team, cp };
+      });
+      withCP.sort((a,b) => b.cp - a.cp);
+      picks[grp] = [withCP[0].team, withCP[1].team];
+    } else {
+      // Group hasn't started — best guess uses the two shortest-odds teams
+      const sorted = [...teams].sort((a,b) => (ODDS[a]||99) - (ODDS[b]||99));
+      picks[grp] = [sorted[0], sorted[1]];
+    }
+  });
+  return picks;
+}
+
+// "Favourites" — the two shortest-odds teams in each group, exactly as if
+// drafted on Day 1 using only the Ladbrokes odds, with no knowledge of how
+// the groups would actually play out. Static — never changes.
+function buildPreTournamentPicks() {
+  const picks = {};
+  Object.entries(GROUPS).forEach(([grp, teams]) => {
+    const sorted = [...teams].sort((a,b) => (ODDS[a]||99) - (ODDS[b]||99));
+    picks[grp] = [sorted[0], sorted[1]];
+  });
+  return picks;
+}
+
+function getHypotheticalEntrants() {
+  return [
+    { name:'Max Possible', ai:false, hypothetical:true, av:'av-hypo1',
+      desc:'The 2 highest-scoring teams from every group, right now — the maximum Competition Points achievable based on current standings (includes 3rd-placed teams where their odds make them worth more than 1st/2nd).',
+      picks: buildMaxPossiblePicks() },
+    { name:'Favourites', ai:false, hypothetical:true, av:'av-hypo2',
+      desc:'The two shortest-odds favourites in every group, selected using only the Ladbrokes odds before a ball was kicked.',
+      picks: buildPreTournamentPicks() }
+  ];
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // RENDER
 // ══════════════════════════════════════════════════════════════════════════════
@@ -618,6 +678,35 @@ function renderAll() {
         <td class="pts hide-mobile" style="color:#166534;font-weight:700">${through}/24</td>
         <td class="pts hide-mobile" style="font-weight:400;font-size:12px;color:#666">${bestStr}</td>
         <td class="pts hide-mobile" style="color:#ef4444;font-size:12px">${gap}</td>
+      </tr>`;
+    }).join('') + '</tbody>';
+
+  // ── Hypothetical leaderboard
+  const hypoEntrants = getHypotheticalEntrants();
+  const hypoScored = hypoEntrants.map(e => ({...e, ...calcEntrant(e.picks)}));
+  const hypoMax = Math.max(...hypoScored.map(h=>h.total), ...scored.map(s=>s.total), 0.001);
+  document.getElementById('hypo-lb').innerHTML = `
+    <thead><tr>
+      <th style="width:40px"></th>
+      <th>Scenario</th>
+      <th class="num">Points</th>
+      <th class="num hide-mobile" title="Teams currently in a qualifying spot (1st, 2nd, or best-8 3rd place)">Teams Through</th>
+      <th class="num hide-mobile" style="color:#4ade80">Best team</th>
+      <th class="num hide-mobile">vs real leader</th>
+    </tr></thead>
+    <tbody>` +
+    hypoScored.map((e,i)=>{
+      const gap = e.total >= scored[0].total ? `+${(e.total-scored[0].total).toFixed(2)}` : `–${(scored[0].total-e.total).toFixed(2)}`;
+      const best = Object.entries(e.detail).filter(([,v])=>v.pts>0).sort((a,b)=>b[1].pts-a[1].pts)[0];
+      const bestStr = best ? `${best[0]} (+${best[1].pts.toFixed(2)})` : '—';
+      const through = countTeamsThrough(e.picks, thirdPlaceQualifiers);
+      return `<tr class="hypo-row" onclick="openModal('${e.name}')" title="Click to see the 24 picks for this scenario">
+        <td class="rank">💭</td>
+        <td class="name-cell">${e.name}<span class="hypo-badge">Hypothetical</span></td>
+        <td class="pts">${e.total.toFixed(2)}</td>
+        <td class="pts hide-mobile" style="color:#166534;font-weight:700">${through}/24</td>
+        <td class="pts hide-mobile" style="font-weight:400;font-size:12px;color:#666">${bestStr}</td>
+        <td class="pts hide-mobile" style="color:${e.total>=scored[0].total?'#166534':'#ef4444'};font-size:12px">${gap}</td>
       </tr>`;
     }).join('') + '</tbody>';
 
@@ -841,16 +930,28 @@ function updateLiveFromAPI(matches) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 function openModal(name) {
-  const entrant = ALL_ENTRANTS.find(e => e.name === name);
+  const hypoEntrants = getHypotheticalEntrants();
+  const entrant = ALL_ENTRANTS.find(e => e.name === name) || hypoEntrants.find(e => e.name === name);
   if (!entrant) return;
 
   const scored = ALL_ENTRANTS.map(e=>({...e,...calcEntrant(e.picks)})).sort((a,b)=>b.total-a.total);
-  const sc = scored.find(s => s.name === name);
-  const rank = scored.findIndex(s => s.name === name) + 1;
-  const medals = {1:'🥇',2:'🥈',3:'🥉'};
+  const hypoScored = hypoEntrants.map(e=>({...e,...calcEntrant(e.picks)}));
 
-  document.getElementById('modal-title').textContent = `${medals[rank]||'#'+rank}  ${name}${entrant.ai ? ' (AI)' : ''}`;
-  document.getElementById('modal-sub').textContent = `Rank ${rank} of 23  ·  ${sc.total.toFixed(2)} pts`;
+  let sc, rank, rankLabel;
+  if (entrant.hypothetical) {
+    sc = hypoScored.find(s => s.name === name);
+    rankLabel = '💭 Hypothetical scenario';
+  } else {
+    sc = scored.find(s => s.name === name);
+    rank = scored.findIndex(s => s.name === name) + 1;
+    const medals = {1:'🥇',2:'🥈',3:'🥉'};
+    rankLabel = `${medals[rank]||'#'+rank}  Rank ${rank} of 23`;
+  }
+
+  document.getElementById('modal-title').textContent = `${entrant.hypothetical?'💭 ':''}${name}${entrant.ai ? ' (AI)' : ''}`;
+  document.getElementById('modal-sub').textContent = entrant.hypothetical
+    ? `${entrant.desc}  ·  ${sc.total.toFixed(2)} pts`
+    : `Rank ${rank} of 23  ·  ${sc.total.toFixed(2)} pts`;
 
   // Summary stats — "Teams progressing" must match the leaderboard's "Teams Through" logic
   const thirdRanking = getThirdPlaceRanking();
@@ -862,6 +963,7 @@ function openModal(name) {
 
   document.getElementById('modal-body').innerHTML = `
     <div class="modal-summary">
+      ${entrant.hypothetical ? `<div class="modal-stat" style="grid-column:1/-1"><span class="modal-stat-lbl" style="font-size:12px;color:#6d28d9">${entrant.desc}</span></div>` : ''}
       <div class="modal-stat"><span class="modal-stat-val">${sc.total.toFixed(2)}</span><span class="modal-stat-lbl">Total points</span></div>
       <div class="modal-stat"><span class="modal-stat-val">${teamsProgressing}/24</span><span class="modal-stat-lbl">Teams through</span></div>
       <div class="modal-stat"><span class="modal-stat-val">${teamsScoring}</span><span class="modal-stat-lbl">Teams scoring</span></div>
@@ -955,7 +1057,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 23 — France 3–0 Iraq, Norway 3–2 Senegal, Argentina 2–0 Austria, Algeria 2–1 Jordan added. Groups I &amp; J updated. France, Norway and Argentina through; Jordan eliminated.';
+  'Updated Jun 24 — Portugal 5–0 Uzbekistan, Colombia 1–0 DR Congo, England 0–0 Ghana, Croatia 1–0 Panama added. All 48 teams have now played twice. Final group games run Jun 24–27.';
 setInterval(refreshAll, 60000);
 refreshAll();
 </script>
