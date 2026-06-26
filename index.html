@@ -182,7 +182,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Groups A, B &amp; C finalised! Mexico, South Africa, Switzerland, Canada, Brazil, Morocco through.</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Groups D, E &amp; F finalised! USA, Australia, Germany, Ivory Coast, Netherlands, Japan through.</p>
     <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
     <div class="last-updated" id="last-updated">Loading live scores...</div>
   </div>
@@ -276,7 +276,7 @@ const GROUPS = {
   A:['Mexico','South Africa','South Korea','Czechia'],
   B:['Switzerland','Canada','Bosnia And Herzegovina','Qatar'],
   C:['Brazil','Morocco','Scotland','Haiti'],
-  D:['USA','Paraguay','Australia','Turkiye'],
+  D:['USA','Australia','Paraguay','Turkiye'],
   E:['Germany','Ivory Coast','Ecuador','Curacao'],
   F:['Netherlands','Japan','Sweden','Tunisia'],
   G:['Egypt','Iran','Belgium','New Zealand'],
@@ -387,18 +387,19 @@ const CONFIRMED = [
   {g:'B',h:'Bosnia And Herzegovina', a:'Qatar', hg:3,ag:1,ft:true},
   {g:'C',h:'Scotland',     a:'Brazil',        hg:0,ag:3,ft:true},
   {g:'C',h:'Morocco',      a:'Haiti',         hg:4,ag:2,ft:true},
+  // Jun 25 — Matchday 3 (final group games), Groups D, E, F
+  {g:'D',h:'Turkiye',      a:'USA',           hg:3,ag:2,ft:true},
+  {g:'D',h:'Paraguay',     a:'Australia',     hg:0,ag:0,ft:true},
+  {g:'E',h:'Ecuador',      a:'Germany',       hg:2,ag:1,ft:true},
+  {g:'E',h:'Ivory Coast',  a:'Curacao',       hg:2,ag:0,ft:true},
+  {g:'F',h:'Japan',        a:'Sweden',        hg:1,ag:1,ft:true},
+  {g:'F',h:'Netherlands',  a:'Tunisia',       hg:3,ag:1,ft:true},
 ];
 
 // No live matches right now
 let LIVE = [];
 
 const UPCOMING = [
-  {date:'Jun 25', h:'Turkiye',      a:'USA',                    g:'D', md:'MD3'},
-  {date:'Jun 25', h:'Paraguay',     a:'Australia',               g:'D', md:'MD3'},
-  {date:'Jun 25', h:'Curacao',      a:'Germany',                g:'E', md:'MD3'},
-  {date:'Jun 25', h:'Ecuador',      a:'Ivory Coast',            g:'E', md:'MD3'},
-  {date:'Jun 25', h:'Japan',        a:'Sweden',                 g:'F', md:'MD3'},
-  {date:'Jun 25', h:'Tunisia',      a:'Netherlands',             g:'F', md:'MD3'},
   {date:'Jun 26', h:'Egypt',        a:'Iran',                   g:'G', md:'MD3'},
   {date:'Jun 26', h:'New Zealand',  a:'Belgium',                g:'G', md:'MD3'},
   {date:'Jun 26', h:'Cape Verde',   a:'Saudi Arabia',           g:'H', md:'MD3'},
@@ -1058,7 +1059,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 25 — Mexico 3–0 Czechia, South Africa 1–0 South Korea, Switzerland 2–1 Canada, Bosnia 3–1 Qatar, Scotland 0–3 Brazil, Morocco 4–2 Haiti added. Groups A, B &amp; C now finalised.';
+  'Updated Jun 26 — Türkiye 3–2 USA, Paraguay 0–0 Australia, Ecuador 2–1 Germany, Ivory Coast 2–0 Curaçao, Japan 1–1 Sweden, Netherlands 3–1 Tunisia added. Groups D, E &amp; F now finalised.';
 setInterval(refreshAll, 60000);
 refreshAll();
 </script>
