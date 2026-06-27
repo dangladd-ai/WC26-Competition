@@ -182,7 +182,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Groups D, E &amp; F finalised! USA, Australia, Germany, Ivory Coast, Netherlands, Japan through.</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Groups G, H &amp; I finalised! Belgium, Egypt, Spain, Cape Verde, France, Norway through. Final group games (J, K, L) tomorrow!</p>
     <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
     <div class="last-updated" id="last-updated">Loading live scores...</div>
   </div>
@@ -279,8 +279,8 @@ const GROUPS = {
   D:['USA','Australia','Paraguay','Turkiye'],
   E:['Germany','Ivory Coast','Ecuador','Curacao'],
   F:['Netherlands','Japan','Sweden','Tunisia'],
-  G:['Egypt','Iran','Belgium','New Zealand'],
-  H:['Spain','Uruguay','Cape Verde','Saudi Arabia'],
+  G:['Belgium','Egypt','Iran','New Zealand'],
+  H:['Spain','Cape Verde','Saudi Arabia','Uruguay'],
   I:['France','Norway','Senegal','Iraq'],
   J:['Argentina','Austria','Algeria','Jordan'],
   K:['Colombia','Portugal','Dr Congo','Uzbekistan'],
@@ -394,18 +394,19 @@ const CONFIRMED = [
   {g:'E',h:'Ivory Coast',  a:'Curacao',       hg:2,ag:0,ft:true},
   {g:'F',h:'Japan',        a:'Sweden',        hg:1,ag:1,ft:true},
   {g:'F',h:'Netherlands',  a:'Tunisia',       hg:3,ag:1,ft:true},
+  // Jun 26 — Matchday 3 (final group games), Groups G, H, I
+  {g:'G',h:'Egypt',        a:'Iran',          hg:1,ag:1,ft:true},
+  {g:'G',h:'Belgium',      a:'New Zealand',   hg:5,ag:1,ft:true},
+  {g:'H',h:'Cape Verde',   a:'Saudi Arabia',  hg:0,ag:0,ft:true},
+  {g:'H',h:'Spain',        a:'Uruguay',       hg:1,ag:0,ft:true},
+  {g:'I',h:'Norway',       a:'France',        hg:4,ag:1,ft:true},
+  {g:'I',h:'Senegal',      a:'Iraq',          hg:5,ag:0,ft:true},
 ];
 
 // No live matches right now
 let LIVE = [];
 
 const UPCOMING = [
-  {date:'Jun 26', h:'Egypt',        a:'Iran',                   g:'G', md:'MD3'},
-  {date:'Jun 26', h:'New Zealand',  a:'Belgium',                g:'G', md:'MD3'},
-  {date:'Jun 26', h:'Cape Verde',   a:'Saudi Arabia',           g:'H', md:'MD3'},
-  {date:'Jun 26', h:'Uruguay',      a:'Spain',                  g:'H', md:'MD3'},
-  {date:'Jun 26', h:'Norway',       a:'France',                 g:'I', md:'MD3'},
-  {date:'Jun 26', h:'Senegal',      a:'Iraq',                   g:'I', md:'MD3'},
   {date:'Jun 27', h:'Jordan',       a:'Argentina',              g:'J', md:'MD3'},
   {date:'Jun 27', h:'Algeria',      a:'Austria',                g:'J', md:'MD3'},
   {date:'Jun 27', h:'Colombia',     a:'Portugal',               g:'K', md:'MD3'},
@@ -1059,7 +1060,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 26 — Türkiye 3–2 USA, Paraguay 0–0 Australia, Ecuador 2–1 Germany, Ivory Coast 2–0 Curaçao, Japan 1–1 Sweden, Netherlands 3–1 Tunisia added. Groups D, E &amp; F now finalised.';
+  'Updated Jun 27 — Egypt 1–1 Iran, Belgium 5–1 New Zealand, Cape Verde 0–0 Saudi Arabia, Spain 1–0 Uruguay, Norway 4–1 France, Senegal 5–0 Iraq added. Groups G, H &amp; I now finalised.';
 setInterval(refreshAll, 60000);
 refreshAll();
 </script>
