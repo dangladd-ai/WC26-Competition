@@ -152,6 +152,8 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 .pop-name{font-size:11px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#111}
 .pop-name-click{cursor:pointer;color:#1d4ed8;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px}
 .pop-name-click:hover{color:#1e40af}
+.pop-name-qualified{color:#166534 !important}
+.pop-name-qualified:hover{color:#14532d !important}
 .pop-pip-wrap{display:flex;gap:2px;flex-shrink:0}
 .pop-pip{width:7px;height:7px;border-radius:2px;background:#e5e7eb}
 .pop-pip.filled{background:#4ade80}
@@ -182,7 +184,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Groups G, H &amp; I finalised! Belgium, Egypt, Spain, Cape Verde, France, Norway through. Final group games (J, K, L) tomorrow!</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; 🏁 Group stage complete! All 12 groups finalised. Round of 32 begins Jun 28.</p>
     <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
     <div class="last-updated" id="last-updated">Loading live scores...</div>
   </div>
@@ -218,9 +220,8 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <!-- ═══ TEAM POPULARITY ═══════════════════════════════════════════════════ -->
 <h2>🌍 Team popularity — how many entrants selected each team</h2>
 <div class="legend">
-  <div class="leg"><div class="legdot" style="background:#4ade80"></div>Progressing (1st/2nd) or yet to play</div>
-  <div class="leg"><div class="legdot" style="background:#fbbf24"></div>3rd place — still alive (best 8 third-placed teams qualify)</div>
-  <div class="leg"><div class="legdot" style="background:#fca5a5"></div>Eliminated (4th place)</div>
+  <div class="leg"><div class="legdot" style="background:#4ade80"></div>Qualified for Round of 32 (1st, 2nd, or a best-8 third place)</div>
+  <div class="leg"><div class="legdot" style="background:#fca5a5"></div>Eliminated (4th, or a non-qualifying 3rd place)</div>
   <div class="leg"><div class="legdot" style="background:#ef4444"></div>Currently live</div>
 </div>
 <div class="card" id="team-popularity"></div>
@@ -232,7 +233,8 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="card" id="results"></div>
 
 <!-- ═══ UPCOMING ══════════════════════════════════════════════════════════ -->
-<h2>Upcoming fixtures</h2>
+<h2>Upcoming fixtures — Round of 32 begins</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">The group stage is complete. The Round of 32 kicks off Jun 28 — a new dashboard structure with knockout multipliers (×1.5/0.75/0.25 rising to ×8/4/2 in the Final) will be built next.</p>
 <div class="card" id="upcoming"></div>
 
 <p class="foot">Points: Group odds × multiplier (Winner ×1.0 | Runner-up ×0.5 | 3rd ×0.25 | 4th ×0.0). Knockout rounds add further points. Live scores refresh every 60 seconds. Click any entrant name to see their picks.</p>
@@ -284,7 +286,7 @@ const GROUPS = {
   I:['France','Norway','Senegal','Iraq'],
   J:['Argentina','Austria','Algeria','Jordan'],
   K:['Colombia','Portugal','Dr Congo','Uzbekistan'],
-  L:['England','Ghana','Croatia','Panama']
+  L:['England','Croatia','Ghana','Panama']
 };
 
 // All 23 entrants — picks parsed directly from PDF column positions
@@ -401,18 +403,20 @@ const CONFIRMED = [
   {g:'H',h:'Spain',        a:'Uruguay',       hg:1,ag:0,ft:true},
   {g:'I',h:'Norway',       a:'France',        hg:4,ag:1,ft:true},
   {g:'I',h:'Senegal',      a:'Iraq',          hg:5,ag:0,ft:true},
+  // Jun 27 — Matchday 3 (final group games), Groups J, K, L — GROUP STAGE COMPLETE
+  {g:'J',h:'Argentina',    a:'Jordan',        hg:3,ag:1,ft:true},
+  {g:'J',h:'Austria',      a:'Algeria',       hg:3,ag:3,ft:true},
+  {g:'K',h:'Colombia',     a:'Portugal',      hg:0,ag:0,ft:true},
+  {g:'K',h:'Dr Congo',     a:'Uzbekistan',    hg:3,ag:1,ft:true},
+  {g:'L',h:'England',      a:'Panama',        hg:2,ag:0,ft:true},
+  {g:'L',h:'Croatia',      a:'Ghana',         hg:2,ag:1,ft:true},
 ];
 
 // No live matches right now
 let LIVE = [];
 
 const UPCOMING = [
-  {date:'Jun 27', h:'Jordan',       a:'Argentina',              g:'J', md:'MD3'},
-  {date:'Jun 27', h:'Algeria',      a:'Austria',                g:'J', md:'MD3'},
-  {date:'Jun 27', h:'Colombia',     a:'Portugal',               g:'K', md:'MD3'},
-  {date:'Jun 27', h:'Dr Congo',     a:'Uzbekistan',              g:'K', md:'MD3'},
-  {date:'Jun 27', h:'Panama',       a:'England',                g:'L', md:'MD3'},
-  {date:'Jun 27', h:'Croatia',      a:'Ghana',                  g:'L', md:'MD3'},
+  {date:'Jun 28', h:'Canada',       a:'South Africa',           g:'R32', md:'R32'},
 ];
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -552,7 +556,7 @@ function getHypotheticalEntrants() {
 // RENDER
 // ══════════════════════════════════════════════════════════════════════════════
 
-function renderTeamPopularity(scored) {
+function renderTeamPopularity(scored, thirdPlaceQualifiers) {
   const counts = {};
   Object.keys(GROUPS).forEach(g => GROUPS[g].forEach(t => counts[t] = 0));
   ALL_ENTRANTS.forEach(e => Object.values(e.picks).flat().forEach(t => { if(counts[t]!==undefined) counts[t]++; }));
@@ -593,7 +597,7 @@ function renderTeamPopularity(scored) {
     const pos = teamPos(team, grp);
     if (!pos) return 'tbd';
     if (pos==='W'||pos==='RU') return 'thru';
-    if (pos==='T3') return 'border';
+    if (pos==='T3') return thirdPlaceQualifiers.has(team) ? 'thru' : 'out';
     return 'out';
   };
 
@@ -612,8 +616,9 @@ function renderTeamPopularity(scored) {
         `<div class="pop-pip${i < filledPips ? ` filled ${pipCls}` : ''}"></div>`
       ).join('');
       const odds = ODDS_FRAC[team] || '';
+      const nameCls = status==='thru' ? 'pop-name-qualified' : '';
       html += `<div class="pop-row">
-        <span class="pop-name pop-name-click" title="Click to see who picked ${team}" onclick="openTeamModal('${team}')">${team}</span>
+        <span class="pop-name pop-name-click ${nameCls}" title="Click to see who picked ${team}" onclick="openTeamModal('${team}')">${team}</span>
         <span class="pop-odds">${odds}</span>
         <div class="pop-pip-wrap">${pips}</div>
         <span class="pop-n${n===0?' zero':''}">${n}</span>
@@ -714,7 +719,7 @@ function renderAll() {
     }).join('') + '</tbody>';
 
   // ── Team popularity
-  renderTeamPopularity(scored);
+  renderTeamPopularity(scored, thirdPlaceQualifiers);
 
   // ── Group tables
   const playedGroups = [...new Set(allResults().map(r=>r.g))];
@@ -733,7 +738,8 @@ function renderAll() {
         const cpStr = cp!=null ? cp.toFixed(2) : '—';
         const cpCls = cp!=null && cp>0 ? 'cp-pos' : 'cp-zero';
         const multiStr = s.P>0 ? `×${multi.toFixed(2)}` : '—';
-        return `<tr class="${i<2?'q':''} ${s.live?'lv':''}">
+        const qualifies = (i<2) || (i===2 && thirdPlaceQualifiers.has(team));
+        return `<tr class="${qualifies?'q':''} ${s.live?'lv':''}">
           <td>${team}${s.live?' 🔴':''}</td><td>${s.P}</td><td>${gd>0?'+':''}${gd}</td><td><b>${s.Pts}</b></td><td style="color:#999">${odds.toFixed(3)}</td><td style="color:#999">${multiStr}</td><td class="${cpCls}">${cpStr}</td>
         </tr>`;
       }).join('')}
@@ -1060,7 +1066,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 27 — Egypt 1–1 Iran, Belgium 5–1 New Zealand, Cape Verde 0–0 Saudi Arabia, Spain 1–0 Uruguay, Norway 4–1 France, Senegal 5–0 Iraq added. Groups G, H &amp; I now finalised.';
+  'Updated Jun 28 — Argentina 3–1 Jordan, Austria 3–3 Algeria, Colombia 0–0 Portugal, DR Congo 3–1 Uzbekistan, England 2–0 Panama, Croatia 2–1 Ghana added. 🏁 Group stage complete — all 12 groups finalised!';
 setInterval(refreshAll, 60000);
 refreshAll();
 </script>
