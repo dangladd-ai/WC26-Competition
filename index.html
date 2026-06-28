@@ -204,16 +204,12 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <p style="font-size:12px;color:#888;margin-bottom:10px">Two reference benchmarks to compare against the real entrants — click either row to see their 24 picks.</p>
 <div class="card"><table class="lb-full" id="hypo-lb"></table></div>
 
-<!-- ═══ GROUP TABLES ══════════════════════════════════════════════════════ -->
-<h2>Group tables</h2>
-<p style="font-size:12px;color:#888;margin-bottom:10px"><b>Odds</b> = decimal odds to win the group. <b>Multi</b> = position multiplier, applied to the odds depending on where a team finishes in the group (1st ×1.0, 2nd ×0.5, 3rd ×0.25, 4th ×0). <b>CP</b> = Competition Points currently earned, calculated as Odds × Multi.</p>
-<div class="grid4" id="grptables"></div>
-<p id="grppending" style="font-size:12px;color:#aaa;margin-top:8px"></p>
+<hr class="section-divider">
 
-<h2>🥉 Best 3rd-place teams — who's currently in the Round of 32?</h2>
-<p style="font-size:12px;color:#888;margin-bottom:10px">The top 8 third-placed teams across all 12 groups qualify for the knockout stage alongside the 24 group winners and runners-up. This table ranks all currently-3rd teams by points, then goal difference, then goals scored — exactly as FIFA does.</p>
-<div class="card"><table class="lb-full" id="third-place-table"></table></div>
-<p style="font-size:11px;color:#aaa;margin-top:8px">Green line marks the cutoff — teams above qualify for the Round of 32, teams below are currently eliminated. Only groups with at least one match played are included; this updates automatically as more groups kick off.</p>
+<!-- ═══ ROUND OF 32 FIXTURES & ODDS ═══════════════════════════════════════ -->
+<h2>⚔️ Round of 32 — fixtures and odds</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">All 16 Round of 32 matches with kick-off times (BST) and Win/Draw/Win odds, shown as decimal odds × the Round of 32 multiplier. The result is based on normal time only: Winner (after 90 mins) ×1.0, Draw (after 90 mins) ×0.5, Loser ×0. If a match is drawn after 90 minutes and goes to extra time, <b>both teams</b> receive the ×0.5 draw multiplier regardless of who eventually progresses on penalties or in extra time.</p>
+<div class="card" id="r32-fixtures"></div>
 
 <hr class="section-divider">
 
@@ -228,14 +224,34 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 
 <hr class="section-divider">
 
+<!-- ═══ UPCOMING ══════════════════════════════════════════════════════════ -->
+<h2>Upcoming fixtures</h2>
+<div class="card" id="upcoming"></div>
+
 <!-- ═══ RESULTS ═══════════════════════════════════════════════════════════ -->
 <h2>Results</h2>
-<div class="card" id="results"></div>
+<p style="font-size:12px;color:#888;margin-bottom:10px">Most recent first. Round of 32 results are shown separately above the Group Stage results.</p>
+<div id="results-r32-wrap" style="margin-bottom:18px">
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px">Round of 32</div>
+  <div class="card" id="results-r32"></div>
+</div>
+<div id="results-group-wrap">
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px">Group Stage</div>
+  <div class="card" id="results-group"></div>
+</div>
 
-<!-- ═══ UPCOMING ══════════════════════════════════════════════════════════ -->
-<h2>Upcoming fixtures — Round of 32 begins</h2>
-<p style="font-size:12px;color:#888;margin-bottom:10px">The group stage is complete. The Round of 32 kicks off Jun 28 — a new dashboard structure with knockout multipliers (×1.5/0.75/0.25 rising to ×8/4/2 in the Final) will be built next.</p>
-<div class="card" id="upcoming"></div>
+<hr class="section-divider">
+
+<!-- ═══ GROUP TABLES ══════════════════════════════════════════════════════ -->
+<h2>Group tables</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px"><b>Odds</b> = decimal odds to win the group. <b>Multi</b> = position multiplier, applied to the odds depending on where a team finishes in the group (1st ×1.0, 2nd ×0.5, 3rd ×0.25, 4th ×0). <b>CP</b> = Competition Points currently earned, calculated as Odds × Multi.</p>
+<div class="grid4" id="grptables"></div>
+<p id="grppending" style="font-size:12px;color:#aaa;margin-top:8px"></p>
+
+<h2>🥉 Best 3rd-place teams — who's currently in the Round of 32?</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">The top 8 third-placed teams across all 12 groups qualify for the knockout stage alongside the 24 group winners and runners-up. This table ranks all currently-3rd teams by points, then goal difference, then goals scored — exactly as FIFA does.</p>
+<div class="card"><table class="lb-full" id="third-place-table"></table></div>
+<p style="font-size:11px;color:#aaa;margin-top:8px">Green line marks the cutoff — teams above qualify for the Round of 32, teams below are currently eliminated. Only groups with at least one match played are included; this updates automatically as more groups kick off.</p>
 
 <p class="foot">Points: Group odds × multiplier (Winner ×1.0 | Runner-up ×0.5 | 3rd ×0.25 | 4th ×0.0). Knockout rounds add further points. Live scores refresh every 60 seconds. Click any entrant name to see their picks.</p>
 </div>
@@ -322,102 +338,127 @@ const ALL_ENTRANTS = [
 // Confirmed completed results
 const CONFIRMED = [
   // Jun 11
-  {g:'A',h:'Mexico',      a:'South Africa',           hg:2,ag:0,ft:true},
-  {g:'A',h:'South Korea', a:'Czechia',                hg:2,ag:1,ft:true},
+  {date:'Jun 11',g:'A',h:'Mexico',      a:'South Africa',           hg:2,ag:0,ft:true},
+  {date:'Jun 11',g:'A',h:'South Korea', a:'Czechia',                hg:2,ag:1,ft:true},
   // Jun 12
-  {g:'B',h:'Canada',      a:'Bosnia And Herzegovina', hg:1,ag:1,ft:true},
-  {g:'D',h:'USA',         a:'Paraguay',               hg:4,ag:1,ft:true},
+  {date:'Jun 12',g:'B',h:'Canada',      a:'Bosnia And Herzegovina', hg:1,ag:1,ft:true},
+  {date:'Jun 12',g:'D',h:'USA',         a:'Paraguay',               hg:4,ag:1,ft:true},
   // Jun 13
-  {g:'B',h:'Qatar',       a:'Switzerland',            hg:1,ag:1,ft:true},
-  {g:'C',h:'Brazil',      a:'Morocco',                hg:1,ag:1,ft:true},
-  {g:'C',h:'Scotland',    a:'Haiti',                  hg:1,ag:0,ft:true},
-  {g:'D',h:'Australia',   a:'Turkiye',                hg:2,ag:0,ft:true},
+  {date:'Jun 13',g:'B',h:'Qatar',       a:'Switzerland',            hg:1,ag:1,ft:true},
+  {date:'Jun 13',g:'C',h:'Brazil',      a:'Morocco',                hg:1,ag:1,ft:true},
+  {date:'Jun 13',g:'C',h:'Scotland',    a:'Haiti',                  hg:1,ag:0,ft:true},
+  {date:'Jun 13',g:'D',h:'Australia',   a:'Turkiye',                hg:2,ag:0,ft:true},
   // Jun 14
-  {g:'E',h:'Germany',     a:'Curacao',                hg:7,ag:1,ft:true},
-  {g:'F',h:'Netherlands', a:'Japan',                  hg:2,ag:2,ft:true},
-  {g:'E',h:'Ivory Coast', a:'Ecuador',                hg:1,ag:0,ft:true},
-  {g:'F',h:'Sweden',      a:'Tunisia',                hg:5,ag:1,ft:true},
+  {date:'Jun 14',g:'E',h:'Germany',     a:'Curacao',                hg:7,ag:1,ft:true},
+  {date:'Jun 14',g:'F',h:'Netherlands', a:'Japan',                  hg:2,ag:2,ft:true},
+  {date:'Jun 14',g:'E',h:'Ivory Coast', a:'Ecuador',                hg:1,ag:0,ft:true},
+  {date:'Jun 14',g:'F',h:'Sweden',      a:'Tunisia',                hg:5,ag:1,ft:true},
   // Jun 15 — Groups G & H
-  {g:'H',h:'Spain',        a:'Cape Verde',    hg:0,ag:0,ft:true},
-  {g:'G',h:'Belgium',      a:'Egypt',         hg:1,ag:1,ft:true},
-  {g:'H',h:'Saudi Arabia', a:'Uruguay',       hg:1,ag:1,ft:true},
-  {g:'G',h:'Iran',         a:'New Zealand',   hg:2,ag:2,ft:true},
+  {date:'Jun 15',g:'H',h:'Spain',        a:'Cape Verde',    hg:0,ag:0,ft:true},
+  {date:'Jun 15',g:'G',h:'Belgium',      a:'Egypt',         hg:1,ag:1,ft:true},
+  {date:'Jun 15',g:'H',h:'Saudi Arabia', a:'Uruguay',       hg:1,ag:1,ft:true},
+  {date:'Jun 15',g:'G',h:'Iran',         a:'New Zealand',   hg:2,ag:2,ft:true},
   // Jun 16 — Groups I & J
-  {g:'I',h:'France',       a:'Senegal',       hg:3,ag:1,ft:true},
-  {g:'I',h:'Norway',       a:'Iraq',          hg:4,ag:1,ft:true},
-  {g:'J',h:'Argentina',    a:'Algeria',       hg:3,ag:0,ft:true},
-  {g:'J',h:'Austria',      a:'Jordan',        hg:3,ag:1,ft:true},
+  {date:'Jun 16',g:'I',h:'France',       a:'Senegal',       hg:3,ag:1,ft:true},
+  {date:'Jun 16',g:'I',h:'Norway',       a:'Iraq',          hg:4,ag:1,ft:true},
+  {date:'Jun 16',g:'J',h:'Argentina',    a:'Algeria',       hg:3,ag:0,ft:true},
+  {date:'Jun 16',g:'J',h:'Austria',      a:'Jordan',        hg:3,ag:1,ft:true},
   // Jun 17 — Groups K & L
-  {g:'K',h:'Portugal',     a:'Dr Congo',      hg:1,ag:1,ft:true},
-  {g:'L',h:'England',      a:'Croatia',       hg:4,ag:2,ft:true},
-  {g:'L',h:'Ghana',        a:'Panama',        hg:1,ag:0,ft:true},
-  {g:'K',h:'Uzbekistan',   a:'Colombia',      hg:1,ag:3,ft:true},
+  {date:'Jun 17',g:'K',h:'Portugal',     a:'Dr Congo',      hg:1,ag:1,ft:true},
+  {date:'Jun 17',g:'L',h:'England',      a:'Croatia',       hg:4,ag:2,ft:true},
+  {date:'Jun 17',g:'L',h:'Ghana',        a:'Panama',        hg:1,ag:0,ft:true},
+  {date:'Jun 17',g:'K',h:'Uzbekistan',   a:'Colombia',      hg:1,ag:3,ft:true},
   // Jun 18 — Matchday 2, Groups A & B
-  {g:'A',h:'Czechia',      a:'South Africa',  hg:1,ag:1,ft:true},
-  {g:'A',h:'Mexico',       a:'South Korea',   hg:1,ag:0,ft:true},
-  {g:'B',h:'Switzerland',  a:'Bosnia And Herzegovina', hg:4,ag:1,ft:true},
-  {g:'B',h:'Canada',       a:'Qatar',         hg:6,ag:0,ft:true},
+  {date:'Jun 18',g:'A',h:'Czechia',      a:'South Africa',  hg:1,ag:1,ft:true},
+  {date:'Jun 18',g:'A',h:'Mexico',       a:'South Korea',   hg:1,ag:0,ft:true},
+  {date:'Jun 18',g:'B',h:'Switzerland',  a:'Bosnia And Herzegovina', hg:4,ag:1,ft:true},
+  {date:'Jun 18',g:'B',h:'Canada',       a:'Qatar',         hg:6,ag:0,ft:true},
   // Jun 19 — Matchday 2, Groups C & D
-  {g:'D',h:'USA',          a:'Australia',     hg:2,ag:0,ft:true},
-  {g:'C',h:'Morocco',      a:'Scotland',      hg:1,ag:0,ft:true},
-  {g:'C',h:'Brazil',       a:'Haiti',         hg:3,ag:0,ft:true},
-  {g:'D',h:'Paraguay',     a:'Turkiye',       hg:1,ag:0,ft:true},
+  {date:'Jun 19',g:'D',h:'USA',          a:'Australia',     hg:2,ag:0,ft:true},
+  {date:'Jun 19',g:'C',h:'Morocco',      a:'Scotland',      hg:1,ag:0,ft:true},
+  {date:'Jun 19',g:'C',h:'Brazil',       a:'Haiti',         hg:3,ag:0,ft:true},
+  {date:'Jun 19',g:'D',h:'Paraguay',     a:'Turkiye',       hg:1,ag:0,ft:true},
   // Jun 20 — Matchday 2, Groups E & F
-  {g:'E',h:'Germany',      a:'Ivory Coast',   hg:2,ag:1,ft:true},
-  {g:'E',h:'Ecuador',      a:'Curacao',       hg:0,ag:0,ft:true},
-  {g:'F',h:'Netherlands',  a:'Sweden',        hg:5,ag:1,ft:true},
-  {g:'F',h:'Japan',        a:'Tunisia',       hg:4,ag:0,ft:true},
+  {date:'Jun 20',g:'E',h:'Germany',      a:'Ivory Coast',   hg:2,ag:1,ft:true},
+  {date:'Jun 20',g:'E',h:'Ecuador',      a:'Curacao',       hg:0,ag:0,ft:true},
+  {date:'Jun 20',g:'F',h:'Netherlands',  a:'Sweden',        hg:5,ag:1,ft:true},
+  {date:'Jun 20',g:'F',h:'Japan',        a:'Tunisia',       hg:4,ag:0,ft:true},
   // Jun 21 — Matchday 3, Groups G & H
-  {g:'G',h:'Belgium',      a:'Iran',          hg:0,ag:0,ft:true},
-  {g:'G',h:'Egypt',        a:'New Zealand',   hg:3,ag:1,ft:true},
-  {g:'H',h:'Spain',        a:'Saudi Arabia',  hg:4,ag:0,ft:true},
-  {g:'H',h:'Uruguay',      a:'Cape Verde',    hg:2,ag:2,ft:true},
+  {date:'Jun 21',g:'G',h:'Belgium',      a:'Iran',          hg:0,ag:0,ft:true},
+  {date:'Jun 21',g:'G',h:'Egypt',        a:'New Zealand',   hg:3,ag:1,ft:true},
+  {date:'Jun 21',g:'H',h:'Spain',        a:'Saudi Arabia',  hg:4,ag:0,ft:true},
+  {date:'Jun 21',g:'H',h:'Uruguay',      a:'Cape Verde',    hg:2,ag:2,ft:true},
   // Jun 22 — Matchday 3, Groups I & J
-  {g:'I',h:'France',       a:'Iraq',          hg:3,ag:0,ft:true},
-  {g:'I',h:'Norway',       a:'Senegal',       hg:3,ag:2,ft:true},
-  {g:'J',h:'Argentina',    a:'Austria',       hg:2,ag:0,ft:true},
-  {g:'J',h:'Algeria',      a:'Jordan',        hg:2,ag:1,ft:true},
+  {date:'Jun 22',g:'I',h:'France',       a:'Iraq',          hg:3,ag:0,ft:true},
+  {date:'Jun 22',g:'I',h:'Norway',       a:'Senegal',       hg:3,ag:2,ft:true},
+  {date:'Jun 22',g:'J',h:'Argentina',    a:'Austria',       hg:2,ag:0,ft:true},
+  {date:'Jun 22',g:'J',h:'Algeria',      a:'Jordan',        hg:2,ag:1,ft:true},
   // Jun 23 — Matchday 2, Groups K & L
-  {g:'K',h:'Portugal',     a:'Uzbekistan',    hg:5,ag:0,ft:true},
-  {g:'K',h:'Colombia',     a:'Dr Congo',      hg:1,ag:0,ft:true},
-  {g:'L',h:'England',      a:'Ghana',         hg:0,ag:0,ft:true},
-  {g:'L',h:'Croatia',      a:'Panama',        hg:1,ag:0,ft:true},
+  {date:'Jun 23',g:'K',h:'Portugal',     a:'Uzbekistan',    hg:5,ag:0,ft:true},
+  {date:'Jun 23',g:'K',h:'Colombia',     a:'Dr Congo',      hg:1,ag:0,ft:true},
+  {date:'Jun 23',g:'L',h:'England',      a:'Ghana',         hg:0,ag:0,ft:true},
+  {date:'Jun 23',g:'L',h:'Croatia',      a:'Panama',        hg:1,ag:0,ft:true},
   // Jun 24 — Matchday 3 (final group games), Groups A, B, C
-  {g:'A',h:'Mexico',       a:'Czechia',       hg:3,ag:0,ft:true},
-  {g:'A',h:'South Africa', a:'South Korea',   hg:1,ag:0,ft:true},
-  {g:'B',h:'Switzerland',  a:'Canada',        hg:2,ag:1,ft:true},
-  {g:'B',h:'Bosnia And Herzegovina', a:'Qatar', hg:3,ag:1,ft:true},
-  {g:'C',h:'Scotland',     a:'Brazil',        hg:0,ag:3,ft:true},
-  {g:'C',h:'Morocco',      a:'Haiti',         hg:4,ag:2,ft:true},
+  {date:'Jun 24',g:'A',h:'Mexico',       a:'Czechia',       hg:3,ag:0,ft:true},
+  {date:'Jun 24',g:'A',h:'South Africa', a:'South Korea',   hg:1,ag:0,ft:true},
+  {date:'Jun 24',g:'B',h:'Switzerland',  a:'Canada',        hg:2,ag:1,ft:true},
+  {date:'Jun 24',g:'B',h:'Bosnia And Herzegovina', a:'Qatar', hg:3,ag:1,ft:true},
+  {date:'Jun 24',g:'C',h:'Scotland',     a:'Brazil',        hg:0,ag:3,ft:true},
+  {date:'Jun 24',g:'C',h:'Morocco',      a:'Haiti',         hg:4,ag:2,ft:true},
   // Jun 25 — Matchday 3 (final group games), Groups D, E, F
-  {g:'D',h:'Turkiye',      a:'USA',           hg:3,ag:2,ft:true},
-  {g:'D',h:'Paraguay',     a:'Australia',     hg:0,ag:0,ft:true},
-  {g:'E',h:'Ecuador',      a:'Germany',       hg:2,ag:1,ft:true},
-  {g:'E',h:'Ivory Coast',  a:'Curacao',       hg:2,ag:0,ft:true},
-  {g:'F',h:'Japan',        a:'Sweden',        hg:1,ag:1,ft:true},
-  {g:'F',h:'Netherlands',  a:'Tunisia',       hg:3,ag:1,ft:true},
+  {date:'Jun 25',g:'D',h:'Turkiye',      a:'USA',           hg:3,ag:2,ft:true},
+  {date:'Jun 25',g:'D',h:'Paraguay',     a:'Australia',     hg:0,ag:0,ft:true},
+  {date:'Jun 25',g:'E',h:'Ecuador',      a:'Germany',       hg:2,ag:1,ft:true},
+  {date:'Jun 25',g:'E',h:'Ivory Coast',  a:'Curacao',       hg:2,ag:0,ft:true},
+  {date:'Jun 25',g:'F',h:'Japan',        a:'Sweden',        hg:1,ag:1,ft:true},
+  {date:'Jun 25',g:'F',h:'Netherlands',  a:'Tunisia',       hg:3,ag:1,ft:true},
   // Jun 26 — Matchday 3 (final group games), Groups G, H, I
-  {g:'G',h:'Egypt',        a:'Iran',          hg:1,ag:1,ft:true},
-  {g:'G',h:'Belgium',      a:'New Zealand',   hg:5,ag:1,ft:true},
-  {g:'H',h:'Cape Verde',   a:'Saudi Arabia',  hg:0,ag:0,ft:true},
-  {g:'H',h:'Spain',        a:'Uruguay',       hg:1,ag:0,ft:true},
-  {g:'I',h:'Norway',       a:'France',        hg:4,ag:1,ft:true},
-  {g:'I',h:'Senegal',      a:'Iraq',          hg:5,ag:0,ft:true},
+  {date:'Jun 26',g:'G',h:'Egypt',        a:'Iran',          hg:1,ag:1,ft:true},
+  {date:'Jun 26',g:'G',h:'Belgium',      a:'New Zealand',   hg:5,ag:1,ft:true},
+  {date:'Jun 26',g:'H',h:'Cape Verde',   a:'Saudi Arabia',  hg:0,ag:0,ft:true},
+  {date:'Jun 26',g:'H',h:'Spain',        a:'Uruguay',       hg:1,ag:0,ft:true},
+  {date:'Jun 26',g:'I',h:'France',       a:'Norway',        hg:4,ag:1,ft:true},
+  {date:'Jun 26',g:'I',h:'Senegal',      a:'Iraq',          hg:5,ag:0,ft:true},
   // Jun 27 — Matchday 3 (final group games), Groups J, K, L — GROUP STAGE COMPLETE
-  {g:'J',h:'Argentina',    a:'Jordan',        hg:3,ag:1,ft:true},
-  {g:'J',h:'Austria',      a:'Algeria',       hg:3,ag:3,ft:true},
-  {g:'K',h:'Colombia',     a:'Portugal',      hg:0,ag:0,ft:true},
-  {g:'K',h:'Dr Congo',     a:'Uzbekistan',    hg:3,ag:1,ft:true},
-  {g:'L',h:'England',      a:'Panama',        hg:2,ag:0,ft:true},
-  {g:'L',h:'Croatia',      a:'Ghana',         hg:2,ag:1,ft:true},
+  {date:'Jun 27',g:'J',h:'Argentina',    a:'Jordan',        hg:3,ag:1,ft:true},
+  {date:'Jun 27',g:'J',h:'Austria',      a:'Algeria',       hg:3,ag:3,ft:true},
+  {date:'Jun 27',g:'K',h:'Colombia',     a:'Portugal',      hg:0,ag:0,ft:true},
+  {date:'Jun 27',g:'K',h:'Dr Congo',     a:'Uzbekistan',    hg:3,ag:1,ft:true},
+  {date:'Jun 27',g:'L',h:'England',      a:'Panama',        hg:2,ag:0,ft:true},
+  {date:'Jun 27',g:'L',h:'Croatia',      a:'Ghana',         hg:2,ag:1,ft:true},
 ];
 
 // No live matches right now
 let LIVE = [];
 
-const UPCOMING = [
-  {date:'Jun 28', h:'Canada',       a:'South Africa',           g:'R32', md:'R32'},
+// Round of 32 — full bracket with kick-off times (BST), confirmed results where
+// played, and Win/Draw/Win decimal odds (FanDuel, converted from American odds
+// where given; estimated from market consensus where not directly available).
+// Round of 32 — full bracket with kick-off times (BST, converted from ET) and
+// Win/Draw/Win decimal odds sourced directly from the RD_32_Betting.xlsx
+// spreadsheet (columns J = win decimal odds, N = draw decimal odds).
+// As of Jun 28, NONE of these matches have been played yet — the Round of 32
+// begins tonight with South Africa vs Canada. All other ties are still TBC.
+const R32_FIXTURES = [
+  {date:'Jun 28', time:'8:00pm',  h:'South Africa', a:'Canada',                 hOdds:4.00, dOdds:2.70, aOdds:0.70, hg:null, ag:null, ft:false},
+  {date:'Jun 29', time:'6:00pm',  h:'Brazil',        a:'Japan',                  hOdds:0.7272727273, dOdds:2.60, aOdds:3.80, hg:null, ag:null, ft:false},
+  {date:'Jun 29', time:'9:30pm',  h:'Germany',       a:'Paraguay',               hOdds:0.3636363636, dOdds:4.00, aOdds:7.00, hg:null, ag:null, ft:false},
+  {date:'Jun 30', time:'2:00am',  h:'Netherlands',   a:'Morocco',                hOdds:1.10, dOdds:2.20, aOdds:2.60, hg:null, ag:null, ft:false},
+  {date:'Jun 30', time:'6:00pm',  h:'Ivory Coast',   a:'Norway',                 hOdds:2.50, dOdds:2.50, aOdds:1.05, hg:null, ag:null, ft:false},
+  {date:'Jun 30', time:'10:00pm', h:'France',        a:'Sweden',                 hOdds:0.2857142857, dOdds:4.75, aOdds:9.00, hg:null, ag:null, ft:false},
+  {date:'Jul 1',  time:'2:00am',  h:'Mexico',        a:'Ecuador',                hOdds:1.10, dOdds:2.10, aOdds:2.75, hg:null, ag:null, ft:false},
+  {date:'Jul 1',  time:'5:00pm',  h:'England',       a:'Dr Congo',               hOdds:0.2857142857, dOdds:4.50, aOdds:11.0, hg:null, ag:null, ft:false},
+  {date:'Jul 1',  time:'9:00pm',  h:'Belgium',       a:'Senegal',                hOdds:1.10, dOdds:2.20, aOdds:2.60, hg:null, ag:null, ft:false},
+  {date:'Jul 2',  time:'1:00am',  h:'USA',           a:'Bosnia And Herzegovina', hOdds:0.3636363636, dOdds:3.80, aOdds:7.50, hg:null, ag:null, ft:false},
+  {date:'Jul 2',  time:'8:00pm',  h:'Spain',         a:'Austria',                hOdds:0.25, dOdds:4.50, aOdds:11.0, hg:null, ag:null, ft:false},
+  {date:'Jul 3',  time:'12:00am', h:'Portugal',      a:'Croatia',                hOdds:0.8333333333, dOdds:2.50, aOdds:3.333333333, hg:null, ag:null, ft:false},
+  {date:'Jul 3',  time:'4:00am',  h:'Switzerland',   a:'Algeria',                hOdds:0.85, dOdds:2.50, aOdds:3.00, hg:null, ag:null, ft:false},
+  {date:'Jul 3',  time:'7:00pm',  h:'Australia',     a:'Egypt',                  hOdds:2.30, dOdds:1.90, aOdds:1.40, hg:null, ag:null, ft:false},
+  {date:'Jul 3',  time:'11:00pm', h:'Argentina',     a:'Cape Verde',             hOdds:0.1538461538, dOdds:7.00, aOdds:16.0, hg:null, ag:null, ft:false},
+  {date:'Jul 4',  time:'2:30am',  h:'Colombia',      a:'Ghana',                  hOdds:0.60, dOdds:2.70, aOdds:5.00, hg:null, ag:null, ft:false},
 ];
+
+const UPCOMING = R32_FIXTURES.map(f => ({date:`${f.date} ${f.time}`, h:f.h, a:f.a, g:'R32', md:'R32'}));
 
 // ══════════════════════════════════════════════════════════════════════════════
 // LOGIC
@@ -483,6 +524,35 @@ function countTeamsThrough(picks, thirdPlaceQualifiers) {
     });
   });
   return count;
+}
+
+// Counts how many of an entrant's 24 picks finished 1st or 2nd in their group
+// (i.e. qualified outright, with no dependency on the third-place race)
+function countGroupQualifiers(picks) {
+  let count = 0;
+  Object.keys(GROUPS).forEach(grp => {
+    (picks[grp]||[]).forEach(team => {
+      const pos = teamPos(team, grp);
+      if (pos === 'W' || pos === 'RU') count++;
+    });
+  });
+  return count;
+}
+
+// Maximum number of the entrant's teams that could possibly progress to the
+// Round of 16, given the actual Round of 32 bracket. This is NOT simply a count
+// of qualified teams — if an entrant picked BOTH teams in the same R32 fixture,
+// only one of them can possibly win that match, so it only counts once. The
+// result can never exceed 16, since there are only 16 Round of 32 matches.
+function countMaxR32Through(picks) {
+  const pickedTeams = new Set(Object.values(picks).flat());
+  let maxThrough = 0;
+  R32_FIXTURES.forEach(f => {
+    const hasHome = pickedTeams.has(f.h);
+    const hasAway = pickedTeams.has(f.a);
+    if (hasHome || hasAway) maxThrough++; // at most 1 winner per fixture, regardless of how many sides the entrant picked
+  });
+  return Math.min(maxThrough, 16);
 }
 
 function calcEntrant(picks) {
@@ -666,26 +736,26 @@ function renderAll() {
       <th style="width:40px">Pos</th>
       <th>Entrant</th>
       <th class="num">Points</th>
-      <th class="num hide-mobile" title="Teams currently in a qualifying spot (1st, 2nd, or best-8 3rd place)">Teams Through</th>
+      <th class="num hide-mobile" title="Picks currently through to the Round of 32 — 1st, 2nd, or a best-8 3rd place finish, out of 24">Group Teams Through</th>
+      <th class="num hide-mobile" title="Maximum number of picks that could still progress to the Round of 16, given the actual Round of 32 bracket (capped at 16 — if you picked both teams in a tie, that tie can only produce 1 winner)">Max R32 Through</th>
       <th class="num hide-mobile" style="color:#4ade80">Best team</th>
-      <th class="num hide-mobile">vs leader</th>
     </tr></thead>
     <tbody>` +
     scored.map((e,i)=>{
       const isAI = e.ai;
-      const gap = i===0 ? '—' : `–${(scored[0].total - e.total).toFixed(2)}`;
       const best = Object.entries(e.detail).filter(([,v])=>v.pts>0).sort((a,b)=>b[1].pts-a[1].pts)[0];
       const bestStr = best ? `${best[0]} (+${best[1].pts.toFixed(2)})` : '—';
-      const through = countTeamsThrough(e.picks, thirdPlaceQualifiers);
+      const groupQualifiers = countTeamsThrough(e.picks, thirdPlaceQualifiers);
+      const maxR32 = countMaxR32Through(e.picks);
       const rankCell = i<3 ? `<span class="rank-${i+1}">${medals[i]}</span>` : `<span style="color:#bbb">${i+1}</span>`;
       const hlClass = isAI&&(e.name==='Dan'||e.name==='Max'||e.name==='Seb') ? ' highlight' : '';
       return `<tr class="${hlClass}" onclick="openModal('${e.name}')" title="Click to see ${e.name}'s picks">
         <td class="rank">${rankCell}</td>
         <td class="name-cell">${e.name}${isAI?'<span class="ai-badge">AI</span>':''}</td>
         <td class="pts">${e.total.toFixed(2)}</td>
-        <td class="pts hide-mobile" style="color:#166534;font-weight:700">${through}/24</td>
+        <td class="pts hide-mobile" style="color:#374151;font-weight:600">${groupQualifiers}/24</td>
+        <td class="pts hide-mobile" style="color:#166534;font-weight:700">${maxR32}/16</td>
         <td class="pts hide-mobile" style="font-weight:400;font-size:12px;color:#666">${bestStr}</td>
-        <td class="pts hide-mobile" style="color:#ef4444;font-size:12px">${gap}</td>
       </tr>`;
     }).join('') + '</tbody>';
 
@@ -698,23 +768,23 @@ function renderAll() {
       <th style="width:40px"></th>
       <th>Scenario</th>
       <th class="num">Points</th>
-      <th class="num hide-mobile" title="Teams currently in a qualifying spot (1st, 2nd, or best-8 3rd place)">Teams Through</th>
+      <th class="num hide-mobile" title="Picks currently through to the Round of 32 — 1st, 2nd, or a best-8 3rd place finish, out of 24">Group Teams Through</th>
+      <th class="num hide-mobile" title="Maximum number of picks that could still progress to the Round of 16, given the actual Round of 32 bracket (capped at 16)">Max R32 Through</th>
       <th class="num hide-mobile" style="color:#4ade80">Best team</th>
-      <th class="num hide-mobile">vs real leader</th>
     </tr></thead>
     <tbody>` +
     hypoScored.map((e,i)=>{
-      const gap = e.total >= scored[0].total ? `+${(e.total-scored[0].total).toFixed(2)}` : `–${(scored[0].total-e.total).toFixed(2)}`;
       const best = Object.entries(e.detail).filter(([,v])=>v.pts>0).sort((a,b)=>b[1].pts-a[1].pts)[0];
       const bestStr = best ? `${best[0]} (+${best[1].pts.toFixed(2)})` : '—';
-      const through = countTeamsThrough(e.picks, thirdPlaceQualifiers);
+      const groupQualifiers = countTeamsThrough(e.picks, thirdPlaceQualifiers);
+      const maxR32 = countMaxR32Through(e.picks);
       return `<tr class="hypo-row" onclick="openModal('${e.name}')" title="Click to see the 24 picks for this scenario">
         <td class="rank">💭</td>
         <td class="name-cell">${e.name}<span class="hypo-badge">Hypothetical</span></td>
         <td class="pts">${e.total.toFixed(2)}</td>
-        <td class="pts hide-mobile" style="color:#166534;font-weight:700">${through}/24</td>
+        <td class="pts hide-mobile" style="color:#374151;font-weight:600">${groupQualifiers}/24</td>
+        <td class="pts hide-mobile" style="color:#166534;font-weight:700">${maxR32}/16</td>
         <td class="pts hide-mobile" style="font-weight:400;font-size:12px;color:#666">${bestStr}</td>
-        <td class="pts hide-mobile" style="color:${e.total>=scored[0].total?'#166534':'#ef4444'};font-size:12px">${gap}</td>
       </tr>`;
     }).join('') + '</tbody>';
 
@@ -778,31 +848,60 @@ function renderAll() {
       </tr>`;
     }).join('') + '</tbody>';
 
-  // ── Results
-  const confirmedHTML = CONFIRMED.map(r=>`<div class="rrow">
+  // ── Round of 32 fixtures & odds
+  const R32_MULT = {W:1.0, D:0.5, L:0};
+  document.getElementById('r32-fixtures').innerHTML = R32_FIXTURES.map(f => {
+    const hPick = allPicks[f.h], aPick = allPicks[f.a];
+    const played = f.ft;
+    let resultHTML;
+    if (played) {
+      const drawn = f.hg === f.ag;
+      resultHTML = `<div class="rscore ft">${f.hg} – ${f.ag}</div>`;
+      if (f.note) resultHTML += `<div style="font-size:10px;color:#aaa;text-align:center;width:100%;margin-top:2px">${f.note}</div>`;
+    } else {
+      resultHTML = `<div class="rscore" style="background:#fef9c3;color:#78350f">TBC</div>`;
+    }
+    const hCP = (f.hOdds * R32_MULT.W).toFixed(2);
+    const dCP = (f.dOdds * R32_MULT.D).toFixed(2);
+    const aCP = (f.aOdds * R32_MULT.W).toFixed(2);
+    return `<div class="rrow" style="flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;align-items:center;width:100%">
+        <div class="rhome"><span class="${hPick?'rpick':''}">${f.h}</span></div>
+        ${resultHTML}
+        <div class="raway"><span class="${aPick?'rpick':''}">${f.a}</span></div>
+        <span class="rbadge">${f.date} ${f.time}</span>
+        ${played ? '<span class="rbadge ft">FT</span>' : ''}
+      </div>
+      <div style="width:100%;display:flex;gap:8px;justify-content:center;margin-top:6px;font-size:11px;color:#888">
+        <span>${f.h} <b>${f.hOdds.toFixed(2)}</b> ×1.0 = <b style="color:#166534">${hCP}</b></span>
+        <span>Draw <b>${f.dOdds.toFixed(2)}</b> ×0.5 = <b style="color:#166534">${dCP}</b></span>
+        <span>${f.a} <b>${f.aOdds.toFixed(2)}</b> ×1.0 = <b style="color:#166534">${aCP}</b></span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // ── Results — split Round of 32 vs Group Stage, newest first
+  const r32Played = R32_FIXTURES.filter(f => f.ft).slice().reverse();
+  document.getElementById('results-r32').innerHTML = r32Played.length ? r32Played.map(f => `<div class="rrow">
+    <div class="rhome"><span class="${allPicks[f.h]?'rpick':''}">${f.h}</span></div>
+    <div class="rscore ft">${f.hg} – ${f.ag}</div>
+    <div class="raway"><span class="${allPicks[f.a]?'rpick':''}">${f.a}</span></div>
+    <span class="rbadge">${f.date}</span><span class="rbadge ft">FT</span>
+  </div>`).join('') : '<p style="font-size:12px;color:#aaa">No Round of 32 results yet</p>';
+
+  const groupSorted = [...CONFIRMED].reverse(); // newest first (entries are already in chronological order)
+  document.getElementById('results-group').innerHTML = groupSorted.map(r=>`<div class="rrow">
     <div class="rhome"><span class="${allPicks[r.h]?'rpick':''}">${r.h}</span></div>
     <div class="rscore ft">${r.hg} – ${r.ag}</div>
     <div class="raway"><span class="${allPicks[r.a]?'rpick':''}">${r.a}</span></div>
-    <span class="rbadge">Grp ${r.g}</span><span class="rbadge ft">FT</span>
+    <span class="rbadge">${r.date}</span><span class="rbadge">Grp ${r.g}</span><span class="rbadge ft">FT</span>
   </div>`).join('');
-
-  const liveHTML = LIVE.filter(r=>r.live||r.ft).map(r=>`<div class="rrow">
-    <div class="rhome"><span class="${allPicks[r.h]?'rpick':''}">${r.h}</span></div>
-    <div class="rscore ${r.live?'live':'ft'}">${r.hg} – ${r.ag}</div>
-    <div class="raway"><span class="${allPicks[r.a]?'rpick':''}">${r.a}</span></div>
-    <span class="rbadge">Grp ${r.g}</span>
-    <span class="rbadge ${r.live?'live':'ft'}">${r.live?r.min:'FT'}</span>
-  </div>`).join('');
-
-  document.getElementById('results').innerHTML = confirmedHTML +
-    (liveHTML ? `<div style="padding:8px 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#ef4444">🔴 Today — Jun 14</div>` : '') +
-    liveHTML;
 
   // ── Upcoming
   document.getElementById('upcoming').innerHTML = UPCOMING.map(u=>`<div class="urow">
     <span class="udate">${u.date}</span>
     <span class="ufixture"><span class="${allPicks[u.h]?'upick':''}">${u.h}</span> vs <span class="${allPicks[u.a]?'upick':''}">${u.a}</span></span>
-    <span class="rbadge">Grp ${u.g}</span>${u.md?`<span class="rbadge md2">${u.md}</span>`:''}
+    <span class="rbadge">${u.g==='R32'?'R32':'Grp '+u.g}</span>${u.md?`<span class="rbadge md2">${u.md}</span>`:''}
   </div>`).join('');
 }
 
@@ -814,124 +913,18 @@ async function refreshAll() {
   const btn = document.getElementById('refresh-btn');
   btn.disabled = true; btn.textContent = '↻ Updating...';
 
-  let gotStandings = false;
-  let gotScores = false;
-
-  // ── 1. Try worldcup26.ir free API for live group standings (no auth needed)
-  try {
-    const r = await fetch('https://worldcup26.ir/get/groups', {cache:'no-store'});
-    if (r.ok) {
-      const data = await r.json();
-      if (data && data.length) {
-        applyGroupStandings(data);
-        gotStandings = true;
-      }
-    }
-  } catch(e) {}
-
-  // ── 2. Try worldcup26.ir for live match scores
-  try {
-    const r = await fetch('https://worldcup26.ir/get/games', {cache:'no-store'});
-    if (r.ok) {
-      const data = await r.json();
-      if (data && data.length) {
-        applyLiveScores(data);
-        gotScores = true;
-      }
-    }
-  } catch(e) {}
-
-  // ── 3. Fallback: football-data.org for scores only
-  if (!gotScores) {
-    try {
-      const r = await fetch('https://api.football-data.org/v4/competitions/WC/matches?season=2026&status=IN_PLAY,FINISHED');
-      if (r.ok) {
-        const data = await r.json();
-        if (data.matches) { updateLiveFromAPI(data.matches); gotScores = true; }
-      }
-    } catch(e) {}
-  }
+  // NOTE: Automatic live-data fetching from third-party APIs has been disabled.
+  // These APIs proved unreliable (consistently returning no data, or risking
+  // silently overwriting manually-verified group standings with bad data).
+  // The group stage is now complete and all standings below are final,
+  // manually verified against official FIFA/ESPN sources. Round of 32 results
+  // will be added manually as they are confirmed.
 
   renderAll();
   const now = new Date();
-  const src = gotStandings ? 'standings + scores live' : gotScores ? 'scores live, standings seeded' : 'seeded data';
   document.getElementById('last-updated').innerHTML =
-    `Updated ${now.toLocaleTimeString('en-GB')} &nbsp;<span class="live-badge">LIVE</span>&nbsp;<span style="font-size:10px;color:#aaa">(${src})</span>`;
+    `Refreshed ${now.toLocaleTimeString('en-GB')} &nbsp;<span style="font-size:10px;color:#aaa">(manually verified data — group stage final)</span>`;
   btn.disabled = false; btn.textContent = '↻ Refresh scores';
-}
-
-// Map API group names to our internal names
-const TEAM_NAME_MAP = {
-  'iran (islamic republic of)':'Iran','korea republic':'South Korea','usa':'USA',
-  'united states':'USA','côte d\'ivoire':'Ivory Coast',"cote d'ivoire":'Ivory Coast',
-  'dr congo':'Dr Congo','congo dr':'Dr Congo','curaçao':'Curacao','türkiye':'Turkiye',
-  'czechia':'Czechia','czech republic':'Czechia','bosnia and herzegovina':'Bosnia And Herzegovina',
-  'bosnia & herzegovina':'Bosnia And Herzegovina','cape verde':'Cape Verde',
-  'new zealand':'New Zealand','saudi arabia':'Saudi Arabia','south africa':'South Africa',
-  'south korea':'South Korea'
-};
-
-function normTeam(name) {
-  if (!name) return '';
-  const lower = name.toLowerCase().trim();
-  return TEAM_NAME_MAP[lower] || name.split(' ').map(w => w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
-}
-
-function applyGroupStandings(groups) {
-  // groups is array of group objects: {name, teams:[{name, played, won, drawn, lost, goalsFor, goalsAgainst, points}]}
-  groups.forEach(grp => {
-    const letter = grp.name?.replace(/group\s*/i,'').trim().toUpperCase();
-    if (!letter || !GROUPS[letter]) return;
-    // Sort teams by points desc, then GD desc, then GF desc
-    const sorted = [...(grp.teams||[])].sort((a,b) => {
-      const ptsDiff = (b.points||b.pts||0) - (a.points||a.pts||0);
-      if (ptsDiff !== 0) return ptsDiff;
-      const gdA = (a.goalsFor||a.gf||0) - (a.goalsAgainst||a.ga||0);
-      const gdB = (b.goalsFor||b.gf||0) - (b.goalsAgainst||b.ga||0);
-      if (gdB !== gdA) return gdB - gdA;
-      return (b.goalsFor||b.gf||0) - (a.goalsFor||a.gf||0);
-    });
-    const teamNames = sorted.map(t => normTeam(t.name||t.team));
-    // Only update if all 4 teams recognised
-    if (teamNames.every(n => GROUPS[letter].includes(n))) {
-      GROUPS[letter] = teamNames;
-    }
-  });
-}
-
-function applyLiveScores(games) {
-  // games: [{home, away, homeScore, awayScore, status, minute}]
-  LIVE = LIVE.map(lr => {
-    const m = games.find(g => {
-      const h = normTeam(g.home||g.homeTeam||'');
-      const a = normTeam(g.away||g.awayTeam||'');
-      return (h===lr.h||h.includes(lr.h.split(' ')[0])||lr.h.includes(h.split(' ')[0])) &&
-             (a===lr.a||a.includes(lr.a.split(' ')[0])||lr.a.includes(a.split(' ')[0]));
-    });
-    if (!m) return lr;
-    const hg = m.homeScore ?? m.home_score ?? m.score?.home ?? lr.hg;
-    const ag = m.awayScore ?? m.away_score ?? m.score?.away ?? lr.ag;
-    const status = (m.status||m.state||'').toLowerCase();
-    const isLive = status.includes('live')||status.includes('in_play')||status.includes('progress');
-    const isFT = status.includes('ft')||status.includes('finish')||status.includes('ended');
-    const min = m.minute||m.time||'';
-    return {...lr, hg, ag, live:isLive, ft:isFT, min:isLive?(min?min+"'":'LIVE'):(isFT?'FT':lr.min)};
-  });
-}
-
-function updateLiveFromAPI(matches) {
-  LIVE = LIVE.map(lr => {
-    const m = matches.find(m =>
-      (m.homeTeam.name.includes(lr.h.split(' ')[0]) || lr.h.includes(m.homeTeam.name.split(' ')[0])) &&
-      (m.awayTeam.name.includes(lr.a.split(' ')[0]) || lr.a.includes(m.awayTeam.name.split(' ')[0]))
-    );
-    if(!m) return lr;
-    const hg = m.score.fullTime.home ?? m.score.halfTime.home ?? 0;
-    const ag = m.score.fullTime.away ?? m.score.halfTime.away ?? 0;
-    const isLive = m.status==='IN_PLAY'||m.status==='PAUSED';
-    const isFT = m.status==='FINISHED';
-    return {...lr, hg, ag, live:isLive, ft:isFT, min:isLive?(m.minute?m.minute+"'":'LIVE'):(isFT?'FT':'upcoming')};
-  });
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1066,9 +1059,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 28 — Argentina 3–1 Jordan, Austria 3–3 Algeria, Colombia 0–0 Portugal, DR Congo 3–1 Uzbekistan, England 2–0 Panama, Croatia 2–1 Ghana added. 🏁 Group stage complete — all 12 groups finalised!';
-setInterval(refreshAll, 60000);
-refreshAll();
+  'Updated Jun 28 — Group stage complete and fully verified against official sources. Round of 32 begins tonight (South Africa vs Canada, 8pm BST). Results will be added manually as they are confirmed.';
 </script>
 </body>
 </html>
