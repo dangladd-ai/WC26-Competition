@@ -439,7 +439,7 @@ let LIVE = [];
 const R32_FIXTURES = [
   {date:'Jun 28', time:'8:00pm',  h:'South Africa', a:'Canada',                 hOdds:4.00, dOdds:2.70, aOdds:0.70, hg:0, ag:1, ft:true},
   {date:'Jun 29', time:'6:00pm',  h:'Brazil',        a:'Japan',                  hOdds:0.7272727273, dOdds:2.60, aOdds:3.80, hg:2, ag:1, ft:true},
-  {date:'Jun 29', time:'9:30pm',  h:'Germany',       a:'Paraguay',               hOdds:0.3636363636, dOdds:4.00, aOdds:7.00, hg:null, ag:null, ft:false},
+  {date:'Jun 29', time:'9:30pm',  h:'Germany',       a:'Paraguay',               hOdds:0.3636363636, dOdds:4.00, aOdds:7.00, hg:1, ag:1, ft:true, penaltyWinner:'Paraguay'},
   {date:'Jun 30', time:'2:00am',  h:'Netherlands',   a:'Morocco',                hOdds:1.10, dOdds:2.20, aOdds:2.60, hg:null, ag:null, ft:false},
   {date:'Jun 30', time:'6:00pm',  h:'Ivory Coast',   a:'Norway',                 hOdds:2.50, dOdds:2.50, aOdds:1.05, hg:null, ag:null, ft:false},
   {date:'Jun 30', time:'10:00pm', h:'France',        a:'Sweden',                 hOdds:0.2857142857, dOdds:4.75, aOdds:9.00, hg:null, ag:null, ft:false},
@@ -564,13 +564,17 @@ function getR32Points(team) {
   const f = R32_FIXTURES.find(f => f.h === team || f.a === team);
   if (!f || !f.ft) return null;
   const isHome = f.h === team;
-  const ownOdds = isHome ? f.hOdds : f.aOdds;
   const drawn = f.hg === f.ag;
   const won = isHome ? f.hg > f.ag : f.ag > f.hg;
+  // Points use the relevant odds × multiplier:
+  // Win → team's own win odds × 1.0
+  // Draw → the match draw odds × 0.5 (same for both teams)
+  // Loss → 0
+  const oddsUsed = drawn ? f.dOdds : (isHome ? f.hOdds : f.aOdds);
   const mult = drawn ? 0.5 : (won ? 1.0 : 0);
   let eliminated = !drawn && !won;
   if (drawn && f.penaltyWinner) eliminated = (f.penaltyWinner !== team);
-  return { pts: ownOdds * mult, mult, drawn, won, odds: ownOdds, eliminated };
+  return { pts: oddsUsed * mult, mult, drawn, won, odds: oddsUsed, eliminated };
 }
 
 function calcEntrant(picks) {
@@ -1003,9 +1007,9 @@ function openModal(name) {
 
             // If this team's R32 match has been played, override the label to show the R32 result
             if (d.r32) {
-              if (d.r32.drawn) { cls = 'mtp-thru'; label = 'R32 Drew'; }
-              else if (d.r32.won) { cls = 'mtp-thru'; label = 'R32 Won'; }
-              else { cls = 'mtp-out'; label = 'R32 Lost'; }
+              if (d.r32.eliminated) { cls = 'mtp-out'; label = d.r32.drawn ? 'R32 Drew (out)' : 'R32 Lost'; }
+              else if (d.r32.drawn) { cls = 'mtp-thru'; label = 'R32 Drew'; }
+              else { cls = 'mtp-thru'; label = 'R32 Won'; }
             }
 
             const ptsStr = d.pts > 0 ? `+${d.pts.toFixed(2)}` : (pos==='F4' || (d.r32 && !d.r32.won && !d.r32.drawn)) ? '0.00' : '';
@@ -1042,9 +1046,9 @@ function openTeamModal(team) {
 
   // If this team's R32 match has been played, the R32 result takes display priority
   if (r32) {
-    if (r32.drawn) { statusCls = 'mtp-thru'; posLabel = 'R32 Drew'; }
-    else if (r32.won) { statusCls = 'mtp-thru'; posLabel = 'R32 Won'; }
-    else { statusCls = 'mtp-out'; posLabel = 'R32 Lost'; }
+    if (r32.eliminated) { statusCls = 'mtp-out'; posLabel = r32.drawn ? 'R32 Drew (out)' : 'R32 Lost'; }
+    else if (r32.drawn) { statusCls = 'mtp-thru'; posLabel = 'R32 Drew'; }
+    else { statusCls = 'mtp-thru'; posLabel = 'R32 Won'; }
   }
 
   // Find every entrant who picked this team
@@ -1089,7 +1093,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 29 — Canada 1–0 South Africa, Brazil 2–1 Japan added (both R32). Germany vs Paraguay still in progress — not yet included.';
+  'Updated Jun 29 — Germany 1–1 Paraguay (Paraguay win on penalties). Both teams scored ×0.5 draw points. Germany eliminated, Paraguay through to R16.';
 </script>
 </body>
 </html>
