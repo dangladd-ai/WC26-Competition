@@ -11,8 +11,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .header{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .header h1{font-size:22px;font-weight:700;margin-bottom:2px}
 .header p{font-size:12px;color:#777}
-.refresh-btn{background:#111;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;white-space:nowrap}
-.refresh-btn:hover{background:#333}
 .last-updated{font-size:11px;color:#aaa;margin-top:4px}
 .live-badge{display:inline-block;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -186,9 +184,8 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
     <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; 🏁 Group stage complete! All 12 groups finalised. Round of 32 begins Jun 28.</p>
     <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
-    <div class="last-updated" id="last-updated">Loading live scores...</div>
+    <div class="last-updated" id="last-updated">Loading...</div>
   </div>
-  <button class="refresh-btn" id="refresh-btn" onclick="refreshAll()">↻ Refresh scores</button>
 </div>
 
 <div class="live-bar" id="live-bar">
@@ -440,8 +437,8 @@ let LIVE = [];
 // As of Jun 28, NONE of these matches have been played yet — the Round of 32
 // begins tonight with South Africa vs Canada. All other ties are still TBC.
 const R32_FIXTURES = [
-  {date:'Jun 28', time:'8:00pm',  h:'South Africa', a:'Canada',                 hOdds:4.00, dOdds:2.70, aOdds:0.70, hg:null, ag:null, ft:false},
-  {date:'Jun 29', time:'6:00pm',  h:'Brazil',        a:'Japan',                  hOdds:0.7272727273, dOdds:2.60, aOdds:3.80, hg:null, ag:null, ft:false},
+  {date:'Jun 28', time:'8:00pm',  h:'South Africa', a:'Canada',                 hOdds:4.00, dOdds:2.70, aOdds:0.70, hg:0, ag:1, ft:true},
+  {date:'Jun 29', time:'6:00pm',  h:'Brazil',        a:'Japan',                  hOdds:0.7272727273, dOdds:2.60, aOdds:3.80, hg:2, ag:1, ft:true},
   {date:'Jun 29', time:'9:30pm',  h:'Germany',       a:'Paraguay',               hOdds:0.3636363636, dOdds:4.00, aOdds:7.00, hg:null, ag:null, ft:false},
   {date:'Jun 30', time:'2:00am',  h:'Netherlands',   a:'Morocco',                hOdds:1.10, dOdds:2.20, aOdds:2.60, hg:null, ag:null, ft:false},
   {date:'Jun 30', time:'6:00pm',  h:'Ivory Coast',   a:'Norway',                 hOdds:2.50, dOdds:2.50, aOdds:1.05, hg:null, ag:null, ft:false},
@@ -458,7 +455,7 @@ const R32_FIXTURES = [
   {date:'Jul 4',  time:'2:30am',  h:'Colombia',      a:'Ghana',                  hOdds:0.60, dOdds:2.70, aOdds:5.00, hg:null, ag:null, ft:false},
 ];
 
-const UPCOMING = R32_FIXTURES.map(f => ({date:`${f.date} ${f.time}`, h:f.h, a:f.a, g:'R32', md:'R32'}));
+const UPCOMING = () => R32_FIXTURES.filter(f => !f.ft).map(f => ({date:`${f.date} ${f.time}`, h:f.h, a:f.a, g:'R32', md:'R32'}));
 
 // ══════════════════════════════════════════════════════════════════════════════
 // LOGIC
@@ -555,6 +552,27 @@ function countMaxR32Through(picks) {
   return Math.min(maxThrough, 16);
 }
 
+// Returns the R32 points a team has earned, based on the actual result of
+// their Round of 32 fixture (if played). Winner ×1.0, Draw ×0.5, Loser ×0 —
+// using the team's own win/draw odds from R32_FIXTURES. Returns null if the
+// team's R32 fixture hasn't been played yet (or they didn't qualify for R32).
+// Also reports `eliminated`: true if this team is out of the tournament
+// (lost in normal time, or lost a penalty shootout after a 90-min draw —
+// set the fixture's optional `penaltyWinner` field to the team name that won
+// the shootout once that's known).
+function getR32Points(team) {
+  const f = R32_FIXTURES.find(f => f.h === team || f.a === team);
+  if (!f || !f.ft) return null;
+  const isHome = f.h === team;
+  const ownOdds = isHome ? f.hOdds : f.aOdds;
+  const drawn = f.hg === f.ag;
+  const won = isHome ? f.hg > f.ag : f.ag > f.hg;
+  const mult = drawn ? 0.5 : (won ? 1.0 : 0);
+  let eliminated = !drawn && !won;
+  if (drawn && f.penaltyWinner) eliminated = (f.penaltyWinner !== team);
+  return { pts: ownOdds * mult, mult, drawn, won, odds: ownOdds, eliminated };
+}
+
 function calcEntrant(picks) {
   let total=0;
   const detail={};
@@ -562,9 +580,15 @@ function calcEntrant(picks) {
     (picks[grp]||[]).forEach(team=>{
       const pos=teamPos(team,grp);
       const odds=ODDS[team]||0;
-      const pts=pos!=null?odds*MULT[pos]:0;
+      const groupPts=pos!=null?odds*MULT[pos]:0;
+
+      // Add Round of 32 points on top, if that team's R32 match has been played
+      const r32 = getR32Points(team);
+      const r32Pts = r32 ? r32.pts : 0;
+      const pts = groupPts + r32Pts;
+
       total+=pts;
-      detail[team]={grp,pos,pts,odds};
+      detail[team]={grp,pos,pts,odds,groupPts,r32Pts,r32};
     });
   });
   return {total,detail};
@@ -664,6 +688,13 @@ function renderTeamPopularity(scored, thirdPlaceQualifiers) {
 
   const getStatus = (team, grp) => {
     if (isLiveTeam(team)) return 'live';
+    const r32 = getR32Points(team);
+    if (r32) {
+      // Team's R32 match has been played — eliminated if they didn't progress
+      // (lost in normal time, or lost on penalties/extra time after a draw)
+      if (r32.eliminated) return 'eliminated';
+      return 'thru'; // still alive in the tournament (won, or won on penalties after a draw)
+    }
     const pos = teamPos(team, grp);
     if (!pos) return 'tbd';
     if (pos==='W'||pos==='RU') return 'thru';
@@ -681,11 +712,13 @@ function renderTeamPopularity(scored, thirdPlaceQualifiers) {
       const n = counts[team];
       const status = getStatus(team, grp);
       const filledPips = Math.round((n / 23) * MAX_PIPS);
-      const pipCls = status==='out' ? 'out' : status==='border' ? 'border' : status==='live' ? 'live' : '';
+      const pipCls = (status==='out' || status==='eliminated') ? 'out' : status==='border' ? 'border' : status==='live' ? 'live' : '';
       const pips = Array.from({length:MAX_PIPS}, (_,i) =>
         `<div class="pop-pip${i < filledPips ? ` filled ${pipCls}` : ''}"></div>`
       ).join('');
       const odds = ODDS_FRAC[team] || '';
+      // Green name only while still alive and progressing; once eliminated
+      // (knocked out in the Round of 32 or later), revert to the default blue link
       const nameCls = status==='thru' ? 'pop-name-qualified' : '';
       html += `<div class="pop-row">
         <span class="pop-name pop-name-click ${nameCls}" title="Click to see who picked ${team}" onclick="openTeamModal('${team}')">${team}</span>
@@ -898,33 +931,11 @@ function renderAll() {
   </div>`).join('');
 
   // ── Upcoming
-  document.getElementById('upcoming').innerHTML = UPCOMING.map(u=>`<div class="urow">
+  document.getElementById('upcoming').innerHTML = UPCOMING().map(u=>`<div class="urow">
     <span class="udate">${u.date}</span>
     <span class="ufixture"><span class="${allPicks[u.h]?'upick':''}">${u.h}</span> vs <span class="${allPicks[u.a]?'upick':''}">${u.a}</span></span>
     <span class="rbadge">${u.g==='R32'?'R32':'Grp '+u.g}</span>${u.md?`<span class="rbadge md2">${u.md}</span>`:''}
   </div>`).join('');
-}
-
-// ══════════════════════════════════════════════════════════════════════════════
-// LIVE FETCH
-// ══════════════════════════════════════════════════════════════════════════════
-
-async function refreshAll() {
-  const btn = document.getElementById('refresh-btn');
-  btn.disabled = true; btn.textContent = '↻ Updating...';
-
-  // NOTE: Automatic live-data fetching from third-party APIs has been disabled.
-  // These APIs proved unreliable (consistently returning no data, or risking
-  // silently overwriting manually-verified group standings with bad data).
-  // The group stage is now complete and all standings below are final,
-  // manually verified against official FIFA/ESPN sources. Round of 32 results
-  // will be added manually as they are confirmed.
-
-  renderAll();
-  const now = new Date();
-  document.getElementById('last-updated').innerHTML =
-    `Refreshed ${now.toLocaleTimeString('en-GB')} &nbsp;<span style="font-size:10px;color:#aaa">(manually verified data — group stage final)</span>`;
-  btn.disabled = false; btn.textContent = '↻ Refresh scores';
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -989,7 +1000,15 @@ function openModal(name) {
               label = qualifying ? '3rd (Q)' : '3rd';
             }
             else if (pos==='F4') { cls='mtp-out'; label='4th'; }
-            const ptsStr = d.pts > 0 ? `+${d.pts.toFixed(2)}` : pos==='F4' ? '0.00' : '';
+
+            // If this team's R32 match has been played, override the label to show the R32 result
+            if (d.r32) {
+              if (d.r32.drawn) { cls = 'mtp-thru'; label = 'R32 Drew'; }
+              else if (d.r32.won) { cls = 'mtp-thru'; label = 'R32 Won'; }
+              else { cls = 'mtp-out'; label = 'R32 Lost'; }
+            }
+
+            const ptsStr = d.pts > 0 ? `+${d.pts.toFixed(2)}` : (pos==='F4' || (d.r32 && !d.r32.won && !d.r32.drawn)) ? '0.00' : '';
             return `<div class="modal-team">
               <span class="modal-team-name">${team}</span>
               <span class="modal-team-pts ${cls}">${label}${ptsStr ? ' · '+ptsStr : ''}</span>
@@ -1013,30 +1032,41 @@ function openTeamModal(team) {
   const live = isLiveTeam(team);
   const odds = ODDS[team] || 0;
   const multi = pos ? MULT[pos] : null;
-  const cp = pos ? odds * multi : null;
+  const groupCp = pos ? odds * multi : null;
+  const r32 = getR32Points(team);
+  const r32Cp = r32 ? r32.pts : null;
+  const totalCp = (groupCp || 0) + (r32Cp || 0);
 
-  const posLabel = live ? 'LIVE' : pos ? {W:'1st',RU:'2nd',T3:'3rd',F4:'4th'}[pos] : 'Yet to play';
-  const statusCls = live ? 'mtp-live' : pos==='W'||pos==='RU' ? 'mtp-thru' : pos==='T3' ? 'mtp-out' : pos==='F4' ? 'mtp-out' : 'mtp-tbd';
+  let posLabel = live ? 'LIVE' : pos ? {W:'1st',RU:'2nd',T3:'3rd',F4:'4th'}[pos] : 'Yet to play';
+  let statusCls = live ? 'mtp-live' : pos==='W'||pos==='RU' ? 'mtp-thru' : pos==='T3' ? 'mtp-out' : pos==='F4' ? 'mtp-out' : 'mtp-tbd';
+
+  // If this team's R32 match has been played, the R32 result takes display priority
+  if (r32) {
+    if (r32.drawn) { statusCls = 'mtp-thru'; posLabel = 'R32 Drew'; }
+    else if (r32.won) { statusCls = 'mtp-thru'; posLabel = 'R32 Won'; }
+    else { statusCls = 'mtp-out'; posLabel = 'R32 Lost'; }
+  }
 
   // Find every entrant who picked this team
   const pickers = ALL_ENTRANTS.filter(e => (e.picks[grp]||[]).includes(team));
 
   document.getElementById('modal-title').textContent = `${team}`;
-  document.getElementById('modal-sub').textContent = `Group ${grp}  ·  ${posLabel}  ·  Odds ${odds.toFixed(3)}  ·  Picked by ${pickers.length} of 23 entrants`;
+  document.getElementById('modal-sub').textContent = `Group ${grp}  ·  ${posLabel}  ·  Picked by ${pickers.length} of 23 entrants`;
 
   document.getElementById('modal-body').innerHTML = `
     <div class="modal-summary">
       <div class="modal-stat"><span class="modal-stat-val">${pickers.length}</span><span class="modal-stat-lbl">Entrants picked this team</span></div>
-      <div class="modal-stat"><span class="modal-stat-val ${statusCls==='mtp-out'?'':''}" style="font-size:18px">${posLabel}</span><span class="modal-stat-lbl">Current group position</span></div>
-      <div class="modal-stat"><span class="modal-stat-val">${odds.toFixed(3)}</span><span class="modal-stat-lbl">Odds to win group</span></div>
-      <div class="modal-stat"><span class="modal-stat-val">${cp!=null?cp.toFixed(2):'—'}</span><span class="modal-stat-lbl">Competition points each</span></div>
+      <div class="modal-stat"><span class="modal-stat-val" style="font-size:18px">${posLabel}</span><span class="modal-stat-lbl">Current status</span></div>
+      <div class="modal-stat"><span class="modal-stat-val">${groupCp!=null?groupCp.toFixed(2):'—'}</span><span class="modal-stat-lbl">Group stage points</span></div>
+      <div class="modal-stat"><span class="modal-stat-val">${r32Cp!=null?'+'+r32Cp.toFixed(2):'—'}</span><span class="modal-stat-lbl">Round of 32 points</span></div>
+      <div class="modal-stat"><span class="modal-stat-val" style="color:#166534">${totalCp.toFixed(2)}</span><span class="modal-stat-lbl">Total points each</span></div>
     </div>
     <div class="modal-grp-grid">
       <div class="modal-grp-card" style="grid-column:1/-1">
         <div class="modal-grp-label">Entrants who selected ${team}</div>
         ${pickers.length ? pickers.map(e => `<div class="modal-team">
           <span class="modal-team-name">${e.name}${e.ai?'<span class="ai-badge" style="margin-left:5px">AI</span>':''}</span>
-          <span class="modal-team-pts ${statusCls}">${cp!=null?'+'+cp.toFixed(2):posLabel}</span>
+          <span class="modal-team-pts ${statusCls}">+${totalCp.toFixed(2)}</span>
         </div>`).join('') : '<div class="modal-team"><span class="modal-team-name" style="color:#aaa">Nobody picked this team</span></div>'}
       </div>
     </div>`;
@@ -1059,7 +1089,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 28 — Group stage complete and fully verified against official sources. Round of 32 begins tonight (South Africa vs Canada, 8pm BST). Results will be added manually as they are confirmed.';
+  'Updated Jun 29 — Canada 1–0 South Africa, Brazil 2–1 Japan added (both R32). Germany vs Paraguay still in progress — not yet included.';
 </script>
 </body>
 </html>
