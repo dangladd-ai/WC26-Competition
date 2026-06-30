@@ -84,6 +84,8 @@ table.lb-full .ai-badge{display:inline-block;font-size:10px;background:#dbeafe;c
 
 /* Results */
 .rrow{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid #f3f3f3;font-size:13px}
+.odds-pill{padding:2px 8px;border-radius:12px;border:1px solid transparent}
+.odds-pill.odds-used{background:#f0fdf4;border-color:#86efac;color:#166534;font-weight:600}
 .rrow:last-child{border-bottom:none}
 .rhome{flex:1;text-align:right;font-weight:600;padding-right:8px}
 .rscore{background:#f3f3f3;border-radius:6px;padding:3px 12px;font-weight:800;font-size:14px;min-width:56px;text-align:center}
@@ -441,7 +443,7 @@ const R32_FIXTURES = [
   {date:'Jun 29', time:'6:00pm',  h:'Brazil',        a:'Japan',                  hOdds:0.7272727273, dOdds:2.60, aOdds:3.80, hg:2, ag:1, ft:true},
   {date:'Jun 29', time:'9:30pm',  h:'Germany',       a:'Paraguay',               hOdds:0.3636363636, dOdds:4.00, aOdds:7.00, hg:1, ag:1, ft:true, penaltyWinner:'Paraguay'},
   {date:'Jun 30', time:'2:00am',  h:'Netherlands',   a:'Morocco',                hOdds:1.10, dOdds:2.20, aOdds:2.60, hg:1, ag:1, ft:true, penaltyWinner:'Morocco'},
-  {date:'Jun 30', time:'6:00pm',  h:'Ivory Coast',   a:'Norway',                 hOdds:2.50, dOdds:2.50, aOdds:1.05, hg:null, ag:null, ft:false},
+  {date:'Jun 30', time:'6:00pm',  h:'Ivory Coast',   a:'Norway',                 hOdds:2.50, dOdds:2.50, aOdds:1.05, hg:1, ag:2, ft:true},
   {date:'Jun 30', time:'10:00pm', h:'France',        a:'Sweden',                 hOdds:0.2857142857, dOdds:4.75, aOdds:9.00, hg:null, ag:null, ft:false},
   {date:'Jul 1',  time:'2:00am',  h:'Mexico',        a:'Ecuador',                hOdds:1.10, dOdds:2.10, aOdds:2.75, hg:null, ag:null, ft:false},
   {date:'Jul 1',  time:'5:00pm',  h:'England',       a:'Dr Congo',               hOdds:0.2857142857, dOdds:4.50, aOdds:11.0, hg:null, ag:null, ft:false},
@@ -891,8 +893,9 @@ function renderAll() {
     const hPick = allPicks[f.h], aPick = allPicks[f.a];
     const played = f.ft;
     let resultHTML;
+    let drawn = false;
     if (played) {
-      const drawn = f.hg === f.ag;
+      drawn = f.hg === f.ag;
       resultHTML = `<div class="rscore ft">${f.hg} – ${f.ag}</div>`;
       if (f.note) resultHTML += `<div style="font-size:10px;color:#aaa;text-align:center;width:100%;margin-top:2px">${f.note}</div>`;
     } else {
@@ -901,6 +904,14 @@ function renderAll() {
     const hCP = (f.hOdds * R32_MULT.W).toFixed(2);
     const dCP = (f.dOdds * R32_MULT.D).toFixed(2);
     const aCP = (f.aOdds * R32_MULT.W).toFixed(2);
+
+    // Highlight whichever odds segment actually determined the points awarded
+    const hWon = played && !drawn && f.hg > f.ag;
+    const aWon = played && !drawn && f.ag > f.hg;
+    const hUsedCls = hWon ? 'odds-used' : '';
+    const dUsedCls = (played && drawn) ? 'odds-used' : '';
+    const aUsedCls = aWon ? 'odds-used' : '';
+
     return `<div class="rrow" style="flex-wrap:wrap;align-items:flex-start">
       <div style="display:flex;align-items:center;width:100%">
         <div class="rhome"><span class="${hPick?'rpick':''}">${f.h}</span></div>
@@ -909,10 +920,10 @@ function renderAll() {
         <span class="rbadge">${f.date} ${f.time}</span>
         ${played ? '<span class="rbadge ft">FT</span>' : ''}
       </div>
-      <div style="width:100%;display:flex;gap:8px;justify-content:center;margin-top:6px;font-size:11px;color:#888">
-        <span>${f.h} <b>${f.hOdds.toFixed(2)}</b> ×1.0 = <b style="color:#166534">${hCP}</b></span>
-        <span>Draw <b>${f.dOdds.toFixed(2)}</b> ×0.5 = <b style="color:#166534">${dCP}</b></span>
-        <span>${f.a} <b>${f.aOdds.toFixed(2)}</b> ×1.0 = <b style="color:#166534">${aCP}</b></span>
+      <div style="width:100%;display:flex;gap:8px;justify-content:center;margin-top:6px;font-size:11px;color:#888;flex-wrap:wrap">
+        <span class="odds-pill ${hUsedCls}">${f.h} <b>${f.hOdds.toFixed(2)}</b> ×1.0 = <b style="color:#166534">${hCP}</b></span>
+        <span class="odds-pill ${dUsedCls}">Draw <b>${f.dOdds.toFixed(2)}</b> ×0.5 = <b style="color:#166534">${dCP}</b></span>
+        <span class="odds-pill ${aUsedCls}">${f.a} <b>${f.aOdds.toFixed(2)}</b> ×1.0 = <b style="color:#166534">${aCP}</b></span>
       </div>
     </div>`;
   }).join('');
@@ -1093,7 +1104,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 30 — Netherlands 1–1 Morocco (Morocco win on penalties) added. Both teams earn ×0.5 draw points; Netherlands eliminated, Morocco through to R16.';
+  'Updated Jun 30 — Norway 2–1 Ivory Coast added (Haaland 86th-minute winner). Norway earn full win odds; Ivory Coast eliminated. Norway face Brazil in the R16.';
 </script>
 </body>
 </html>
