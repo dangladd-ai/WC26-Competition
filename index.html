@@ -440,7 +440,7 @@ const R32_FIXTURES = [
   {date:'Jun 28', time:'8:00pm',  h:'South Africa', a:'Canada',                 hOdds:4.00, dOdds:2.70, aOdds:0.70, hg:0, ag:1, ft:true},
   {date:'Jun 29', time:'6:00pm',  h:'Brazil',        a:'Japan',                  hOdds:0.7272727273, dOdds:2.60, aOdds:3.80, hg:2, ag:1, ft:true},
   {date:'Jun 29', time:'9:30pm',  h:'Germany',       a:'Paraguay',               hOdds:0.3636363636, dOdds:4.00, aOdds:7.00, hg:1, ag:1, ft:true, penaltyWinner:'Paraguay'},
-  {date:'Jun 30', time:'2:00am',  h:'Netherlands',   a:'Morocco',                hOdds:1.10, dOdds:2.20, aOdds:2.60, hg:null, ag:null, ft:false},
+  {date:'Jun 30', time:'2:00am',  h:'Netherlands',   a:'Morocco',                hOdds:1.10, dOdds:2.20, aOdds:2.60, hg:1, ag:1, ft:true, penaltyWinner:'Morocco'},
   {date:'Jun 30', time:'6:00pm',  h:'Ivory Coast',   a:'Norway',                 hOdds:2.50, dOdds:2.50, aOdds:1.05, hg:null, ag:null, ft:false},
   {date:'Jun 30', time:'10:00pm', h:'France',        a:'Sweden',                 hOdds:0.2857142857, dOdds:4.75, aOdds:9.00, hg:null, ag:null, ft:false},
   {date:'Jul 1',  time:'2:00am',  h:'Mexico',        a:'Ecuador',                hOdds:1.10, dOdds:2.10, aOdds:2.75, hg:null, ag:null, ft:false},
@@ -1093,7 +1093,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 29 — Germany 1–1 Paraguay (Paraguay win on penalties). Both teams scored ×0.5 draw points. Germany eliminated, Paraguay through to R16.';
+  'Updated Jun 30 — Netherlands 1–1 Morocco (Morocco win on penalties) added. Both teams earn ×0.5 draw points; Netherlands eliminated, Morocco through to R16.';
 </script>
 </body>
 </html>
