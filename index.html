@@ -210,6 +210,11 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <p style="font-size:12px;color:#888;margin-bottom:10px">All 16 Round of 32 matches with kick-off times (BST) and Win/Draw/Win odds, shown as decimal odds × the Round of 32 multiplier. The result is based on normal time only: Winner (after 90 mins) ×1.0, Draw (after 90 mins) ×0.5, Loser ×0. If a match is drawn after 90 minutes and goes to extra time, <b>both teams</b> receive the ×0.5 draw multiplier regardless of who eventually progresses on penalties or in extra time.</p>
 <div class="card" id="r32-fixtures"></div>
 
+<!-- ═══ TEAM POINTS BY ROUND ══════════════════════════════════════════════ -->
+<h2>📊 Team points by round</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">All 48 teams sorted by total competition points, highest first. Points are earned in each round based on odds × the round's multiplier for the result after 90 minutes.</p>
+<div class="card" style="overflow-x:auto"><table class="lb-full" id="team-points-table" style="min-width:420px"></table></div>
+
 <hr class="section-divider">
 
 <!-- ═══ TEAM POPULARITY ═══════════════════════════════════════════════════ -->
@@ -276,7 +281,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 
 const ODDS = {
   'Mexico':0.909,'Czechia':3,'South Korea':3,'South Africa':10,
-  'Switzerland':0.8,'Canada':2.25,'Bosnia And Herzegovina':3.5,'Qatar':25,
+  'Switzerland':0.8,'Canada':2.25,'Bosnia':3.5,'Qatar':25,
   'Brazil':0.286,'Morocco':3.5,'Scotland':8,'Haiti':50,
   'USA':1.3,'Turkiye':1.75,'Paraguay':3.5,'Australia':9,
   'Germany':0.3,'Ecuador':3.5,'Ivory Coast':7.5,'Curacao':66,
@@ -291,13 +296,13 @@ const ODDS = {
 
 const GROUPS = {
   A:['Mexico','South Africa','South Korea','Czechia'],
-  B:['Switzerland','Canada','Bosnia And Herzegovina','Qatar'],
+  B:['Switzerland','Canada','Bosnia','Qatar'],
   C:['Brazil','Morocco','Scotland','Haiti'],
   D:['USA','Australia','Paraguay','Turkiye'],
   E:['Germany','Ivory Coast','Ecuador','Curacao'],
   F:['Netherlands','Japan','Sweden','Tunisia'],
   G:['Belgium','Egypt','Iran','New Zealand'],
-  H:['Spain','Cape Verde','Saudi Arabia','Uruguay'],
+  H:['Spain','Cape Verde','Uruguay','Saudi Arabia'],
   I:['France','Norway','Senegal','Iraq'],
   J:['Argentina','Austria','Algeria','Jordan'],
   K:['Colombia','Portugal','Dr Congo','Uzbekistan'],
@@ -306,18 +311,18 @@ const GROUPS = {
 
 // All 23 entrants — picks parsed directly from PDF column positions
 const ALL_ENTRANTS = [
-  {name:'Wilky', ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Bosnia And Herzegovina'],C:['Brazil','Morocco'],D:['USA','Turkiye'],E:['Germany','Ivory Coast'],F:['Netherlands','Japan'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
+  {name:'Wilky', ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Bosnia'],C:['Brazil','Morocco'],D:['USA','Turkiye'],E:['Germany','Ivory Coast'],F:['Netherlands','Japan'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
   {name:'Jane',  ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Qatar'],C:['Brazil','Scotland'],D:['Turkiye','Paraguay'],E:['Germany','Ivory Coast'],F:['Netherlands','Sweden'],G:['Belgium','New Zealand'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Jordan'],K:['Portugal','Uzbekistan'],L:['England','Croatia']}},
   {name:'Terry', ai:false, picks:{A:['South Korea','South Africa'],B:['Canada','Qatar'],C:['Brazil','Scotland'],D:['Turkiye','Paraguay'],E:['Germany','Ivory Coast'],F:['Netherlands','Sweden'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Norway'],J:['Argentina','Austria'],K:['Portugal','Dr Congo'],L:['England','Croatia']}},
   {name:'Connor',ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Canada'],C:['Brazil','Morocco'],D:['USA','Turkiye'],E:['Germany','Ivory Coast'],F:['Netherlands','Japan'],G:['Belgium','Iran'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Algeria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
-  {name:'Lisa',  ai:false, picks:{A:['Mexico','Czechia'],B:['Switzerland','Bosnia And Herzegovina'],C:['Brazil','Scotland'],D:['USA','Paraguay'],E:['Germany','Ivory Coast'],F:['Netherlands','Japan'],G:['Belgium','New Zealand'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
-  {name:'Steggs',ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Bosnia And Herzegovina'],C:['Brazil','Morocco'],D:['USA','Australia'],E:['Germany','Ecuador'],F:['Netherlands','Japan'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
-  {name:'Damo',  ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Bosnia And Herzegovina'],C:['Brazil','Scotland'],D:['USA','Paraguay'],E:['Germany','Ivory Coast'],F:['Netherlands','Sweden'],G:['Belgium','Iran'],H:['Spain','Uruguay'],I:['France','Norway'],J:['Argentina','Algeria'],K:['Portugal','Uzbekistan'],L:['England','Croatia']}},
-  {name:'Colin', ai:false, picks:{A:['Czechia','South Korea'],B:['Switzerland','Bosnia And Herzegovina'],C:['Brazil','Scotland'],D:['Turkiye','Australia'],E:['Germany','Ivory Coast'],F:['Netherlands','Sweden'],G:['Egypt','Iran'],H:['Spain','Saudi Arabia'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Colombia','Dr Congo'],L:['England','Croatia']}},
+  {name:'Lisa',  ai:false, picks:{A:['Mexico','Czechia'],B:['Switzerland','Bosnia'],C:['Brazil','Scotland'],D:['USA','Paraguay'],E:['Germany','Ivory Coast'],F:['Netherlands','Japan'],G:['Belgium','New Zealand'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
+  {name:'Steggs',ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Bosnia'],C:['Brazil','Morocco'],D:['USA','Australia'],E:['Germany','Ecuador'],F:['Netherlands','Japan'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
+  {name:'Damo',  ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Bosnia'],C:['Brazil','Scotland'],D:['USA','Paraguay'],E:['Germany','Ivory Coast'],F:['Netherlands','Sweden'],G:['Belgium','Iran'],H:['Spain','Uruguay'],I:['France','Norway'],J:['Argentina','Algeria'],K:['Portugal','Uzbekistan'],L:['England','Croatia']}},
+  {name:'Colin', ai:false, picks:{A:['Czechia','South Korea'],B:['Switzerland','Bosnia'],C:['Brazil','Scotland'],D:['Turkiye','Australia'],E:['Germany','Ivory Coast'],F:['Netherlands','Sweden'],G:['Egypt','Iran'],H:['Spain','Saudi Arabia'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Colombia','Dr Congo'],L:['England','Croatia']}},
   {name:'Neil',  ai:false, picks:{A:['Mexico','Czechia'],B:['Switzerland','Canada'],C:['Brazil','Morocco'],D:['USA','Turkiye'],E:['Germany','Ivory Coast'],F:['Netherlands','Japan'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
-  {name:'Lee',   ai:false, picks:{A:['Mexico','Czechia'],B:['Switzerland','Bosnia And Herzegovina'],C:['Brazil','Scotland'],D:['USA','Turkiye'],E:['Germany','Ivory Coast'],F:['Netherlands','Sweden'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
-  {name:'Gary',  ai:false, picks:{A:['Mexico','Czechia'],B:['Switzerland','Bosnia And Herzegovina'],C:['Brazil','Scotland'],D:['USA','Turkiye'],E:['Germany','Ecuador'],F:['Netherlands','Sweden'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Norway'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
-  {name:'Adrian',ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Bosnia And Herzegovina'],C:['Brazil','Morocco'],D:['USA','Turkiye'],E:['Germany','Ecuador'],F:['Netherlands','Sweden'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
+  {name:'Lee',   ai:false, picks:{A:['Mexico','Czechia'],B:['Switzerland','Bosnia'],C:['Brazil','Scotland'],D:['USA','Turkiye'],E:['Germany','Ivory Coast'],F:['Netherlands','Sweden'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
+  {name:'Gary',  ai:false, picks:{A:['Mexico','Czechia'],B:['Switzerland','Bosnia'],C:['Brazil','Scotland'],D:['USA','Turkiye'],E:['Germany','Ecuador'],F:['Netherlands','Sweden'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Norway'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
+  {name:'Adrian',ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Bosnia'],C:['Brazil','Morocco'],D:['USA','Turkiye'],E:['Germany','Ecuador'],F:['Netherlands','Sweden'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
   {name:'Frank', ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Qatar'],C:['Brazil','Morocco'],D:['USA','Turkiye'],E:['Germany','Ecuador'],F:['Netherlands','Japan'],G:['Belgium','New Zealand'],H:['Spain','Uruguay'],I:['France','Norway'],J:['Argentina','Algeria'],K:['Portugal','Colombia'],L:['England','Ghana']}},
   {name:'Pete',  ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Qatar'],C:['Brazil','Scotland'],D:['Turkiye','Australia'],E:['Germany','Ivory Coast'],F:['Japan','Sweden'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Norway'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Ghana']}},
   {name:'Dan',   ai:true,  av:'av-dan', color:'#3b82f6', initials:'DG',
@@ -325,12 +330,12 @@ const ALL_ENTRANTS = [
   {name:'Max',   ai:true,  av:'av-max', color:'#22c55e', initials:'MW',
    picks:{A:['Mexico','South Korea'],B:['Switzerland','Canada'],C:['Brazil','Haiti'],D:['Turkiye','Paraguay'],E:['Ecuador','Curacao'],F:['Netherlands','Japan'],G:['Iran','New Zealand'],H:['Saudi Arabia','Cape Verde'],I:['France','Senegal'],J:['Austria','Jordan'],K:['Colombia','Uzbekistan'],L:['England','Panama']}},
   {name:'Seb',   ai:false, av:'av-seb', color:'#eab308', initials:'SF',
-   picks:{A:['Czechia','South Korea'],B:['Canada','Bosnia And Herzegovina'],C:['Morocco','Scotland'],D:['USA','Australia'],E:['Ecuador','Ivory Coast'],F:['Japan','Sweden'],G:['Egypt','New Zealand'],H:['Saudi Arabia','Cape Verde'],I:['Norway','Senegal'],J:['Austria','Algeria'],K:['Colombia','Dr Congo'],L:['Croatia','Ghana']}},
+   picks:{A:['Czechia','South Korea'],B:['Canada','Bosnia'],C:['Morocco','Scotland'],D:['USA','Australia'],E:['Ecuador','Ivory Coast'],F:['Japan','Sweden'],G:['Egypt','New Zealand'],H:['Saudi Arabia','Cape Verde'],I:['Norway','Senegal'],J:['Austria','Algeria'],K:['Colombia','Dr Congo'],L:['Croatia','Ghana']}},
   {name:'Dons',  ai:true,  picks:{A:['Mexico','Czechia'],B:['Switzerland','Canada'],C:['Brazil','Morocco'],D:['USA','Paraguay'],E:['Germany','Ecuador'],F:['Netherlands','Japan'],G:['Belgium','Iran'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
   {name:'Matt R',ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Canada'],C:['Brazil','Morocco'],D:['USA','Paraguay'],E:['Germany','Ivory Coast'],F:['Netherlands','Sweden'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
-  {name:'Matt P',ai:false, picks:{A:['Mexico','Czechia'],B:['Switzerland','Bosnia And Herzegovina'],C:['Brazil','Morocco'],D:['USA','Turkiye'],E:['Germany','Ecuador'],F:['Netherlands','Japan'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Algeria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
+  {name:'Matt P',ai:false, picks:{A:['Mexico','Czechia'],B:['Switzerland','Bosnia'],C:['Brazil','Morocco'],D:['USA','Turkiye'],E:['Germany','Ecuador'],F:['Netherlands','Japan'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Algeria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
   {name:'Dave',  ai:false, picks:{A:['Mexico','Czechia'],B:['Switzerland','Canada'],C:['Brazil','Morocco'],D:['USA','Paraguay'],E:['Germany','Ecuador'],F:['Netherlands','Japan'],G:['Egypt','Iran'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Austria'],K:['Portugal','Colombia'],L:['England','Croatia']}},
-  {name:'Lynne', ai:false, picks:{A:['Czechia','South Korea'],B:['Switzerland','Bosnia And Herzegovina'],C:['Brazil','Morocco'],D:['Turkiye','Paraguay'],E:['Germany','Ivory Coast'],F:['Netherlands','Japan'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Algeria'],K:['Colombia','Dr Congo'],L:['England','Croatia']}},
+  {name:'Lynne', ai:false, picks:{A:['Czechia','South Korea'],B:['Switzerland','Bosnia'],C:['Brazil','Morocco'],D:['Turkiye','Paraguay'],E:['Germany','Ivory Coast'],F:['Netherlands','Japan'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Senegal'],J:['Argentina','Algeria'],K:['Colombia','Dr Congo'],L:['England','Croatia']}},
   {name:'Martin',ai:false, picks:{A:['Mexico','South Korea'],B:['Switzerland','Canada'],C:['Brazil','Morocco'],D:['Turkiye','Paraguay'],E:['Germany','Ecuador'],F:['Netherlands','Sweden'],G:['Belgium','Egypt'],H:['Spain','Uruguay'],I:['France','Norway'],J:['Argentina','Algeria'],K:['Portugal','Colombia'],L:['England','Ghana']}}
 ];
 
@@ -340,7 +345,7 @@ const CONFIRMED = [
   {date:'Jun 11',g:'A',h:'Mexico',      a:'South Africa',           hg:2,ag:0,ft:true},
   {date:'Jun 11',g:'A',h:'South Korea', a:'Czechia',                hg:2,ag:1,ft:true},
   // Jun 12
-  {date:'Jun 12',g:'B',h:'Canada',      a:'Bosnia And Herzegovina', hg:1,ag:1,ft:true},
+  {date:'Jun 12',g:'B',h:'Canada',      a:'Bosnia', hg:1,ag:1,ft:true},
   {date:'Jun 12',g:'D',h:'USA',         a:'Paraguay',               hg:4,ag:1,ft:true},
   // Jun 13
   {date:'Jun 13',g:'B',h:'Qatar',       a:'Switzerland',            hg:1,ag:1,ft:true},
@@ -370,7 +375,7 @@ const CONFIRMED = [
   // Jun 18 — Matchday 2, Groups A & B
   {date:'Jun 18',g:'A',h:'Czechia',      a:'South Africa',  hg:1,ag:1,ft:true},
   {date:'Jun 18',g:'A',h:'Mexico',       a:'South Korea',   hg:1,ag:0,ft:true},
-  {date:'Jun 18',g:'B',h:'Switzerland',  a:'Bosnia And Herzegovina', hg:4,ag:1,ft:true},
+  {date:'Jun 18',g:'B',h:'Switzerland',  a:'Bosnia', hg:4,ag:1,ft:true},
   {date:'Jun 18',g:'B',h:'Canada',       a:'Qatar',         hg:6,ag:0,ft:true},
   // Jun 19 — Matchday 2, Groups C & D
   {date:'Jun 19',g:'D',h:'USA',          a:'Australia',     hg:2,ag:0,ft:true},
@@ -401,7 +406,7 @@ const CONFIRMED = [
   {date:'Jun 24',g:'A',h:'Mexico',       a:'Czechia',       hg:3,ag:0,ft:true},
   {date:'Jun 24',g:'A',h:'South Africa', a:'South Korea',   hg:1,ag:0,ft:true},
   {date:'Jun 24',g:'B',h:'Switzerland',  a:'Canada',        hg:2,ag:1,ft:true},
-  {date:'Jun 24',g:'B',h:'Bosnia And Herzegovina', a:'Qatar', hg:3,ag:1,ft:true},
+  {date:'Jun 24',g:'B',h:'Bosnia', a:'Qatar', hg:3,ag:1,ft:true},
   {date:'Jun 24',g:'C',h:'Scotland',     a:'Brazil',        hg:0,ag:3,ft:true},
   {date:'Jun 24',g:'C',h:'Morocco',      a:'Haiti',         hg:4,ag:2,ft:true},
   // Jun 25 — Matchday 3 (final group games), Groups D, E, F
@@ -445,10 +450,10 @@ const R32_FIXTURES = [
   {date:'Jun 30', time:'2:00am',  h:'Netherlands',   a:'Morocco',                hOdds:1.10, dOdds:2.20, aOdds:2.60, hg:1, ag:1, ft:true, penaltyWinner:'Morocco'},
   {date:'Jun 30', time:'6:00pm',  h:'Ivory Coast',   a:'Norway',                 hOdds:2.50, dOdds:2.50, aOdds:1.05, hg:1, ag:2, ft:true},
   {date:'Jun 30', time:'10:00pm', h:'France',        a:'Sweden',                 hOdds:0.2857142857, dOdds:4.75, aOdds:9.00, hg:3, ag:0, ft:true},
-  {date:'Jul 1',  time:'2:00am',  h:'Mexico',        a:'Ecuador',                hOdds:1.10, dOdds:2.10, aOdds:2.75, hg:null, ag:null, ft:false},
+  {date:'Jul 1',  time:'2:00am',  h:'Mexico',        a:'Ecuador',                hOdds:1.10, dOdds:2.10, aOdds:2.75, hg:2, ag:0, ft:true},
   {date:'Jul 1',  time:'5:00pm',  h:'England',       a:'Dr Congo',               hOdds:0.2857142857, dOdds:4.50, aOdds:11.0, hg:null, ag:null, ft:false},
   {date:'Jul 1',  time:'9:00pm',  h:'Belgium',       a:'Senegal',                hOdds:1.10, dOdds:2.20, aOdds:2.60, hg:null, ag:null, ft:false},
-  {date:'Jul 2',  time:'1:00am',  h:'USA',           a:'Bosnia And Herzegovina', hOdds:0.3636363636, dOdds:3.80, aOdds:7.50, hg:null, ag:null, ft:false},
+  {date:'Jul 2',  time:'1:00am',  h:'USA',           a:'Bosnia', hOdds:0.3636363636, dOdds:3.80, aOdds:7.50, hg:null, ag:null, ft:false},
   {date:'Jul 2',  time:'8:00pm',  h:'Spain',         a:'Austria',                hOdds:0.25, dOdds:4.50, aOdds:11.0, hg:null, ag:null, ft:false},
   {date:'Jul 3',  time:'12:00am', h:'Portugal',      a:'Croatia',                hOdds:0.8333333333, dOdds:2.50, aOdds:3.333333333, hg:null, ag:null, ft:false},
   {date:'Jul 3',  time:'4:00am',  h:'Switzerland',   a:'Algeria',                hOdds:0.85, dOdds:2.50, aOdds:3.00, hg:null, ag:null, ft:false},
@@ -679,7 +684,7 @@ function renderTeamPopularity(scored, thirdPlaceQualifiers) {
   // Team name -> fractional odds string
   const ODDS_FRAC = {
     'Mexico':'10/11','Czechia':'3/1','South Korea':'3/1','South Africa':'10/1',
-    'Switzerland':'4/5','Canada':'9/4','Bosnia And Herzegovina':'7/2','Qatar':'25/1',
+    'Switzerland':'4/5','Canada':'9/4','Bosnia':'7/2','Qatar':'25/1',
     'Brazil':'2/7','Morocco':'7/2','Scotland':'8/1','Haiti':'50/1',
     'USA':'13/10','Turkiye':'7/4','Paraguay':'7/2','Australia':'9/1',
     'Germany':'3/10','Ecuador':'7/2','Ivory Coast':'15/2','Curacao':'66/1',
@@ -945,12 +950,59 @@ function renderAll() {
     <span class="rbadge">${r.date}</span><span class="rbadge">Grp ${r.g}</span><span class="rbadge ft">FT</span>
   </div>`).join('');
 
+  // ── Team points by round table
+  renderTeamPointsTable();
+
   // ── Upcoming
   document.getElementById('upcoming').innerHTML = UPCOMING().map(u=>`<div class="urow">
     <span class="udate">${u.date}</span>
     <span class="ufixture"><span class="${allPicks[u.h]?'upick':''}">${u.h}</span> vs <span class="${allPicks[u.a]?'upick':''}">${u.a}</span></span>
     <span class="rbadge">${u.g==='R32'?'R32':'Grp '+u.g}</span>${u.md?`<span class="rbadge md2">${u.md}</span>`:''}
   </div>`).join('');
+}
+
+function renderTeamPointsTable() {
+  const allTeams = [];
+
+  Object.entries(GROUPS).forEach(([grp, teams]) => {
+    teams.forEach(team => {
+      const pos = teamPos(team, grp) || 'F4'; // use actual result-derived position
+      const groupPts = (ODDS[team]||0) * MULT[pos];
+      const r32 = getR32Points(team);
+      const r32Pts = r32 ? r32.pts : null;
+      const total = groupPts + (r32Pts || 0);
+      allTeams.push({ team, grp, pos, groupPts, r32Pts, total });
+    });
+  });
+
+  allTeams.sort((a, b) => b.total - a.total || b.groupPts - a.groupPts);
+
+  const r32Started = R32_FIXTURES.some(f => f.ft);
+  const posLabel = {W:'1st',RU:'2nd',T3:'3rd',F4:'4th'};
+  const posCls   = {W:'mtp-thru',RU:'mtp-thru',T3:'mtp-out',F4:'mtp-out'};
+
+  const headers = `<thead><tr>
+    <th style="width:30px">Pos</th>
+    <th>Team</th>
+    <th class="num" style="color:#166534">Total</th>
+    <th class="num">Group</th>
+    ${r32Started ? '<th class="num">R32</th>' : ''}
+  </tr></thead>`;
+
+  const rows = allTeams.map((t, i) => {
+    const r32Cell = r32Started
+      ? `<td class="pts" style="color:#888">${t.r32Pts !== null ? t.r32Pts.toFixed(2) : '—'}</td>`
+      : '';
+    return `<tr>
+      <td class="rank" style="color:#bbb">${i+1}</td>
+      <td class="name-cell">${t.team}<span class="rbadge" style="margin-left:6px">Grp ${t.grp}</span></td>
+      <td class="pts" style="color:#166534;font-weight:800">${t.total.toFixed(2)}</td>
+      <td class="pts">${t.groupPts.toFixed(2)}</td>
+      ${r32Cell}
+    </tr>`;
+  }).join('');
+
+  document.getElementById('team-points-table').innerHTML = headers + `<tbody>${rows}</tbody>`;
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1104,7 +1156,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jun 30 — France 3–0 Sweden added (R32). France earn full win odds (0.286 × 1.0 = +0.29 pts); Sweden eliminated.';
+  'Updated Jul 1 — Mexico 2–0 Ecuador added (R32). Mexico earn 1.10 × 1.0 = +1.10 pts; Ecuador eliminated. Mexico through to R16.';
 </script>
 </body>
 </html>
