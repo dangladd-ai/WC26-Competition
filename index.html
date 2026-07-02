@@ -154,6 +154,8 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 .pop-name-click:hover{color:#1e40af}
 .pop-name-qualified{color:#166534 !important}
 .pop-name-qualified:hover{color:#14532d !important}
+.pop-name-eliminated{color:#ef4444 !important}
+.pop-name-eliminated:hover{color:#dc2626 !important}
 .pop-pip-wrap{display:flex;gap:2px;flex-shrink:0}
 .pop-pip{width:7px;height:7px;border-radius:2px;background:#e5e7eb}
 .pop-pip.filled{background:#4ade80}
@@ -446,14 +448,14 @@ let LIVE = [];
 const R32_FIXTURES = [
   {date:'Jun 28', time:'8:00pm',  h:'South Africa', a:'Canada',                 hOdds:4.00, dOdds:2.70, aOdds:0.70, hg:0, ag:1, ft:true},
   {date:'Jun 29', time:'6:00pm',  h:'Brazil',        a:'Japan',                  hOdds:0.7272727273, dOdds:2.60, aOdds:3.80, hg:2, ag:1, ft:true},
-  {date:'Jun 29', time:'9:30pm',  h:'Germany',       a:'Paraguay',               hOdds:0.3636363636, dOdds:4.00, aOdds:7.00, hg:1, ag:1, ft:true, penaltyWinner:'Paraguay'},
-  {date:'Jun 30', time:'2:00am',  h:'Netherlands',   a:'Morocco',                hOdds:1.10, dOdds:2.20, aOdds:2.60, hg:1, ag:1, ft:true, penaltyWinner:'Morocco'},
+  {date:'Jun 29', time:'9:30pm',  h:'Germany',       a:'Paraguay',               hOdds:0.3636363636, dOdds:4.00, aOdds:7.00, hg:1, ag:1, ft:true, penaltyWinner:'Paraguay', penScore:'3-4'},
+  {date:'Jun 30', time:'2:00am',  h:'Netherlands',   a:'Morocco',                hOdds:1.10, dOdds:2.20, aOdds:2.60, hg:1, ag:1, ft:true, penaltyWinner:'Morocco', penScore:'2-3'},
   {date:'Jun 30', time:'6:00pm',  h:'Ivory Coast',   a:'Norway',                 hOdds:2.50, dOdds:2.50, aOdds:1.05, hg:1, ag:2, ft:true},
   {date:'Jun 30', time:'10:00pm', h:'France',        a:'Sweden',                 hOdds:0.2857142857, dOdds:4.75, aOdds:9.00, hg:3, ag:0, ft:true},
   {date:'Jul 1',  time:'2:00am',  h:'Mexico',        a:'Ecuador',                hOdds:1.10, dOdds:2.10, aOdds:2.75, hg:2, ag:0, ft:true},
-  {date:'Jul 1',  time:'5:00pm',  h:'England',       a:'Dr Congo',               hOdds:0.2857142857, dOdds:4.50, aOdds:11.0, hg:null, ag:null, ft:false},
-  {date:'Jul 1',  time:'9:00pm',  h:'Belgium',       a:'Senegal',                hOdds:1.10, dOdds:2.20, aOdds:2.60, hg:null, ag:null, ft:false},
-  {date:'Jul 2',  time:'1:00am',  h:'USA',           a:'Bosnia', hOdds:0.3636363636, dOdds:3.80, aOdds:7.50, hg:null, ag:null, ft:false},
+  {date:'Jul 1',  time:'5:00pm',  h:'England',       a:'Dr Congo',               hOdds:0.2857142857, dOdds:4.50, aOdds:11.0, hg:2, ag:1, ft:true},
+  {date:'Jul 1',  time:'9:00pm',  h:'Belgium',       a:'Senegal',                hOdds:1.10, dOdds:2.20, aOdds:2.60, hg:2, ag:2, ft:true, aetWinner:'Belgium', aetScore:'3-2'},
+  {date:'Jul 2',  time:'1:00am',  h:'USA',           a:'Bosnia', hOdds:0.3636363636, dOdds:3.80, aOdds:7.50, hg:2, ag:0, ft:true},
   {date:'Jul 2',  time:'8:00pm',  h:'Spain',         a:'Austria',                hOdds:0.25, dOdds:4.50, aOdds:11.0, hg:null, ag:null, ft:false},
   {date:'Jul 3',  time:'12:00am', h:'Portugal',      a:'Croatia',                hOdds:0.8333333333, dOdds:2.50, aOdds:3.333333333, hg:null, ag:null, ft:false},
   {date:'Jul 3',  time:'4:00am',  h:'Switzerland',   a:'Algeria',                hOdds:0.85, dOdds:2.50, aOdds:3.00, hg:null, ag:null, ft:false},
@@ -462,7 +464,19 @@ const R32_FIXTURES = [
   {date:'Jul 4',  time:'2:30am',  h:'Colombia',      a:'Ghana',                  hOdds:0.60, dOdds:2.70, aOdds:5.00, hg:null, ag:null, ft:false},
 ];
 
-const UPCOMING = () => R32_FIXTURES.filter(f => !f.ft).map(f => ({date:`${f.date} ${f.time}`, h:f.h, a:f.a, g:'R32', md:'R32'}));
+const UPCOMING = () => [
+  // Remaining Round of 32
+  ...R32_FIXTURES.filter(f => !f.ft).map(f => ({date:`${f.date} ${f.time}`, h:f.h, a:f.a, g:'R32', md:'R32'})),
+  // Round of 16 — fixtures with at least one confirmed team (BST kick-off times)
+  {date:'Jul 4',  h:'Canada',    a:'Morocco',                 g:'R16', md:'R16'},
+  {date:'Jul 4',  h:'Paraguay',  a:'France',                  g:'R16', md:'R16'},
+  {date:'Jul 5',  h:'Brazil',    a:'Norway',                  g:'R16', md:'R16'},
+  {date:'Jul 5',  h:'Mexico',    a:'England',                 g:'R16', md:'R16'},
+  {date:'Jul 6',  h:'W Portugal/Croatia', a:'W Spain/Austria',g:'R16', md:'R16'},
+  {date:'Jul 6',  h:'W USA/Bosnia', a:'W Belgium/Senegal',    g:'R16', md:'R16'},
+  {date:'Jul 7',  h:'W Argentina/Cape Verde', a:'W Australia/Egypt', g:'R16', md:'R16'},
+  {date:'Jul 7',  h:'W Switzerland/Algeria', a:'W Colombia/Ghana', g:'R16', md:'R16'},
+];
 
 // ══════════════════════════════════════════════════════════════════════════════
 // LOGIC
@@ -503,6 +517,17 @@ function isLiveTeam(team) {
 
 // Returns the 3rd-place team from each group that has played at least one game,
 // ranked by Pts, GD, GF (standard FIFA third-place ranking tiebreakers)
+// Returns true if a team is still alive in the tournament, false if eliminated.
+// Checks R32 result first (definitive), then falls back to group-stage position.
+function teamIsAlive(team, grp, thirdPlaceQualifiers) {
+  const r32 = getR32Points(team);
+  if (r32) return !r32.eliminated;
+  const pos = teamPos(team, grp);
+  if (pos === 'W' || pos === 'RU') return true;
+  if (pos === 'T3') return thirdPlaceQualifiers.has(team);
+  return false; // 4th or unplayed
+}
+
 function getThirdPlaceRanking() {
   const thirds = [];
   Object.keys(GROUPS).forEach(grp => {
@@ -581,6 +606,7 @@ function getR32Points(team) {
   const mult = drawn ? 0.5 : (won ? 1.0 : 0);
   let eliminated = !drawn && !won;
   if (drawn && f.penaltyWinner) eliminated = (f.penaltyWinner !== team);
+  if (drawn && f.aetWinner) eliminated = (f.aetWinner !== team);
   return { pts: oddsUsed * mult, mult, drawn, won, odds: oddsUsed, eliminated };
 }
 
@@ -730,7 +756,7 @@ function renderTeamPopularity(scored, thirdPlaceQualifiers) {
       const odds = ODDS_FRAC[team] || '';
       // Green name only while still alive and progressing; once eliminated
       // (knocked out in the Round of 32 or later), revert to the default blue link
-      const nameCls = status==='thru' ? 'pop-name-qualified' : '';
+      const nameCls = status==='thru' ? 'pop-name-qualified' : (status==='out'||status==='eliminated') ? 'pop-name-eliminated' : '';
       html += `<div class="pop-row">
         <span class="pop-name pop-name-click ${nameCls}" title="Click to see who picked ${team}" onclick="openTeamModal('${team}')">${team}</span>
         <span class="pop-odds">${odds}</span>
@@ -853,8 +879,10 @@ function renderAll() {
         const cpCls = cp!=null && cp>0 ? 'cp-pos' : 'cp-zero';
         const multiStr = s.P>0 ? `×${multi.toFixed(2)}` : '—';
         const qualifies = (i<2) || (i===2 && thirdPlaceQualifiers.has(team));
+        const alive = teamIsAlive(team, grp, thirdPlaceQualifiers);
+        const nameCls = alive ? 'color:#166534;font-weight:600' : 'color:#ef4444';
         return `<tr class="${qualifies?'q':''} ${s.live?'lv':''}">
-          <td>${team}${s.live?' 🔴':''}</td><td>${s.P}</td><td>${gd>0?'+':''}${gd}</td><td><b>${s.Pts}</b></td><td style="color:#999">${odds.toFixed(3)}</td><td style="color:#999">${multiStr}</td><td class="${cpCls}">${cpStr}</td>
+          <td><span style="${nameCls}">${team}${s.live?' 🔴':''}</span></td><td>${s.P}</td><td>${gd>0?'+':''}${gd}</td><td><b>${s.Pts}</b></td><td style="color:#999">${odds.toFixed(3)}</td><td style="color:#999">${multiStr}</td><td class="${cpCls}">${cpStr}</td>
         </tr>`;
       }).join('')}
       </table></div>`;
@@ -882,7 +910,7 @@ function renderAll() {
         : '<span class="rbadge" style="background:#fef2f2;color:#991b1b">Eliminated</span>';
       return `<tr class="${qualifying?'highlight':''}" style="${i===7?'border-bottom:2px solid #4ade80':''}">
         <td class="rank">${rankCell}</td>
-        <td class="name-cell">${t.team}</td>
+        <td class="name-cell" style="${qualifying?'color:#166534;font-weight:700':'color:#ef4444'}">${t.team}</td>
         <td class="pts">${t.grp}</td>
         <td class="pts hide-mobile">${t.P}</td>
         <td class="pts hide-mobile">${t.GD>0?'+':''}${t.GD}</td>
@@ -917,11 +945,20 @@ function renderAll() {
     const dUsedCls = (played && drawn) ? 'odds-used' : '';
     const aUsedCls = aWon ? 'odds-used' : '';
 
+    // Determine alive status for name colouring — need to find each team's group
+    const hGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.h));
+    const aGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.a));
+    const tpq = new Set(getThirdPlaceRanking().slice(0,8).map(t=>t.team));
+    const hAlive = teamIsAlive(f.h, hGrp, tpq);
+    const aAlive = teamIsAlive(f.a, aGrp, tpq);
+    const hNameStyle = hAlive ? 'color:#166534;font-weight:700' : 'color:#ef4444';
+    const aNameStyle = aAlive ? 'color:#166534;font-weight:700' : 'color:#ef4444';
+
     return `<div class="rrow" style="flex-wrap:wrap;align-items:flex-start">
       <div style="display:flex;align-items:center;width:100%">
-        <div class="rhome"><span class="${hPick?'rpick':''}">${f.h}</span></div>
+        <div class="rhome"><span class="${hPick?'rpick':''}" style="${hNameStyle}">${f.h}</span></div>
         ${resultHTML}
-        <div class="raway"><span class="${aPick?'rpick':''}">${f.a}</span></div>
+        <div class="raway"><span class="${aPick?'rpick':''}" style="${aNameStyle}">${f.a}</span></div>
         <span class="rbadge">${f.date} ${f.time}</span>
         ${played ? '<span class="rbadge ft">FT</span>' : ''}
       </div>
@@ -934,52 +971,93 @@ function renderAll() {
   }).join('');
 
   // ── Results — split Round of 32 vs Group Stage, newest first
+  const tpqRes = new Set(getThirdPlaceRanking().slice(0,8).map(t=>t.team));
   const r32Played = R32_FIXTURES.filter(f => f.ft).slice().reverse();
-  document.getElementById('results-r32').innerHTML = r32Played.length ? r32Played.map(f => `<div class="rrow">
-    <div class="rhome"><span class="${allPicks[f.h]?'rpick':''}">${f.h}</span></div>
-    <div class="rscore ft">${f.hg} – ${f.ag}</div>
-    <div class="raway"><span class="${allPicks[f.a]?'rpick':''}">${f.a}</span></div>
-    <span class="rbadge">${f.date}</span><span class="rbadge ft">FT</span>
-  </div>`).join('') : '<p style="font-size:12px;color:#aaa">No Round of 32 results yet</p>';
+  document.getElementById('results-r32').innerHTML = r32Played.length ? r32Played.map(f => {
+    const hGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.h));
+    const aGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.a));
+    const hAlive = teamIsAlive(f.h, hGrp, tpqRes);
+    const aAlive = teamIsAlive(f.a, aGrp, tpqRes);
 
-  const groupSorted = [...CONFIRMED].reverse(); // newest first (entries are already in chronological order)
-  document.getElementById('results-group').innerHTML = groupSorted.map(r=>`<div class="rrow">
-    <div class="rhome"><span class="${allPicks[r.h]?'rpick':''}">${r.h}</span></div>
-    <div class="rscore ft">${r.hg} – ${r.ag}</div>
-    <div class="raway"><span class="${allPicks[r.a]?'rpick':''}">${r.a}</span></div>
-    <span class="rbadge">${r.date}</span><span class="rbadge">Grp ${r.g}</span><span class="rbadge ft">FT</span>
-  </div>`).join('');
+    // Build the score display — show AET/pen score if applicable
+    let scoreDisplay = `${f.hg} – ${f.ag}`;
+    let suffixBadge = '<span class="rbadge ft">FT</span>';
+    if (f.aetWinner && f.aetScore) {
+      scoreDisplay = f.aetScore;
+      suffixBadge = '<span class="rbadge" style="background:#fef9c3;color:#78350f">AET</span>';
+    } else if (f.penaltyWinner && f.penScore) {
+      scoreDisplay = f.penScore;
+      suffixBadge = '<span class="rbadge" style="background:#ede9fe;color:#6d28d9">Pens</span>';
+    }
+
+    return `<div class="rrow" style="flex-wrap:wrap">
+      <div style="display:flex;align-items:center;width:100%">
+        <div class="rhome"><span class="${allPicks[f.h]?'rpick':''}" style="${hAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.h}</span></div>
+        <div class="rscore ft">${scoreDisplay}</div>
+        <div class="raway"><span class="${allPicks[f.a]?'rpick':''}" style="${aAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.a}</span></div>
+        <span class="rbadge">${f.date}</span>${suffixBadge}
+      </div>
+      ${(f.aetWinner||f.penaltyWinner) ? `<div style="width:100%;font-size:11px;color:#aaa;text-align:center;padding:2px 0">${f.hg}–${f.ag} after 90 mins · competition points based on 90-min result</div>` : ''}
+    </div>`;
+  }).join('') : '<p style="font-size:12px;color:#aaa">No Round of 32 results yet</p>';
+
+  const groupSorted = [...CONFIRMED].reverse();
+  document.getElementById('results-group').innerHTML = groupSorted.map(r => {
+    const hGrp = r.g, aGrp = r.g;
+    const hAlive = teamIsAlive(r.h, hGrp, tpqRes);
+    const aAlive = teamIsAlive(r.a, aGrp, tpqRes);
+    return `<div class="rrow">
+      <div class="rhome"><span class="${allPicks[r.h]?'rpick':''}" style="${hAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${r.h}</span></div>
+      <div class="rscore ft">${r.hg} – ${r.ag}</div>
+      <div class="raway"><span class="${allPicks[r.a]?'rpick':''}" style="${aAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${r.a}</span></div>
+      <span class="rbadge">${r.date}</span><span class="rbadge">Grp ${r.g}</span><span class="rbadge ft">FT</span>
+    </div>`;
+  }).join('');
 
   // ── Team points by round table
   renderTeamPointsTable();
 
   // ── Upcoming
-  document.getElementById('upcoming').innerHTML = UPCOMING().map(u=>`<div class="urow">
-    <span class="udate">${u.date}</span>
-    <span class="ufixture"><span class="${allPicks[u.h]?'upick':''}">${u.h}</span> vs <span class="${allPicks[u.a]?'upick':''}">${u.a}</span></span>
-    <span class="rbadge">${u.g==='R32'?'R32':'Grp '+u.g}</span>${u.md?`<span class="rbadge md2">${u.md}</span>`:''}
-  </div>`).join('');
+  document.getElementById('upcoming').innerHTML = UPCOMING().map(u=>{
+    const badge = u.g==='R16'
+      ? `<span class="rbadge" style="background:#ede9fe;color:#6d28d9">R16</span>`
+      : `<span class="rbadge">R32</span>`;
+    const hPick = allPicks[u.h], aPick = allPicks[u.a];
+    return `<div class="urow">
+      <span class="udate">${u.date}</span>
+      <span class="ufixture"><span class="${hPick?'upick':''}">${u.h}</span> vs <span class="${aPick?'upick':''}">${u.a}</span></span>
+      ${badge}
+    </div>`;
+  }).join('');
 }
 
 function renderTeamPointsTable() {
   const allTeams = [];
+  const thirdRanking = getThirdPlaceRanking();
+  const thirdPlaceQualifiers = new Set(thirdRanking.slice(0,8).map(t=>t.team));
 
   Object.entries(GROUPS).forEach(([grp, teams]) => {
     teams.forEach(team => {
-      const pos = teamPos(team, grp) || 'F4'; // use actual result-derived position
+      const pos = teamPos(team, grp) || 'F4';
       const groupPts = (ODDS[team]||0) * MULT[pos];
       const r32 = getR32Points(team);
       const r32Pts = r32 ? r32.pts : null;
       const total = groupPts + (r32Pts || 0);
-      allTeams.push({ team, grp, pos, groupPts, r32Pts, total });
+
+      // Determine if team is still alive
+      let alive = false;
+      if (pos === 'W' || pos === 'RU') alive = true;
+      else if (pos === 'T3' && thirdPlaceQualifiers.has(team)) alive = true;
+      // R32 result overrides: if played, alive = not eliminated
+      if (r32) alive = !r32.eliminated;
+
+      allTeams.push({ team, grp, pos, groupPts, r32Pts, total, alive });
     });
   });
 
   allTeams.sort((a, b) => b.total - a.total || b.groupPts - a.groupPts);
 
   const r32Started = R32_FIXTURES.some(f => f.ft);
-  const posLabel = {W:'1st',RU:'2nd',T3:'3rd',F4:'4th'};
-  const posCls   = {W:'mtp-thru',RU:'mtp-thru',T3:'mtp-out',F4:'mtp-out'};
 
   const headers = `<thead><tr>
     <th style="width:30px">Pos</th>
@@ -993,9 +1071,10 @@ function renderTeamPointsTable() {
     const r32Cell = r32Started
       ? `<td class="pts" style="color:#888">${t.r32Pts !== null ? t.r32Pts.toFixed(2) : '—'}</td>`
       : '';
+    const nameCls = t.alive ? 'color:#166534;font-weight:700' : 'color:#ef4444';
     return `<tr>
       <td class="rank" style="color:#bbb">${i+1}</td>
-      <td class="name-cell">${t.team}<span class="rbadge" style="margin-left:6px">Grp ${t.grp}</span></td>
+      <td class="name-cell" style="${nameCls}">${t.team}<span class="rbadge" style="margin-left:6px">${t.grp}</span></td>
       <td class="pts" style="color:#166534;font-weight:800">${t.total.toFixed(2)}</td>
       <td class="pts">${t.groupPts.toFixed(2)}</td>
       ${r32Cell}
@@ -1156,7 +1235,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jul 1 — Mexico 2–0 Ecuador added (R32). Mexico earn 1.10 × 1.0 = +1.10 pts; Ecuador eliminated. Mexico through to R16.';
+  'Updated Jul 2 — England 2–1 DR Congo, Belgium 2–2 Senegal (Belgium win AET), USA 2–0 Bosnia added (all R32). England, Belgium and USA through to R16.';
 </script>
 </body>
 </html>
