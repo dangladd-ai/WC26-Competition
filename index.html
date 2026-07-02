@@ -568,18 +568,27 @@ function countGroupQualifiers(picks) {
   return count;
 }
 
-// Maximum number of the entrant's teams that could possibly progress to the
-// Round of 16, given the actual Round of 32 bracket. This is NOT simply a count
-// of qualified teams — if an entrant picked BOTH teams in the same R32 fixture,
-// only one of them can possibly win that match, so it only counts once. The
-// result can never exceed 16, since there are only 16 Round of 32 matches.
+// Maximum number of the entrant's teams that could reach the Round of 16.
+// For played R32 fixtures: only counts if entrant's team actually won (confirmed through).
+// For unplayed R32 fixtures: counts 1 if the entrant has at least one team in that tie
+//   (since at most one can go through, even if the entrant picked both sides).
+// Teams that didn't qualify for R32 at all contribute 0.
 function countMaxR32Through(picks) {
   const pickedTeams = new Set(Object.values(picks).flat());
   let maxThrough = 0;
   R32_FIXTURES.forEach(f => {
     const hasHome = pickedTeams.has(f.h);
     const hasAway = pickedTeams.has(f.a);
-    if (hasHome || hasAway) maxThrough++; // at most 1 winner per fixture, regardless of how many sides the entrant picked
+    if (f.ft) {
+      // Match played — only count if entrant's team actually progressed
+      const r32h = getR32Points(f.h);
+      const r32a = getR32Points(f.a);
+      if (hasHome && r32h && !r32h.eliminated) maxThrough++;
+      else if (hasAway && r32a && !r32a.eliminated) maxThrough++;
+    } else {
+      // Match not yet played — if entrant has either team, max 1 can go through
+      if (hasHome || hasAway) maxThrough++;
+    }
   });
   return Math.min(maxThrough, 16);
 }
