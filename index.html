@@ -463,27 +463,41 @@ const R32_FIXTURES = [
   {date:'Jul 3',  time:'12:00am', h:'Portugal',      a:'Croatia',                hOdds:0.8333333333, dOdds:2.50, aOdds:3.333333333, hg:2, ag:1, ft:true},
   {date:'Jul 3',  time:'4:00am',  h:'Switzerland',   a:'Algeria',                hOdds:0.85, dOdds:2.50, aOdds:3.00, hg:2, ag:0, ft:true},
   {date:'Jul 3',  time:'7:00pm',  h:'Australia',     a:'Egypt',                  hOdds:2.30, dOdds:1.90, aOdds:1.40, hg:1, ag:1, ft:true, penaltyWinner:'Egypt', penScore:'2-4'},
-  {date:'Jul 3',  time:'11:00pm', h:'Argentina',     a:'Cape Verde',             hOdds:0.1538461538, dOdds:7.00, aOdds:16.0, hg:null, ag:null, ft:false},
-  {date:'Jul 4',  time:'2:30am',  h:'Colombia',      a:'Ghana',                  hOdds:0.60, dOdds:2.70, aOdds:5.00, hg:null, ag:null, ft:false},
+  {date:'Jul 3',  time:'11:00pm', h:'Argentina',     a:'Cape Verde',             hOdds:0.1538461538, dOdds:7.00, aOdds:16.0, hg:1, ag:1, ft:true, aetWinner:'Argentina', aetScore:'3-2'},
+  {date:'Jul 4',  time:'2:30am',  h:'Colombia',      a:'Ghana',                  hOdds:0.60, dOdds:2.70, aOdds:5.00, hg:1, ag:0, ft:true},
+];
+
+// Round of 16 bracket — all fixtures confirmed, odds TBC
+const R16_FIXTURES = [
+  {date:'Jul 5',  h:'Canada',      a:'Morocco',      hg:null, ag:null, ft:false},
+  {date:'Jul 5',  h:'Paraguay',    a:'France',       hg:null, ag:null, ft:false},
+  {date:'Jul 6',  h:'Brazil',      a:'Norway',       hg:null, ag:null, ft:false},
+  {date:'Jul 6',  h:'Mexico',      a:'England',      hg:null, ag:null, ft:false},
+  {date:'Jul 7',  h:'Spain',       a:'Portugal',     hg:null, ag:null, ft:false},
+  {date:'Jul 7',  h:'USA',         a:'Belgium',      hg:null, ag:null, ft:false},
+  {date:'Jul 8',  h:'Egypt',       a:'Argentina',    hg:null, ag:null, ft:false},
+  {date:'Jul 8',  h:'Switzerland', a:'Colombia',     hg:null, ag:null, ft:false},
 ];
 
 const UPCOMING = () => [
-  // Remaining Round of 32
-  ...R32_FIXTURES.filter(f => !f.ft).map(f => ({date:`${f.date} ${f.time}`, h:f.h, a:f.a, g:'R32', md:'R32'})),
-  // Round of 16 — fixtures with at least one confirmed team (BST kick-off times)
-  {date:'Jul 4',  h:'Canada',    a:'Morocco',                 g:'R16', md:'R16'},
-  {date:'Jul 4',  h:'Paraguay',  a:'France',                  g:'R16', md:'R16'},
-  {date:'Jul 5',  h:'Brazil',    a:'Norway',                  g:'R16', md:'R16'},
-  {date:'Jul 5',  h:'Mexico',    a:'England',                 g:'R16', md:'R16'},
-  {date:'Jul 6',  h:'Spain',       a:'Portugal',                g:'R16', md:'R16'},
-  {date:'Jul 6',  h:'USA',         a:'Belgium',                 g:'R16', md:'R16'},
-  {date:'Jul 7',  h:'Egypt',       a:'W Argentina/Cape Verde',  g:'R16', md:'R16'},
-  {date:'Jul 7',  h:'Switzerland', a:'W Colombia/Ghana',        g:'R16', md:'R16'},
+  ...R16_FIXTURES.filter(f => !f.ft).map(f => ({date:f.date, h:f.h, a:f.a, g:'R16', md:'R16'})),
 ];
 
-// ══════════════════════════════════════════════════════════════════════════════
-// LOGIC
-// ══════════════════════════════════════════════════════════════════════════════
+// Maximum number of the entrant's teams that could reach the Quarter Finals,
+// given the actual R16 bracket. Same logic as R32: for each fixture, at most
+// 1 can go through even if the entrant picked both sides. Capped at 8.
+function countMaxR16Through(picks) {
+  const pickedTeams = new Set(Object.values(picks).flat());
+  let maxThrough = 0;
+  R16_FIXTURES.forEach(f => {
+    const hasHome = pickedTeams.has(f.h);
+    const hasAway = pickedTeams.has(f.a);
+    if (hasHome || hasAway) maxThrough++;
+  });
+  return Math.min(maxThrough, 8);
+}
+
+
 
 const MULT = {W:1.0,RU:0.5,T3:0.25,F4:0.0};
 
@@ -818,8 +832,9 @@ function renderAll() {
       <th style="width:40px">Pos</th>
       <th>Entrant</th>
       <th class="num">Points</th>
-      <th class="num hide-mobile" title="Picks currently through to the Round of 32 — 1st, 2nd, or a best-8 3rd place finish, out of 24">Group Teams Through</th>
-      <th class="num hide-mobile" title="Maximum number of picks that could still progress to the Round of 16, given the actual Round of 32 bracket (capped at 16 — if you picked both teams in a tie, that tie can only produce 1 winner)">Max R32 Through</th>
+      <th class="num hide-mobile" title="Picks currently through to the Round of 32 — 1st, 2nd, or a best-8 3rd place finish, out of 24">Group</th>
+      <th class="num hide-mobile" title="Maximum picks that could still reach the Round of 16, given the R32 bracket (if you picked both teams in a tie, only 1 counts)">R32</th>
+      <th class="num hide-mobile" title="Maximum picks that could reach the Quarter Finals, given the R16 bracket (if you picked both teams in a tie, only 1 counts)">Max R16</th>
       <th class="num hide-mobile" style="color:#4ade80">Best team</th>
     </tr></thead>
     <tbody>` +
@@ -829,6 +844,7 @@ function renderAll() {
       const bestStr = best ? `${best[0]} (+${best[1].pts.toFixed(2)})` : '—';
       const groupQualifiers = countTeamsThrough(e.picks, thirdPlaceQualifiers);
       const maxR32 = countMaxR32Through(e.picks);
+      const maxR16 = countMaxR16Through(e.picks);
       const rankCell = i<3 ? `<span class="rank-${i+1}">${medals[i]}</span>` : `<span style="color:#bbb">${i+1}</span>`;
       const hlClass = isAI&&(e.name==='Dan'||e.name==='Max'||e.name==='Seb') ? ' highlight' : '';
       return `<tr class="${hlClass}" onclick="openModal('${e.name}')" title="Click to see ${e.name}'s picks">
@@ -837,6 +853,7 @@ function renderAll() {
         <td class="pts">${e.total.toFixed(2)}</td>
         <td class="pts hide-mobile" style="color:#374151;font-weight:600">${groupQualifiers}/24</td>
         <td class="pts hide-mobile" style="color:#166534;font-weight:700">${maxR32}/16</td>
+        <td class="pts hide-mobile" style="color:#166534;font-weight:700">${maxR16}/8</td>
         <td class="pts hide-mobile" style="font-weight:400;font-size:12px;color:#666">${bestStr}</td>
       </tr>`;
     }).join('') + '</tbody>';
@@ -850,8 +867,9 @@ function renderAll() {
       <th style="width:40px"></th>
       <th>Scenario</th>
       <th class="num">Points</th>
-      <th class="num hide-mobile" title="Picks currently through to the Round of 32 — 1st, 2nd, or a best-8 3rd place finish, out of 24">Group Teams Through</th>
-      <th class="num hide-mobile" title="Maximum number of picks that could still progress to the Round of 16, given the actual Round of 32 bracket (capped at 16)">Max R32 Through</th>
+      <th class="num hide-mobile" title="Picks currently through to the Round of 32 — 1st, 2nd, or a best-8 3rd place finish, out of 24">Group</th>
+      <th class="num hide-mobile" title="Maximum picks that could still reach the Round of 16, given the R32 bracket">R32</th>
+      <th class="num hide-mobile" title="Maximum picks that could reach the Quarter Finals, given the R16 bracket">Max R16</th>
       <th class="num hide-mobile" style="color:#4ade80">Best team</th>
     </tr></thead>
     <tbody>` +
@@ -860,12 +878,14 @@ function renderAll() {
       const bestStr = best ? `${best[0]} (+${best[1].pts.toFixed(2)})` : '—';
       const groupQualifiers = countTeamsThrough(e.picks, thirdPlaceQualifiers);
       const maxR32 = countMaxR32Through(e.picks);
+      const maxR16 = countMaxR16Through(e.picks);
       return `<tr class="hypo-row" onclick="openModal('${e.name}')" title="Click to see the 24 picks for this scenario">
         <td class="rank">💭</td>
         <td class="name-cell">${e.name}<span class="hypo-badge">Hypothetical</span></td>
         <td class="pts">${e.total.toFixed(2)}</td>
         <td class="pts hide-mobile" style="color:#374151;font-weight:600">${groupQualifiers}/24</td>
         <td class="pts hide-mobile" style="color:#166534;font-weight:700">${maxR32}/16</td>
+        <td class="pts hide-mobile" style="color:#166534;font-weight:700">${maxR16}/8</td>
         <td class="pts hide-mobile" style="font-weight:400;font-size:12px;color:#666">${bestStr}</td>
       </tr>`;
     }).join('') + '</tbody>';
@@ -1077,6 +1097,7 @@ function renderTeamPointsTable() {
     <th class="num" style="color:#166534">Total</th>
     <th class="num">Group</th>
     ${r32Started ? '<th class="num">R32</th>' : ''}
+    <th class="num">R16</th>
   </tr></thead>`;
 
   const rows = allTeams.map((t, i) => {
@@ -1090,6 +1111,7 @@ function renderTeamPointsTable() {
       <td class="pts" style="color:#166534;font-weight:800">${t.total.toFixed(2)}</td>
       <td class="pts">${t.groupPts.toFixed(2)}</td>
       ${r32Cell}
+      <td class="pts" style="color:#bbb">–</td>
     </tr>`;
   }).join('');
 
@@ -1247,7 +1269,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jul 3 — Spain 3–0 Austria, Portugal 2–1 Croatia, Switzerland 2–0 Algeria added (all R32). 13 of 16 R32 matches complete. Australia vs Egypt, Argentina vs Cape Verde, Colombia vs Ghana still to play.';
+  'Updated Jul 4 — All 16 R32 matches complete. Argentina 3–2 Cape Verde (AET), Colombia 1–0 Ghana added. Belgium 90-min score corrected to 1–1. R16 begins Jul 5 — send R16 odds to unlock the fixtures &amp; odds section.';
 </script>
 </body>
 </html>
