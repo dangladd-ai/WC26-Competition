@@ -204,21 +204,23 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <h2>🏆 Full competition leaderboard — all 23 entrants</h2>
 <div class="card"><table class="lb-full" id="full-lb"></table></div>
 
-<h2>💭 Hypothetical leaderboard</h2>
-<p style="font-size:12px;color:#888;margin-bottom:10px">Two reference benchmarks to compare against the real entrants — click either row to see their 24 picks.</p>
-<div class="card"><table class="lb-full" id="hypo-lb"></table></div>
-
 <hr class="section-divider">
 
-<!-- ═══ ROUND OF 32 FIXTURES & ODDS ═══════════════════════════════════════ -->
-<h2>⚔️ Round of 32 — fixtures and odds</h2>
-<p style="font-size:12px;color:#888;margin-bottom:10px">All 16 Round of 32 matches with kick-off times (BST) and Win/Draw/Win odds, shown as decimal odds × the Round of 32 multiplier. The result is based on normal time only: Winner (after 90 mins) ×1.0, Draw (after 90 mins) ×0.5, Loser ×0. If a match is drawn after 90 minutes and goes to extra time, <b>both teams</b> receive the ×0.5 draw multiplier regardless of who eventually progresses on penalties or in extra time.</p>
-<div class="card" id="r32-fixtures"></div>
+<!-- ═══ ROUND OF 16 FIXTURES & ODDS ══════════════════════════════════════ -->
+<h2>⚔️ Round of 16 — fixtures and odds</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">All 8 Round of 16 matches with kick-off times (BST) and Win/Draw/Win odds. Result is based on normal time only: Winner ×1.5, Draw ×0.75, Loser ×0. If drawn after 90 mins and goes to extra time, <b>both teams</b> receive the ×0.75 draw multiplier regardless of who progresses.</p>
+<div class="card" id="r16-fixtures"></div>
 
 <!-- ═══ TEAM POINTS BY ROUND ══════════════════════════════════════════════ -->
 <h2>📊 Team points by round</h2>
 <p style="font-size:12px;color:#888;margin-bottom:10px">All 48 teams sorted by total competition points, highest first. Points are earned in each round based on odds × the round's multiplier for the result after 90 minutes.</p>
 <div class="card" style="overflow-x:auto"><table class="lb-full" id="team-points-table" style="min-width:420px"></table></div>
+
+<hr class="section-divider">
+
+<h2>💭 Hypothetical leaderboard</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">Two reference benchmarks to compare against the real entrants — click either row to see their 24 picks.</p>
+<div class="card"><table class="lb-full" id="hypo-lb"></table></div>
 
 <hr class="section-divider">
 
@@ -248,6 +250,13 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
   <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px">Group Stage</div>
   <div class="card" id="results-group"></div>
 </div>
+
+<hr class="section-divider">
+
+<!-- ═══ ROUND OF 32 FIXTURES & ODDS ═══════════════════════════════════════ -->
+<h2>⚔️ Round of 32 — fixtures and odds</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">All 16 Round of 32 matches with kick-off times (BST) and Win/Draw/Win odds, shown as decimal odds × the Round of 32 multiplier. The result is based on normal time only: Winner (after 90 mins) ×1.0, Draw (after 90 mins) ×0.5, Loser ×0. If a match is drawn after 90 minutes and goes to extra time, <b>both teams</b> receive the ×0.5 draw multiplier regardless of who eventually progresses on penalties or in extra time.</p>
+<div class="card" id="r32-fixtures"></div>
 
 <hr class="section-divider">
 
@@ -467,16 +476,17 @@ const R32_FIXTURES = [
   {date:'Jul 4',  time:'2:30am',  h:'Colombia',      a:'Ghana',                  hOdds:0.60, dOdds:2.70, aOdds:5.00, hg:1, ag:0, ft:true},
 ];
 
-// Round of 16 bracket — all fixtures confirmed, odds TBC
+// Round of 16 — all 8 fixtures with confirmed odds (BST kick-off times converted from ET)
+// Odds sourced from spreadsheet image provided. R16 multipliers: W×1.5, D×0.75, L×0
 const R16_FIXTURES = [
-  {date:'Jul 5',  h:'Canada',      a:'Morocco',      hg:null, ag:null, ft:false},
-  {date:'Jul 5',  h:'Paraguay',    a:'France',       hg:null, ag:null, ft:false},
-  {date:'Jul 6',  h:'Brazil',      a:'Norway',       hg:null, ag:null, ft:false},
-  {date:'Jul 6',  h:'Mexico',      a:'England',      hg:null, ag:null, ft:false},
-  {date:'Jul 7',  h:'Spain',       a:'Portugal',     hg:null, ag:null, ft:false},
-  {date:'Jul 7',  h:'USA',         a:'Belgium',      hg:null, ag:null, ft:false},
-  {date:'Jul 8',  h:'Egypt',       a:'Argentina',    hg:null, ag:null, ft:false},
-  {date:'Jul 8',  h:'Switzerland', a:'Colombia',     hg:null, ag:null, ft:false},
+  {date:'Jul 5',  time:'6:00pm',  h:'Canada',      a:'Morocco',    hOdds:3.800, dOdds:2.300, aOdds:0.800, hg:null, ag:null, ft:false},
+  {date:'Jul 5',  time:'10:00pm', h:'Paraguay',    a:'France',     hOdds:12.000,dOdds:6.000, aOdds:0.200,hg:null, ag:null, ft:false},
+  {date:'Jul 6',  time:'9:00pm',  h:'Brazil',      a:'Norway',     hOdds:0.833, dOdds:2.750, aOdds:3.000,hg:null, ag:null, ft:false},
+  {date:'Jul 6',  time:'1:00am',  h:'Mexico',      a:'England',    hOdds:2.000, dOdds:2.200, aOdds:1.375,hg:null, ag:null, ft:false},
+  {date:'Jul 7',  time:'8:00pm',  h:'Spain',       a:'Portugal',   hOdds:0.909, dOdds:2.600, aOdds:2.900,hg:null, ag:null, ft:false},
+  {date:'Jul 7',  time:'1:00am',  h:'USA',         a:'Belgium',    hOdds:1.600, dOdds:2.100, aOdds:1.400,hg:null, ag:null, ft:false},
+  {date:'Jul 8',  time:'5:00pm',  h:'Egypt',       a:'Argentina',  hOdds:8.000, dOdds:3.800, aOdds:0.350,hg:null, ag:null, ft:false},
+  {date:'Jul 8',  time:'9:00pm',  h:'Switzerland', a:'Colombia',   hOdds:2.300, dOdds:2.200, aOdds:1.200,hg:null, ag:null, ft:false},
 ];
 
 const UPCOMING = () => [
@@ -952,6 +962,51 @@ function renderAll() {
       </tr>`;
     }).join('') + '</tbody>';
 
+  // ── Round of 16 fixtures & odds
+  const R16_MULT = {W:1.5, D:0.75, L:0};
+  document.getElementById('r16-fixtures').innerHTML = R16_FIXTURES.map(f => {
+    const hPick = allPicks[f.h], aPick = allPicks[f.a];
+    const played = f.ft;
+    let resultHTML;
+    let drawn = false;
+    if (played) {
+      drawn = f.hg === f.ag;
+      resultHTML = `<div class="rscore ft">${f.hg} – ${f.ag}</div>`;
+    } else {
+      resultHTML = `<div class="rscore" style="background:#fef9c3;color:#78350f">TBC</div>`;
+    }
+    const hasOdds = f.hOdds && f.dOdds && f.aOdds;
+    const hCP = hasOdds ? (f.hOdds * R16_MULT.W).toFixed(2) : '—';
+    const dCP = hasOdds ? (f.dOdds * R16_MULT.D).toFixed(2) : '—';
+    const aCP = hasOdds ? (f.aOdds * R16_MULT.W).toFixed(2) : '—';
+    const hWon = played && !drawn && f.hg > f.ag;
+    const aWon = played && !drawn && f.ag > f.hg;
+    const hUsedCls = hWon ? 'odds-used' : '';
+    const dUsedCls = (played && drawn) ? 'odds-used' : '';
+    const aUsedCls = aWon ? 'odds-used' : '';
+    const hGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.h));
+    const aGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.a));
+    const tpq = new Set(getThirdPlaceRanking().slice(0,8).map(t=>t.team));
+    const hAlive = teamIsAlive(f.h, hGrp, tpq);
+    const aAlive = teamIsAlive(f.a, aGrp, tpq);
+    const hNameStyle = hAlive ? 'color:#166534;font-weight:700' : 'color:#ef4444';
+    const aNameStyle = aAlive ? 'color:#166534;font-weight:700' : 'color:#ef4444';
+    return `<div class="rrow" style="flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;align-items:center;width:100%">
+        <div class="rhome"><span class="${hPick?'rpick':''}" style="${hNameStyle}">${f.h}</span></div>
+        ${resultHTML}
+        <div class="raway"><span class="${aPick?'rpick':''}" style="${aNameStyle}">${f.a}</span></div>
+        <span class="rbadge">${f.date} ${f.time||''}</span>
+        ${played ? '<span class="rbadge ft">FT</span>' : ''}
+      </div>
+      ${hasOdds ? `<div style="width:100%;display:flex;gap:8px;justify-content:center;margin-top:6px;font-size:11px;color:#888;flex-wrap:wrap">
+        <span class="odds-pill ${hUsedCls}">${f.h} <b>${f.hOdds.toFixed(2)}</b> ×1.5 = <b style="color:#166534">${hCP}</b></span>
+        <span class="odds-pill ${dUsedCls}">Draw <b>${f.dOdds.toFixed(2)}</b> ×0.75 = <b style="color:#166534">${dCP}</b></span>
+        <span class="odds-pill ${aUsedCls}">${f.a} <b>${f.aOdds.toFixed(2)}</b> ×1.5 = <b style="color:#166534">${aCP}</b></span>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+
   // ── Round of 32 fixtures & odds
   const R32_MULT = {W:1.0, D:0.5, L:0};
   document.getElementById('r32-fixtures').innerHTML = R32_FIXTURES.map(f => {
@@ -1269,7 +1324,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jul 4 — All 16 R32 matches complete. Argentina 3–2 Cape Verde (AET), Colombia 1–0 Ghana added. Belgium 90-min score corrected to 1–1. R16 begins Jul 5 — send R16 odds to unlock the fixtures &amp; odds section.';
+  'Updated Jul 4 — All R32 complete. R16 fixtures &amp; odds section added. Canada vs Morocco starts Jul 5 at 6pm BST. R16 multipliers: Winner ×1.5, Draw ×0.75, Loser ×0.';
 </script>
 </body>
 </html>
