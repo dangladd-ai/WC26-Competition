@@ -241,7 +241,11 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 
 <!-- ═══ RESULTS ═══════════════════════════════════════════════════════════ -->
 <h2>Results</h2>
-<p style="font-size:12px;color:#888;margin-bottom:10px">Most recent first. Round of 32 results are shown separately above the Group Stage results.</p>
+<p style="font-size:12px;color:#888;margin-bottom:10px">Most recent first.</p>
+<div id="results-r16-wrap" style="margin-bottom:18px">
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px">Round of 16</div>
+  <div class="card" id="results-r16"></div>
+</div>
 <div id="results-r32-wrap" style="margin-bottom:18px">
   <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px">Round of 32</div>
   <div class="card" id="results-r32"></div>
@@ -479,7 +483,7 @@ const R32_FIXTURES = [
 // Round of 16 — all 8 fixtures with confirmed odds (BST kick-off times converted from ET)
 // Odds sourced from spreadsheet image provided. R16 multipliers: W×1.5, D×0.75, L×0.25
 const R16_FIXTURES = [
-  {date:'Jul 5',  time:'6:00pm',  h:'Canada',      a:'Morocco',    hOdds:3.800, dOdds:2.300, aOdds:0.800, hg:null, ag:null, ft:false},
+  {date:'Jul 5',  time:'6:00pm',  h:'Canada',      a:'Morocco',    hOdds:3.800, dOdds:2.300, aOdds:0.800, hg:0, ag:3, ft:true},
   {date:'Jul 5',  time:'10:00pm', h:'Paraguay',    a:'France',     hOdds:12.000,dOdds:6.000, aOdds:0.200,hg:null, ag:null, ft:false},
   {date:'Jul 6',  time:'9:00pm',  h:'Brazil',      a:'Norway',     hOdds:0.833, dOdds:2.750, aOdds:3.000,hg:null, ag:null, ft:false},
   {date:'Jul 6',  time:'1:00am',  h:'Mexico',      a:'England',    hOdds:2.000, dOdds:2.200, aOdds:1.375,hg:null, ag:null, ft:false},
@@ -1000,14 +1004,18 @@ function renderAll() {
       resultHTML = `<div class="rscore" style="background:#fef9c3;color:#78350f">TBC</div>`;
     }
     const hasOdds = f.hOdds && f.dOdds && f.aOdds;
-    const hCP = hasOdds ? (f.hOdds * R16_MULT.W).toFixed(2) : '—';
-    const dCP = hasOdds ? (f.dOdds * R16_MULT.D).toFixed(2) : '—';
-    const aCP = hasOdds ? (f.aOdds * R16_MULT.W).toFixed(2) : '—';
+    const hWinCP  = hasOdds ? (f.hOdds * R16_MULT.W).toFixed(2) : '—';
+    const hLoseCP = hasOdds ? (f.hOdds * R16_MULT.L).toFixed(2) : '—';
+    const dCP     = hasOdds ? (f.dOdds * R16_MULT.D).toFixed(2) : '—';
+    const aWinCP  = hasOdds ? (f.aOdds * R16_MULT.W).toFixed(2) : '—';
+    const aLoseCP = hasOdds ? (f.aOdds * R16_MULT.L).toFixed(2) : '—';
     const hWon = played && !drawn && f.hg > f.ag;
     const aWon = played && !drawn && f.ag > f.hg;
     const hUsedCls = hWon ? 'odds-used' : '';
     const dUsedCls = (played && drawn) ? 'odds-used' : '';
     const aUsedCls = aWon ? 'odds-used' : '';
+    const hLoseCls = (played && !drawn && !hWon) ? 'odds-used' : '';
+    const aLoseCls = (played && !drawn && !aWon) ? 'odds-used' : '';
     const hGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.h));
     const aGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.a));
     const tpq = new Set(getThirdPlaceRanking().slice(0,8).map(t=>t.team));
@@ -1024,12 +1032,37 @@ function renderAll() {
         ${played ? '<span class="rbadge ft">FT</span>' : ''}
       </div>
       ${hasOdds ? `<div style="width:100%;display:flex;gap:8px;justify-content:center;margin-top:6px;font-size:11px;color:#888;flex-wrap:wrap">
-        <span class="odds-pill ${hUsedCls}">${f.h} <b>${f.hOdds.toFixed(2)}</b> ×1.5 = <b style="color:#166534">${hCP}</b></span>
+        <span class="odds-pill ${hUsedCls}">${f.h} win <b>${f.hOdds.toFixed(2)}</b> ×1.5 = <b style="color:#166534">${hWinCP}</b></span>
         <span class="odds-pill ${dUsedCls}">Draw <b>${f.dOdds.toFixed(2)}</b> ×0.75 = <b style="color:#166534">${dCP}</b></span>
-        <span class="odds-pill ${aUsedCls}">${f.a} <b>${f.aOdds.toFixed(2)}</b> ×1.5 = <b style="color:#166534">${aCP}</b></span>
+        <span class="odds-pill ${aUsedCls}">${f.a} win <b>${f.aOdds.toFixed(2)}</b> ×1.5 = <b style="color:#166534">${aWinCP}</b></span>
+        <span class="odds-pill ${hLoseCls}">${f.h} lose <b>${f.hOdds.toFixed(2)}</b> ×0.25 = <b style="color:#888">${hLoseCP}</b></span>
+        <span class="odds-pill ${aLoseCls}">${f.a} lose <b>${f.aOdds.toFixed(2)}</b> ×0.25 = <b style="color:#888">${aLoseCP}</b></span>
       </div>` : ''}
     </div>`;
   }).join('');
+
+  // ── Round of 16 results
+  const r16Played = R16_FIXTURES.filter(f => f.ft).slice().reverse();
+  document.getElementById('results-r16').innerHTML = r16Played.length ? r16Played.map(f => {
+    const hGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.h));
+    const aGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.a));
+    const tpqR16 = new Set(getThirdPlaceRanking().slice(0,8).map(t=>t.team));
+    const hAlive = teamIsAlive(f.h, hGrp, tpqR16);
+    const aAlive = teamIsAlive(f.a, aGrp, tpqR16);
+    let scoreDisplay = `${f.hg} – ${f.ag}`;
+    let suffixBadge = '<span class="rbadge ft">FT</span>';
+    if (f.aetWinner && f.aetScore) { scoreDisplay = f.aetScore; suffixBadge = '<span class="rbadge" style="background:#fef9c3;color:#78350f">AET</span>'; }
+    else if (f.penaltyWinner && f.penScore) { scoreDisplay = f.penScore; suffixBadge = '<span class="rbadge" style="background:#ede9fe;color:#6d28d9">Pens</span>'; }
+    return `<div class="rrow" style="flex-wrap:wrap">
+      <div style="display:flex;align-items:center;width:100%">
+        <div class="rhome"><span class="${allPicks[f.h]?'rpick':''}" style="${hAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.h}</span></div>
+        <div class="rscore ft">${scoreDisplay}</div>
+        <div class="raway"><span class="${allPicks[f.a]?'rpick':''}" style="${aAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.a}</span></div>
+        <span class="rbadge">${f.date}</span>${suffixBadge}
+      </div>
+      ${(f.aetWinner||f.penaltyWinner)?`<div style="width:100%;font-size:11px;color:#aaa;text-align:center;padding:2px 0">${f.hg}–${f.ag} after 90 mins</div>`:''}
+    </div>`;
+  }).join('') : '<p style="font-size:12px;color:#aaa;padding:8px 0">No Round of 16 results yet</p>';
 
   // ── Round of 32 fixtures & odds
   const R32_MULT = {W:1.0, D:0.5, L:0};
@@ -1356,7 +1389,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jul 4 — All R32 complete. R16 begins Jul 5. Losers now correctly earn ×0.25 (win odds) in R16. Canada 3.800 vs Morocco 0.800, Draw 2.300.';
+  'Updated Jul 5 — Morocco 3–0 Canada (R16). Morocco earn 0.800 × 1.5 = +1.20 pts; Canada earn 3.800 × 0.25 = +0.95 pts. Morocco into the QF to face Paraguay/France.';
 </script>
 </body>
 </html>
