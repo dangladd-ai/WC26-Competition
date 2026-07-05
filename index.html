@@ -506,7 +506,16 @@ function countMaxR16Through(picks) {
   R16_FIXTURES.forEach(f => {
     const hasHome = pickedTeams.has(f.h);
     const hasAway = pickedTeams.has(f.a);
-    if (hasHome || hasAway) maxThrough++;
+    if (f.ft) {
+      // Match played — only count if entrant's team actually progressed
+      const r16h = getR16Points(f.h);
+      const r16a = getR16Points(f.a);
+      if (hasHome && r16h && !r16h.eliminated) maxThrough++;
+      else if (hasAway && r16a && !r16a.eliminated) maxThrough++;
+    } else {
+      // Not yet played — max 1 can go through even if entrant picked both
+      if (hasHome || hasAway) maxThrough++;
+    }
   });
   return Math.min(maxThrough, 8);
 }
@@ -870,9 +879,9 @@ function renderAll() {
       <th style="width:40px">Pos</th>
       <th>Entrant</th>
       <th class="num">Points</th>
-      <th class="num hide-mobile" title="Picks currently through to the Round of 32 — 1st, 2nd, or a best-8 3rd place finish, out of 24">Group</th>
-      <th class="num hide-mobile" title="Maximum picks that could still reach the Round of 16, given the R32 bracket (if you picked both teams in a tie, only 1 counts)">R32</th>
-      <th class="num hide-mobile" title="Maximum picks that could reach the Quarter Finals, given the R16 bracket (if you picked both teams in a tie, only 1 counts)">Max R16</th>
+      <th class="num hide-mobile" title="Teams qualified for the Round of 32 (1st, 2nd, or best-8 3rd place), out of 24">R32</th>
+      <th class="num hide-mobile" title="Maximum picks that could still reach the Quarter Finals, given the R16 bracket">R16</th>
+      <th class="num hide-mobile" title="Maximum picks that could reach the Quarter Finals, given the confirmed R16 bracket">Max QF</th>
       <th class="num hide-mobile" style="color:#4ade80">Best team</th>
     </tr></thead>
     <tbody>` +
@@ -905,9 +914,9 @@ function renderAll() {
       <th style="width:40px"></th>
       <th>Scenario</th>
       <th class="num">Points</th>
-      <th class="num hide-mobile" title="Picks currently through to the Round of 32 — 1st, 2nd, or a best-8 3rd place finish, out of 24">Group</th>
-      <th class="num hide-mobile" title="Maximum picks that could still reach the Round of 16, given the R32 bracket">R32</th>
-      <th class="num hide-mobile" title="Maximum picks that could reach the Quarter Finals, given the R16 bracket">Max R16</th>
+      <th class="num hide-mobile" title="Teams qualified for the Round of 32 (1st, 2nd, or best-8 3rd place), out of 24">R32</th>
+      <th class="num hide-mobile" title="Maximum picks that could still reach the Quarter Finals, given the R16 bracket">R16</th>
+      <th class="num hide-mobile" title="Maximum picks that could reach the Quarter Finals, given the confirmed R16 bracket">Max QF</th>
       <th class="num hide-mobile" style="color:#4ade80">Best team</th>
     </tr></thead>
     <tbody>` +
