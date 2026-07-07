@@ -487,14 +487,19 @@ const R16_FIXTURES = [
   {date:'Jul 5',  time:'10:00pm', h:'Paraguay',    a:'France',     hOdds:12.000,dOdds:6.000, aOdds:0.200,hg:0, ag:1, ft:true},
   {date:'Jul 6',  time:'9:00pm',  h:'Brazil',      a:'Norway',     hOdds:0.833, dOdds:2.750, aOdds:3.000,hg:1, ag:2, ft:true},
   {date:'Jul 6',  time:'1:00am',  h:'Mexico',      a:'England',    hOdds:2.000, dOdds:2.200, aOdds:1.375,hg:2, ag:3, ft:true},
-  {date:'Jul 7',  time:'8:00pm',  h:'Spain',       a:'Portugal',   hOdds:0.909, dOdds:2.600, aOdds:2.900,hg:null, ag:null, ft:false},
-  {date:'Jul 7',  time:'1:00am',  h:'USA',         a:'Belgium',    hOdds:1.600, dOdds:2.100, aOdds:1.400,hg:null, ag:null, ft:false},
+  {date:'Jul 7',  time:'8:00pm',  h:'Spain',       a:'Portugal',   hOdds:0.909, dOdds:2.600, aOdds:2.900,hg:1, ag:0, ft:true},
+  {date:'Jul 7',  time:'1:00am',  h:'USA',         a:'Belgium',    hOdds:1.600, dOdds:2.100, aOdds:1.400,hg:1, ag:4, ft:true},
   {date:'Jul 8',  time:'5:00pm',  h:'Egypt',       a:'Argentina',  hOdds:8.000, dOdds:3.800, aOdds:0.350,hg:null, ag:null, ft:false},
   {date:'Jul 8',  time:'9:00pm',  h:'Switzerland', a:'Colombia',   hOdds:2.300, dOdds:2.200, aOdds:1.200,hg:null, ag:null, ft:false},
 ];
 
 const UPCOMING = () => [
-  ...R16_FIXTURES.filter(f => !f.ft).map(f => ({date:f.date, h:f.h, a:f.a, g:'R16', md:'R16'})),
+  ...R16_FIXTURES.filter(f => !f.ft).map(f => ({date:f.date, time:f.time, h:f.h, a:f.a, g:'R16'})),
+  // Quarter-finals — BST kick-off times
+  {date:'Jul 9',  time:'9:00pm',  h:'France',               a:'Morocco',                    g:'QF'},
+  {date:'Jul 10', time:'8:00pm',  h:'Spain',                a:'Belgium',                    g:'QF'},
+  {date:'Jul 11', time:'10:00pm', h:'Norway',               a:'England',                    g:'QF'},
+  {date:'Jul 12', time:'2:00am',  h:'W Argentina/Egypt',    a:'W Switzerland/Colombia',     g:'QF'},
 ];
 
 // Maximum number of the entrant's teams that could reach the Quarter Finals,
@@ -1172,12 +1177,14 @@ function renderAll() {
 
   // ── Upcoming
   document.getElementById('upcoming').innerHTML = UPCOMING().map(u=>{
-    const badge = u.g==='R16'
+    const badge = u.g==='QF'
+      ? `<span class="rbadge" style="background:#fef3c7;color:#92400e;font-weight:700">QF</span>`
+      : u.g==='R16'
       ? `<span class="rbadge" style="background:#ede9fe;color:#6d28d9">R16</span>`
       : `<span class="rbadge">R32</span>`;
     const hPick = allPicks[u.h], aPick = allPicks[u.a];
     return `<div class="urow">
-      <span class="udate">${u.date}</span>
+      <span class="udate">${u.date}${u.time ? ' '+u.time : ''}</span>
       <span class="ufixture"><span class="${hPick?'upick':''}">${u.h}</span> vs <span class="${aPick?'upick':''}">${u.a}</span></span>
       ${badge}
     </div>`;
@@ -1398,7 +1405,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jul 6 — England 3–2 Mexico (R16, Bellingham ×2, Kane pen). England earn 1.375 × 1.5 = +2.06 pts; Mexico earn 2.000 × 0.25 = +0.50 pts. QFs: England vs Norway, France vs Morocco.';
+  'Updated Jul 7 — Spain 1–0 Portugal, Belgium 4–1 USA (both R16). Spain earn 0.909 × 1.5 = +1.36 pts; Portugal earn 2.900 × 0.25 = +0.73 pts. Spain face Belgium in the QF Jul 10.';
 </script>
 </body>
 </html>
