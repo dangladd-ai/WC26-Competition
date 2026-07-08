@@ -206,15 +206,20 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 
 <hr class="section-divider">
 
-<!-- ═══ ROUND OF 16 FIXTURES & ODDS ══════════════════════════════════════ -->
-<h2>⚔️ Round of 16 — fixtures and odds</h2>
-<p style="font-size:12px;color:#888;margin-bottom:10px">All 8 Round of 16 matches with kick-off times (BST) and Win/Draw/Win odds. Result is based on normal time only: Winner ×1.5, Draw ×0.75, Loser ×0.25. If drawn after 90 mins and goes to extra time, <b>both teams</b> receive the ×0.75 draw multiplier regardless of who progresses.</p>
-<div class="card" id="r16-fixtures"></div>
+<!-- ═══ QUARTER FINAL FIXTURES & ODDS ════════════════════════════════════ -->
+<h2>⚔️ Quarter Finals — fixtures and odds</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">All 4 Quarter Final matches with kick-off times (BST) and Win/Draw/Win odds. Result is based on normal time only: Winner ×2.0, Draw ×1.0, Loser ×0.5. If drawn after 90 mins and goes to extra time, <b>both teams</b> receive the ×1.0 draw multiplier regardless of who progresses.</p>
+<div class="card" id="qf-fixtures"></div>
 
 <!-- ═══ TEAM POINTS BY ROUND ══════════════════════════════════════════════ -->
 <h2>📊 Team points by round</h2>
 <p style="font-size:12px;color:#888;margin-bottom:10px">All 48 teams sorted by total competition points, highest first. Points are earned in each round based on odds × the round's multiplier for the result after 90 minutes.</p>
 <div class="card" style="overflow-x:auto"><table class="lb-full" id="team-points-table" style="min-width:420px"></table></div>
+
+<!-- ═══ ROUND OF 16 FIXTURES & ODDS ══════════════════════════════════════ -->
+<h2>⚔️ Round of 16 — fixtures and odds</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">All 8 Round of 16 matches with kick-off times (BST) and Win/Draw/Win odds. Result is based on normal time only: Winner ×1.5, Draw ×0.75, Loser ×0.25. If drawn after 90 mins and goes to extra time, <b>both teams</b> receive the ×0.75 draw multiplier regardless of who progresses.</p>
+<div class="card" id="r16-fixtures"></div>
 
 <hr class="section-divider">
 
@@ -502,12 +507,13 @@ const UPCOMING = () => [
   {date:'Jul 12', time:'2:00am',  h:'Argentina',            a:'Switzerland',                g:'QF'},
 ];
 
-// Quarter-final bracket — all 4 fixtures confirmed
+// Quarter-final bracket — all 4 fixtures confirmed with odds from spreadsheet
+// QF multipliers: W×2.0, D×1.0, L×0.5
 const QF_FIXTURES = [
-  {date:'Jul 9',  h:'France',      a:'Morocco'},
-  {date:'Jul 10', h:'Spain',       a:'Belgium'},
-  {date:'Jul 11', h:'Norway',      a:'England'},
-  {date:'Jul 12', h:'Argentina',   a:'Switzerland'},
+  {date:'Jul 9',  time:'9:00pm',  h:'France',      a:'Morocco',      hOdds:0.571, dOdds:3.000, aOdds:4.750, hg:null, ag:null, ft:false},
+  {date:'Jul 10', time:'8:00pm',  h:'Spain',       a:'Belgium',      hOdds:0.615, dOdds:3.000, aOdds:4.250, hg:null, ag:null, ft:false},
+  {date:'Jul 11', time:'10:00pm', h:'Norway',      a:'England',      hOdds:2.900, dOdds:2.750, aOdds:0.850, hg:null, ag:null, ft:false},
+  {date:'Jul 12', time:'2:00am',  h:'Argentina',   a:'Switzerland',  hOdds:0.667, dOdds:2.600, aOdds:4.250, hg:null, ag:null, ft:false},
 ];
 
 // Maximum number of the entrant's teams that could reach the Quarter Finals,
@@ -1040,6 +1046,53 @@ function renderAll() {
       </tr>`;
     }).join('') + '</tbody>';
 
+  // ── Quarter Final fixtures & odds
+  const QF_MULT = {W:2.0, D:1.0, L:0.5};
+  document.getElementById('qf-fixtures').innerHTML = QF_FIXTURES.map(f => {
+    const hPick = allPicks[f.h], aPick = allPicks[f.a];
+    const played = f.ft;
+    let resultHTML, drawn = false;
+    if (played) {
+      drawn = f.hg === f.ag;
+      resultHTML = `<div class="rscore ft">${f.hg} – ${f.ag}</div>`;
+    } else {
+      resultHTML = `<div class="rscore" style="background:#fef9c3;color:#78350f">TBC</div>`;
+    }
+    const hWinCP  = (f.hOdds * QF_MULT.W).toFixed(2);
+    const hLoseCP = (f.hOdds * QF_MULT.L).toFixed(2);
+    const dCP     = (f.dOdds * QF_MULT.D).toFixed(2);
+    const aWinCP  = (f.aOdds * QF_MULT.W).toFixed(2);
+    const aLoseCP = (f.aOdds * QF_MULT.L).toFixed(2);
+    const hWon = played && !drawn && f.hg > f.ag;
+    const aWon = played && !drawn && f.ag > f.hg;
+    const hUsedCls  = hWon ? 'odds-used' : '';
+    const dUsedCls  = (played && drawn) ? 'odds-used' : '';
+    const aUsedCls  = aWon ? 'odds-used' : '';
+    const hLoseCls  = (played && !drawn && !hWon) ? 'odds-used' : '';
+    const aLoseCls  = (played && !drawn && !aWon) ? 'odds-used' : '';
+    const hGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.h));
+    const aGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.a));
+    const tpq = new Set(getThirdPlaceRanking().slice(0,8).map(t=>t.team));
+    const hAlive = teamIsAlive(f.h, hGrp, tpq);
+    const aAlive = teamIsAlive(f.a, aGrp, tpq);
+    return `<div class="rrow" style="flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;align-items:center;width:100%">
+        <div class="rhome"><span class="${hPick?'rpick':''}" style="${hAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.h}</span></div>
+        ${resultHTML}
+        <div class="raway"><span class="${aPick?'rpick':''}" style="${aAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.a}</span></div>
+        <span class="rbadge">${f.date} ${f.time}</span>
+        ${played ? '<span class="rbadge ft">FT</span>' : ''}
+      </div>
+      <div style="width:100%;display:flex;gap:8px;justify-content:center;margin-top:6px;font-size:11px;color:#888;flex-wrap:wrap">
+        <span class="odds-pill ${hUsedCls}">${f.h} win <b>${f.hOdds.toFixed(3)}</b> ×2.0 = <b style="color:#166534">${hWinCP}</b></span>
+        <span class="odds-pill ${dUsedCls}">Draw <b>${f.dOdds.toFixed(2)}</b> ×1.0 = <b style="color:#166534">${dCP}</b></span>
+        <span class="odds-pill ${aUsedCls}">${f.a} win <b>${f.aOdds.toFixed(3)}</b> ×2.0 = <b style="color:#166534">${aWinCP}</b></span>
+        <span class="odds-pill ${hLoseCls}">${f.h} lose <b>${f.hOdds.toFixed(3)}</b> ×0.5 = <b style="color:#888">${hLoseCP}</b></span>
+        <span class="odds-pill ${aLoseCls}">${f.a} lose <b>${f.aOdds.toFixed(3)}</b> ×0.5 = <b style="color:#888">${aLoseCP}</b></span>
+      </div>
+    </div>`;
+  }).join('');
+
   // ── Round of 16 fixtures & odds
   const R16_MULT = {W:1.5, D:0.75, L:0.25};
   document.getElementById('r16-fixtures').innerHTML = R16_FIXTURES.map(f => {
@@ -1261,6 +1314,7 @@ function renderTeamPointsTable() {
     <th class="num">Group</th>
     ${r32Started ? '<th class="num">R32</th>' : ''}
     <th class="num">R16</th>
+    <th class="num">QF</th>
   </tr></thead>`;
 
   const rows = allTeams.map((t, i) => {
@@ -1278,6 +1332,7 @@ function renderTeamPointsTable() {
       <td class="pts">${t.groupPts.toFixed(2)}</td>
       ${r32Cell}
       ${r16Cell}
+      <td class="pts" style="color:#bbb">–</td>
     </tr>`;
   }).join('');
 
