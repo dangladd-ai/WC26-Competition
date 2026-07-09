@@ -247,6 +247,10 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <!-- ═══ RESULTS ═══════════════════════════════════════════════════════════ -->
 <h2>Results</h2>
 <p style="font-size:12px;color:#888;margin-bottom:10px">Most recent first.</p>
+<div id="results-qf-wrap" style="margin-bottom:18px">
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px">Quarter Finals</div>
+  <div class="card" id="results-qf"></div>
+</div>
 <div id="results-r16-wrap" style="margin-bottom:18px">
   <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px">Round of 16</div>
   <div class="card" id="results-r16"></div>
@@ -510,7 +514,7 @@ const UPCOMING = () => [
 // Quarter-final bracket — all 4 fixtures confirmed with odds from spreadsheet
 // QF multipliers: W×2.0, D×1.0, L×0.5
 const QF_FIXTURES = [
-  {date:'Jul 9',  time:'9:00pm',  h:'France',      a:'Morocco',      hOdds:0.571, dOdds:3.000, aOdds:4.750, hg:null, ag:null, ft:false},
+  {date:'Jul 9',  time:'9:00pm',  h:'France',      a:'Morocco',      hOdds:0.571, dOdds:3.000, aOdds:4.750, hg:2, ag:0, ft:true},
   {date:'Jul 10', time:'8:00pm',  h:'Spain',       a:'Belgium',      hOdds:0.615, dOdds:3.000, aOdds:4.250, hg:null, ag:null, ft:false},
   {date:'Jul 11', time:'10:00pm', h:'Norway',      a:'England',      hOdds:2.900, dOdds:2.750, aOdds:0.850, hg:null, ag:null, ft:false},
   {date:'Jul 12', time:'2:00am',  h:'Argentina',   a:'Switzerland',  hOdds:0.667, dOdds:2.600, aOdds:4.250, hg:null, ag:null, ft:false},
@@ -556,7 +560,16 @@ function countMaxSFThrough(picks) {
   QF_FIXTURES.forEach(f => {
     const hasHome = pickedTeams.has(f.h);
     const hasAway = pickedTeams.has(f.a);
-    if (hasHome || hasAway) maxThrough++;
+    if (f.ft) {
+      // Played — only count if entrant's team actually won
+      const qfh = getQFPoints(f.h);
+      const qfa = getQFPoints(f.a);
+      if (hasHome && qfh && !qfh.eliminated) maxThrough++;
+      else if (hasAway && qfa && !qfa.eliminated) maxThrough++;
+    } else {
+      // Not yet played — max 1 can go through
+      if (hasHome || hasAway) maxThrough++;
+    }
   });
   return Math.min(maxThrough, 4);
 }
@@ -599,13 +612,12 @@ function isLiveTeam(team) {
 // Returns true if a team is still alive in the tournament, false if eliminated.
 // Checks R32 result first (definitive), then falls back to group-stage position.
 function teamIsAlive(team, grp, thirdPlaceQualifiers) {
-  // Check R16 first (most recent round)
+  const qf = getQFPoints(team);
+  if (qf) return !qf.eliminated;
   const r16 = getR16Points(team);
   if (r16) return !r16.eliminated;
-  // Then R32
   const r32 = getR32Points(team);
   if (r32) return !r32.eliminated;
-  // Fall back to group stage position
   const pos = teamPos(team, grp);
   if (pos === 'W' || pos === 'RU') return true;
   if (pos === 'T3') return thirdPlaceQualifiers.has(team);
@@ -720,6 +732,22 @@ function getR16Points(team) {
   return { pts: oddsUsed * mult, mult, drawn, won, odds: oddsUsed, eliminated };
 }
 
+// QF: W×2.0, D×1.0 (draw odds), L×0.5 (own win odds)
+function getQFPoints(team) {
+  const f = QF_FIXTURES.find(f => f.h === team || f.a === team);
+  if (!f || !f.ft) return null;
+  const isHome = f.h === team;
+  const drawn = f.hg === f.ag;
+  const won = isHome ? f.hg > f.ag : f.ag > f.hg;
+  const ownOdds = isHome ? f.hOdds : f.aOdds;
+  const oddsUsed = drawn ? f.dOdds : ownOdds;
+  const mult = drawn ? 1.0 : (won ? 2.0 : 0.5);
+  let eliminated = !drawn && !won;
+  if (drawn && f.penaltyWinner) eliminated = (f.penaltyWinner !== team);
+  if (drawn && f.aetWinner) eliminated = (f.aetWinner !== team);
+  return { pts: oddsUsed * mult, mult, drawn, won, odds: oddsUsed, eliminated };
+}
+
 function calcEntrant(picks) {
   let total=0;
   const detail={};
@@ -735,9 +763,12 @@ function calcEntrant(picks) {
       const r16 = getR16Points(team);
       const r16Pts = r16 ? r16.pts : 0;
 
-      const pts = groupPts + r32Pts + r16Pts;
+      const qf = getQFPoints(team);
+      const qfPts = qf ? qf.pts : 0;
+
+      const pts = groupPts + r32Pts + r16Pts + qfPts;
       total+=pts;
-      detail[team]={grp,pos,pts,odds,groupPts,r32Pts,r32,r16Pts,r16};
+      detail[team]={grp,pos,pts,odds,groupPts,r32Pts,r32,r16Pts,r16,qfPts,qf};
     });
   });
   return {total,detail};
@@ -837,13 +868,12 @@ function renderTeamPopularity(scored, thirdPlaceQualifiers) {
 
   const getStatus = (team, grp) => {
     if (isLiveTeam(team)) return 'live';
+    const qf = getQFPoints(team);
+    if (qf) return qf.eliminated ? 'eliminated' : 'thru';
+    const r16 = getR16Points(team);
+    if (r16) return r16.eliminated ? 'eliminated' : 'thru';
     const r32 = getR32Points(team);
-    if (r32) {
-      // Team's R32 match has been played — eliminated if they didn't progress
-      // (lost in normal time, or lost on penalties/extra time after a draw)
-      if (r32.eliminated) return 'eliminated';
-      return 'thru'; // still alive in the tournament (won, or won on penalties after a draw)
-    }
+    if (r32) return r32.eliminated ? 'eliminated' : 'thru';
     const pos = teamPos(team, grp);
     if (!pos) return 'tbd';
     if (pos==='W'||pos==='RU') return 'thru';
@@ -1144,6 +1174,29 @@ function renderAll() {
     </div>`;
   }).join('');
 
+  // ── Quarter Final results
+  const qfPlayed = QF_FIXTURES.filter(f => f.ft).slice().reverse();
+  document.getElementById('results-qf').innerHTML = qfPlayed.length ? qfPlayed.map(f => {
+    const hGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.h));
+    const aGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.a));
+    const tpqQF = new Set(getThirdPlaceRanking().slice(0,8).map(t=>t.team));
+    const hAlive = teamIsAlive(f.h, hGrp, tpqQF);
+    const aAlive = teamIsAlive(f.a, aGrp, tpqQF);
+    let scoreDisplay = `${f.hg} – ${f.ag}`;
+    let suffixBadge = '<span class="rbadge ft">FT</span>';
+    if (f.aetWinner && f.aetScore) { scoreDisplay = f.aetScore; suffixBadge = '<span class="rbadge" style="background:#fef9c3;color:#78350f">AET</span>'; }
+    else if (f.penaltyWinner && f.penScore) { scoreDisplay = f.penScore; suffixBadge = '<span class="rbadge" style="background:#ede9fe;color:#6d28d9">Pens</span>'; }
+    return `<div class="rrow" style="flex-wrap:wrap">
+      <div style="display:flex;align-items:center;width:100%">
+        <div class="rhome"><span class="${allPicks[f.h]?'rpick':''}" style="${hAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.h}</span></div>
+        <div class="rscore ft">${scoreDisplay}</div>
+        <div class="raway"><span class="${allPicks[f.a]?'rpick':''}" style="${aAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.a}</span></div>
+        <span class="rbadge">${f.date}</span>${suffixBadge}
+      </div>
+      ${(f.aetWinner||f.penaltyWinner)?`<div style="width:100%;font-size:11px;color:#aaa;text-align:center;padding:2px 0">${f.hg}–${f.ag} after 90 mins</div>`:''}
+    </div>`;
+  }).join('') : '<p style="font-size:12px;color:#aaa;padding:8px 0">No Quarter Final results yet</p>';
+
   // ── Round of 16 results
   const r16Played = R16_FIXTURES.filter(f => f.ft).slice().reverse();
   document.getElementById('results-r16').innerHTML = r16Played.length ? r16Played.map(f => {
@@ -1293,12 +1346,12 @@ function renderTeamPointsTable() {
       const r32Pts = r32 ? r32.pts : null;
       const r16 = getR16Points(team);
       const r16Pts = r16 ? r16.pts : null;
-      const total = groupPts + (r32Pts || 0) + (r16Pts || 0);
+      const qf = getQFPoints(team);
+      const qfPts = qf ? qf.pts : null;
+      const total = groupPts + (r32Pts || 0) + (r16Pts || 0) + (qfPts || 0);
 
-      // alive = teamIsAlive using the shared helper
       const alive = teamIsAlive(team, grp, thirdPlaceQualifiers);
-
-      allTeams.push({ team, grp, pos, groupPts, r32Pts, r16Pts, total, alive });
+      allTeams.push({ team, grp, pos, groupPts, r32Pts, r16Pts, qfPts, total, alive });
     });
   });
 
@@ -1324,6 +1377,10 @@ function renderTeamPointsTable() {
     const r16Cell = r16Started
       ? `<td class="pts" style="color:#888">${t.r16Pts !== null ? t.r16Pts.toFixed(2) : '—'}</td>`
       : `<td class="pts" style="color:#bbb">–</td>`;
+    const qfStarted = QF_FIXTURES.some(f => f.ft);
+    const qfCell = qfStarted
+      ? `<td class="pts" style="color:#888">${t.qfPts !== null ? t.qfPts.toFixed(2) : '—'}</td>`
+      : `<td class="pts" style="color:#bbb">–</td>`;
     const nameCls = t.alive ? 'color:#166534;font-weight:700' : 'color:#ef4444';
     return `<tr>
       <td class="rank" style="color:#bbb">${i+1}</td>
@@ -1332,7 +1389,7 @@ function renderTeamPointsTable() {
       <td class="pts">${t.groupPts.toFixed(2)}</td>
       ${r32Cell}
       ${r16Cell}
-      <td class="pts" style="color:#bbb">–</td>
+      ${qfCell}
     </tr>`;
   }).join('');
 
@@ -1413,6 +1470,12 @@ function openModal(name) {
               if (d.r16.eliminated) { cls = 'mtp-out'; label = d.r16.drawn ? 'R16 Drew (out)' : 'R16 Lost'; }
               else if (d.r16.drawn) { cls = 'mtp-thru'; label = 'R16 Drew'; }
               else { cls = 'mtp-thru'; label = 'R16 Won'; }
+            }
+            // QF result overrides all
+            if (d.qf) {
+              if (d.qf.eliminated) { cls = 'mtp-out'; label = d.qf.drawn ? 'QF Drew (out)' : 'QF Lost'; }
+              else if (d.qf.drawn) { cls = 'mtp-thru'; label = 'QF Drew'; }
+              else { cls = 'mtp-thru'; label = 'QF Won'; }
             }
 
             const ptsStr = d.pts > 0 ? `+${d.pts.toFixed(2)}` : (pos==='F4' || (d.r32 && !d.r32.won && !d.r32.drawn)) ? '0.00' : '';
@@ -1496,7 +1559,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jul 8 — Argentina 3–2 Egypt, Switzerland 0–0 Colombia (Switzerland win 4–3 pens) added. R16 complete! All 4 QFs confirmed. Quarter-finals begin Jul 9.';
+  'Updated Jul 9 — France 2–0 Morocco (QF, Mbappé 60′, Dembélé 66′). France earn 0.571 × 2.0 = +1.14 pts; Morocco earn 4.750 × 0.5 = +2.38 pts. France into the semis!';
 </script>
 </body>
 </html>
