@@ -37,7 +37,7 @@ h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
 .lb.first{border-color:#4ade80}
 .lb-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-bottom:10px}
 .av-dan{background:#dbeafe;color:#1d4ed8}.av-max{background:#dcfce7;color:#166534}.av-seb{background:#fef9c3;color:#854d0e}
-.av-hypo1{background:#ede9fe;color:#6d28d9}.av-hypo2{background:#fce7f3;color:#9d174d}
+.av-hypo1{background:#ede9fe;color:#6d28d9}.av-hypo2{background:#fce7f3;color:#9d174d}.av-hypo3{background:#ecfdf5;color:#065f46}
 table.lb-full tr.hypo-row td{background:#fafaff}
 table.lb-full tr.hypo-row:hover td{background:#f5f3ff !important}
 .hypo-badge{display:inline-block;font-size:10px;background:#ede9fe;color:#6d28d9;padding:1px 6px;border-radius:4px;margin-left:5px;font-weight:500}
@@ -189,8 +189,9 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Semi-finals: France vs Spain (Jul 15), England vs Argentina (Jul 16).</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Semi-finals: France vs Spain (Jul 15, 8pm BST) · England vs Argentina (Jul 16, 8pm BST).</p>
     <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
+    <p style="font-size:11px;color:#bbb;margin-top:4px">📱 Tip: rotate your phone to landscape mode for more columns</p>
     <div class="last-updated" id="last-updated">Loading...</div>
   </div>
 </div>
@@ -206,6 +207,11 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 
 <hr class="section-divider">
 
+<!-- ═══ SEMI FINAL FIXTURES & ODDS ══════════════════════════════════════ -->
+<h2>⚔️ Semi Finals — fixtures and odds</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">Both Semi Final matches with kick-off times (BST) and Win/Draw/Win odds. Result based on normal time: Winner ×4.0, Draw ×2.0, Loser ×1.0. If drawn after 90 mins, <b>both teams</b> receive the ×2.0 draw multiplier regardless of who progresses.</p>
+<div class="card" id="sf-fixtures"></div>
+
 <!-- ═══ QUARTER FINAL FIXTURES & ODDS ════════════════════════════════════ -->
 <h2>⚔️ Quarter Finals — fixtures and odds</h2>
 <p style="font-size:12px;color:#888;margin-bottom:10px">All 4 Quarter Final matches with kick-off times (BST) and Win/Draw/Win odds. Result is based on normal time only: Winner ×2.0, Draw ×1.0, Loser ×0.5. If drawn after 90 mins and goes to extra time, <b>both teams</b> receive the ×1.0 draw multiplier regardless of who progresses.</p>
@@ -216,16 +222,16 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <p style="font-size:12px;color:#888;margin-bottom:10px">All 48 teams sorted by total competition points, highest first. Points are earned in each round based on odds × the round's multiplier for the result after 90 minutes.</p>
 <div class="card" style="overflow-x:auto"><table class="lb-full" id="team-points-table" style="min-width:420px"></table></div>
 
+<h2>💭 Hypothetical leaderboard</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">Reference benchmarks to compare against the real entrants — click any row to see their 24 picks.</p>
+<div class="card"><table class="lb-full" id="hypo-lb"></table></div>
+
+<hr class="section-divider">
+
 <!-- ═══ ROUND OF 16 FIXTURES & ODDS ══════════════════════════════════════ -->
 <h2>⚔️ Round of 16 — fixtures and odds</h2>
 <p style="font-size:12px;color:#888;margin-bottom:10px">All 8 Round of 16 matches with kick-off times (BST) and Win/Draw/Win odds. Result is based on normal time only: Winner ×1.5, Draw ×0.75, Loser ×0.25. If drawn after 90 mins and goes to extra time, <b>both teams</b> receive the ×0.75 draw multiplier regardless of who progresses.</p>
 <div class="card" id="r16-fixtures"></div>
-
-<hr class="section-divider">
-
-<h2>💭 Hypothetical leaderboard</h2>
-<p style="font-size:12px;color:#888;margin-bottom:10px">Two reference benchmarks to compare against the real entrants — click either row to see their 24 picks.</p>
-<div class="card"><table class="lb-full" id="hypo-lb"></table></div>
 
 <hr class="section-divider">
 
@@ -503,11 +509,7 @@ const R16_FIXTURES = [
 ];
 
 const UPCOMING = () => [
-  ...R16_FIXTURES.filter(f => !f.ft).map(f => ({date:f.date, time:f.time, h:f.h, a:f.a, g:'R16'})),
-  ...QF_FIXTURES.filter(f => !f.ft).map(f => ({date:f.date, time:f.time, h:f.h, a:f.a, g:'QF'})),
-  // Semi-finals
-  {date:'Jul 15', time:'8:00pm',  h:'France',     a:'Spain',      g:'SF'},
-  {date:'Jul 16', time:'1:00am',  h:'England',    a:'Argentina',  g:'SF'},
+  ...SF_FIXTURES.filter(f => !f.ft).map(f => ({date:f.date, time:f.time, h:f.h, a:f.a, g:'SF'})),
 ];
 
 // Quarter-final bracket — all 4 fixtures confirmed with odds from spreadsheet
@@ -517,6 +519,12 @@ const QF_FIXTURES = [
   {date:'Jul 10', time:'8:00pm',  h:'Spain',       a:'Belgium',      hOdds:0.615, dOdds:3.000, aOdds:4.250, hg:2, ag:1, ft:true},
   {date:'Jul 11', time:'10:00pm', h:'Norway',      a:'England',      hOdds:2.900, dOdds:2.750, aOdds:0.850, hg:1, ag:1, ft:true, aetWinner:'England', aetScore:'1-2'},
   {date:'Jul 12', time:'2:00am',  h:'Argentina',   a:'Switzerland',  hOdds:0.667, dOdds:2.600, aOdds:4.250, hg:1, ag:1, ft:true, aetWinner:'Argentina', aetScore:'3-1'},
+];
+
+// Semi-finals — SF multipliers: W×4.0, D×2.0, L×1.0
+const SF_FIXTURES = [
+  {date:'Jul 15', time:'8:00pm',  h:'France',    a:'Spain',     hOdds:1.300, dOdds:2.100, aOdds:2.250, hg:null, ag:null, ft:false},
+  {date:'Jul 16', time:'8:00pm',  h:'England',   a:'Argentina', hOdds:1.500, dOdds:2.100, aOdds:1.875, hg:null, ag:null, ft:false},
 ];
 
 // Maximum number of the entrant's teams that could reach the Quarter Finals,
@@ -611,6 +619,8 @@ function isLiveTeam(team) {
 // Returns true if a team is still alive in the tournament, false if eliminated.
 // Checks R32 result first (definitive), then falls back to group-stage position.
 function teamIsAlive(team, grp, thirdPlaceQualifiers) {
+  const sf = getSFPoints(team);
+  if (sf) return !sf.eliminated;
   const qf = getQFPoints(team);
   if (qf) return !qf.eliminated;
   const r16 = getR16Points(team);
@@ -747,6 +757,22 @@ function getQFPoints(team) {
   return { pts: oddsUsed * mult, mult, drawn, won, odds: oddsUsed, eliminated };
 }
 
+// SF: W×4.0, D×2.0 (draw odds), L×1.0 (own win odds)
+function getSFPoints(team) {
+  const f = SF_FIXTURES.find(f => f.h === team || f.a === team);
+  if (!f || !f.ft) return null;
+  const isHome = f.h === team;
+  const drawn = f.hg === f.ag;
+  const won = isHome ? f.hg > f.ag : f.ag > f.hg;
+  const ownOdds = isHome ? f.hOdds : f.aOdds;
+  const oddsUsed = drawn ? f.dOdds : ownOdds;
+  const mult = drawn ? 2.0 : (won ? 4.0 : 1.0);
+  let eliminated = !drawn && !won;
+  if (drawn && f.penaltyWinner) eliminated = (f.penaltyWinner !== team);
+  if (drawn && f.aetWinner) eliminated = (f.aetWinner !== team);
+  return { pts: oddsUsed * mult, mult, drawn, won, odds: oddsUsed, eliminated };
+}
+
 function calcEntrant(picks) {
   let total=0;
   const detail={};
@@ -765,9 +791,12 @@ function calcEntrant(picks) {
       const qf = getQFPoints(team);
       const qfPts = qf ? qf.pts : 0;
 
-      const pts = groupPts + r32Pts + r16Pts + qfPts;
+      const sf = getSFPoints(team);
+      const sfPts = sf ? sf.pts : 0;
+
+      const pts = groupPts + r32Pts + r16Pts + qfPts + sfPts;
       total+=pts;
-      detail[team]={grp,pos,pts,odds,groupPts,r32Pts,r32,r16Pts,r16,qfPts,qf};
+      detail[team]={grp,pos,pts,odds,groupPts,r32Pts,r32,r16Pts,r16,qfPts,qf,sfPts,sf};
     });
   });
   return {total,detail};
@@ -785,16 +814,20 @@ function buildMaxPossiblePicks() {
     const tbl = buildTable(grp);
     const played = tbl.length && tbl[0][1].P > 0;
     if (played) {
-      // Compute actual CP for every team at their current position, then take the top 2
+      // Compute TOTAL CP per team across all rounds played so far,
+      // then pick the top 2 — this correctly reflects the full tournament picture
       const withCP = tbl.map(([team], i) => {
-        const pos = ['W','RU','T3','F4'][i];
-        const cp = (ODDS[team]||0) * MULT[pos];
-        return { team, cp };
+        const groupPos = ['W','RU','T3','F4'][i];
+        const groupCP = (ODDS[team]||0) * MULT[groupPos];
+        const r32 = getR32Points(team);
+        const r16 = getR16Points(team);
+        const qf  = getQFPoints(team);
+        const totalCP = groupCP + (r32?r32.pts:0) + (r16?r16.pts:0) + (qf?qf.pts:0);
+        return { team, cp: totalCP };
       });
       withCP.sort((a,b) => b.cp - a.cp);
       picks[grp] = [withCP[0].team, withCP[1].team];
     } else {
-      // Group hasn't started — best guess uses the two shortest-odds teams
       const sorted = [...teams].sort((a,b) => (ODDS[a]||99) - (ODDS[b]||99));
       picks[grp] = [sorted[0], sorted[1]];
     }
@@ -821,7 +854,23 @@ function getHypotheticalEntrants() {
       picks: buildMaxPossiblePicks() },
     { name:'Favourites', ai:false, hypothetical:true, av:'av-hypo2',
       desc:'The two shortest-odds favourites in every group, selected using only the Ladbrokes odds before a ball was kicked.',
-      picks: buildPreTournamentPicks() }
+      picks: buildPreTournamentPicks() },
+    { name:'AI Choices', ai:true, hypothetical:true, av:'av-hypo3',
+      desc:'Model-driven selection using 50,000 Monte Carlo simulations (80% median + 20% P90 blend). Picks sourced from the WC2026 Optimised Entry Form.',
+      picks:{
+        A:['South Korea','Mexico'],
+        B:['Canada','Switzerland'],
+        C:['Scotland','Haiti'],
+        D:['Australia','Paraguay'],
+        E:['Ecuador','Curacao'],
+        F:['Japan','Netherlands'],
+        G:['Iran','Belgium'],
+        H:['Cape Verde','Spain'],
+        I:['Iraq','Senegal'],
+        J:['Jordan','Argentina'],
+        K:['Uzbekistan','Colombia'],
+        L:['Panama','Croatia']
+      }}
   ];
 }
 
@@ -867,6 +916,8 @@ function renderTeamPopularity(scored, thirdPlaceQualifiers) {
 
   const getStatus = (team, grp) => {
     if (isLiveTeam(team)) return 'live';
+    const sf = getSFPoints(team);
+    if (sf) return sf.eliminated ? 'eliminated' : 'thru';
     const qf = getQFPoints(team);
     if (qf) return qf.eliminated ? 'eliminated' : 'thru';
     const r16 = getR16Points(team);
@@ -1074,6 +1125,53 @@ function renderAll() {
         <td class="pts">${statusBadge}</td>
       </tr>`;
     }).join('') + '</tbody>';
+
+  // ── Semi Final fixtures & odds
+  const SF_MULT = {W:4.0, D:2.0, L:1.0};
+  document.getElementById('sf-fixtures').innerHTML = SF_FIXTURES.map(f => {
+    const hPick = allPicks[f.h], aPick = allPicks[f.a];
+    const played = f.ft;
+    let resultHTML, drawn = false;
+    if (played) {
+      drawn = f.hg === f.ag;
+      resultHTML = `<div class="rscore ft">${f.hg} – ${f.ag}</div>`;
+    } else {
+      resultHTML = `<div class="rscore" style="background:#fef9c3;color:#78350f">TBC</div>`;
+    }
+    const hWinCP  = (f.hOdds * SF_MULT.W).toFixed(2);
+    const hLoseCP = (f.hOdds * SF_MULT.L).toFixed(2);
+    const dCP     = (f.dOdds * SF_MULT.D).toFixed(2);
+    const aWinCP  = (f.aOdds * SF_MULT.W).toFixed(2);
+    const aLoseCP = (f.aOdds * SF_MULT.L).toFixed(2);
+    const hWon = played && !drawn && f.hg > f.ag;
+    const aWon = played && !drawn && f.ag > f.hg;
+    const hUsedCls  = hWon ? 'odds-used' : '';
+    const dUsedCls  = (played && drawn) ? 'odds-used' : '';
+    const aUsedCls  = aWon ? 'odds-used' : '';
+    const hLoseCls  = (played && !drawn && !hWon) ? 'odds-used' : '';
+    const aLoseCls  = (played && !drawn && !aWon) ? 'odds-used' : '';
+    const hGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.h));
+    const aGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.a));
+    const tpq = new Set(getThirdPlaceRanking().slice(0,8).map(t=>t.team));
+    const hAlive = teamIsAlive(f.h, hGrp, tpq);
+    const aAlive = teamIsAlive(f.a, aGrp, tpq);
+    return `<div class="rrow" style="flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;align-items:center;width:100%">
+        <div class="rhome"><span class="${hPick?'rpick':''}" style="${hAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.h}</span></div>
+        ${resultHTML}
+        <div class="raway"><span class="${aPick?'rpick':''}" style="${aAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.a}</span></div>
+        <span class="rbadge">${f.date} ${f.time}</span>
+        ${played ? '<span class="rbadge ft">FT</span>' : ''}
+      </div>
+      <div style="width:100%;display:flex;gap:8px;justify-content:center;margin-top:6px;font-size:11px;color:#888;flex-wrap:wrap">
+        <span class="odds-pill ${hUsedCls}">${f.h} win <b>${f.hOdds.toFixed(3)}</b> ×4.0 = <b style="color:#166534">${hWinCP}</b></span>
+        <span class="odds-pill ${dUsedCls}">Draw <b>${f.dOdds.toFixed(2)}</b> ×2.0 = <b style="color:#166534">${dCP}</b></span>
+        <span class="odds-pill ${aUsedCls}">${f.a} win <b>${f.aOdds.toFixed(3)}</b> ×4.0 = <b style="color:#166534">${aWinCP}</b></span>
+        <span class="odds-pill ${hLoseCls}">${f.h} lose <b>${f.hOdds.toFixed(3)}</b> ×1.0 = <b style="color:#888">${hLoseCP}</b></span>
+        <span class="odds-pill ${aLoseCls}">${f.a} lose <b>${f.aOdds.toFixed(3)}</b> ×1.0 = <b style="color:#888">${aLoseCP}</b></span>
+      </div>
+    </div>`;
+  }).join('');
 
   // ── Quarter Final fixtures & odds
   const QF_MULT = {W:2.0, D:1.0, L:0.5};
@@ -1349,10 +1447,12 @@ function renderTeamPointsTable() {
       const r16Pts = r16 ? r16.pts : null;
       const qf = getQFPoints(team);
       const qfPts = qf ? qf.pts : null;
-      const total = groupPts + (r32Pts || 0) + (r16Pts || 0) + (qfPts || 0);
+      const sf = getSFPoints(team);
+      const sfPts = sf ? sf.pts : null;
+      const total = groupPts + (r32Pts || 0) + (r16Pts || 0) + (qfPts || 0) + (sfPts || 0);
 
       const alive = teamIsAlive(team, grp, thirdPlaceQualifiers);
-      allTeams.push({ team, grp, pos, groupPts, r32Pts, r16Pts, qfPts, total, alive });
+      allTeams.push({ team, grp, pos, groupPts, r32Pts, r16Pts, qfPts, sfPts, total, alive });
     });
   });
 
@@ -1360,6 +1460,8 @@ function renderTeamPointsTable() {
 
   const r32Started = R32_FIXTURES.some(f => f.ft);
   const r16Started = R16_FIXTURES.some(f => f.ft);
+  const qfStartedTbl = QF_FIXTURES.some(f => f.ft);
+  const sfStarted = SF_FIXTURES.some(f => f.ft);
 
   const headers = `<thead><tr>
     <th style="width:30px">Pos</th>
@@ -1369,19 +1471,14 @@ function renderTeamPointsTable() {
     ${r32Started ? '<th class="num">R32</th>' : ''}
     <th class="num">R16</th>
     <th class="num">QF</th>
+    <th class="num">SF</th>
   </tr></thead>`;
 
   const rows = allTeams.map((t, i) => {
-    const r32Cell = r32Started
-      ? `<td class="pts" style="color:#888">${t.r32Pts !== null ? t.r32Pts.toFixed(2) : '—'}</td>`
-      : '';
-    const r16Cell = r16Started
-      ? `<td class="pts" style="color:#888">${t.r16Pts !== null ? t.r16Pts.toFixed(2) : '—'}</td>`
-      : `<td class="pts" style="color:#bbb">–</td>`;
-    const qfStarted = QF_FIXTURES.some(f => f.ft);
-    const qfCell = qfStarted
-      ? `<td class="pts" style="color:#888">${t.qfPts !== null ? t.qfPts.toFixed(2) : '—'}</td>`
-      : `<td class="pts" style="color:#bbb">–</td>`;
+    const r32Cell = r32Started ? `<td class="pts" style="color:#888">${t.r32Pts !== null ? t.r32Pts.toFixed(2) : '—'}</td>` : '';
+    const r16Cell = r16Started ? `<td class="pts" style="color:#888">${t.r16Pts !== null ? t.r16Pts.toFixed(2) : '—'}</td>` : `<td class="pts" style="color:#bbb">–</td>`;
+    const qfCell  = qfStartedTbl ? `<td class="pts" style="color:#888">${t.qfPts !== null ? t.qfPts.toFixed(2) : '—'}</td>` : `<td class="pts" style="color:#bbb">–</td>`;
+    const sfCell  = sfStarted ? `<td class="pts" style="color:#888">${t.sfPts !== null ? t.sfPts.toFixed(2) : '—'}</td>` : `<td class="pts" style="color:#bbb">–</td>`;
     const nameCls = t.alive ? 'color:#166534;font-weight:700' : 'color:#ef4444';
     return `<tr>
       <td class="rank" style="color:#bbb">${i+1}</td>
@@ -1391,6 +1488,7 @@ function renderTeamPointsTable() {
       ${r32Cell}
       ${r16Cell}
       ${qfCell}
+      ${sfCell}
     </tr>`;
   }).join('');
 
@@ -1478,6 +1576,12 @@ function openModal(name) {
               else if (d.qf.drawn) { cls = 'mtp-thru'; label = 'QF Drew'; }
               else { cls = 'mtp-thru'; label = 'QF Won'; }
             }
+            // SF result overrides all
+            if (d.sf) {
+              if (d.sf.eliminated) { cls = 'mtp-out'; label = d.sf.drawn ? 'SF Drew (out)' : 'SF Lost'; }
+              else if (d.sf.drawn) { cls = 'mtp-thru'; label = 'SF Drew'; }
+              else { cls = 'mtp-thru'; label = 'SF Won'; }
+            }
 
             const ptsStr = d.pts > 0 ? `+${d.pts.toFixed(2)}` : (pos==='F4' || (d.r32 && !d.r32.won && !d.r32.drawn)) ? '0.00' : '';
             return `<div class="modal-team">
@@ -1560,7 +1664,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jul 10 — Spain 2–1 Belgium (QF, Ruiz 30′, Merino 88′). Spain earn 0.615 × 2.0 = +1.23 pts; Belgium earn 4.250 × 0.5 = +2.13 pts. SF: France vs Spain, Norway/England TBD.';
+  'Updated Jul 12 — England 1–1 Norway AET (England win 2-1), Argentina 1–1 Switzerland AET (Argentina win 3-1) added. QFs complete! SFs: France vs Spain, England vs Argentina.';
 </script>
 </body>
 </html>
