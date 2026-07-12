@@ -189,7 +189,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; R16 complete! QFs: France vs Morocco, Spain vs Belgium, Norway vs England, Argentina vs Switzerland.</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Semi-finals: France vs Spain (Jul 15), England vs Argentina (Jul 16).</p>
     <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
     <div class="last-updated" id="last-updated">Loading...</div>
   </div>
@@ -504,11 +504,10 @@ const R16_FIXTURES = [
 
 const UPCOMING = () => [
   ...R16_FIXTURES.filter(f => !f.ft).map(f => ({date:f.date, time:f.time, h:f.h, a:f.a, g:'R16'})),
-  // Quarter-finals — BST kick-off times
-  {date:'Jul 9',  time:'9:00pm',  h:'France',               a:'Morocco',                    g:'QF'},
-  {date:'Jul 10', time:'8:00pm',  h:'Spain',                a:'Belgium',                    g:'QF'},
-  {date:'Jul 11', time:'10:00pm', h:'Norway',               a:'England',                    g:'QF'},
-  {date:'Jul 12', time:'2:00am',  h:'Argentina',            a:'Switzerland',                g:'QF'},
+  ...QF_FIXTURES.filter(f => !f.ft).map(f => ({date:f.date, time:f.time, h:f.h, a:f.a, g:'QF'})),
+  // Semi-finals
+  {date:'Jul 15', time:'8:00pm',  h:'France',     a:'Spain',      g:'SF'},
+  {date:'Jul 16', time:'1:00am',  h:'England',    a:'Argentina',  g:'SF'},
 ];
 
 // Quarter-final bracket — all 4 fixtures confirmed with odds from spreadsheet
@@ -516,8 +515,8 @@ const UPCOMING = () => [
 const QF_FIXTURES = [
   {date:'Jul 9',  time:'9:00pm',  h:'France',      a:'Morocco',      hOdds:0.571, dOdds:3.000, aOdds:4.750, hg:2, ag:0, ft:true},
   {date:'Jul 10', time:'8:00pm',  h:'Spain',       a:'Belgium',      hOdds:0.615, dOdds:3.000, aOdds:4.250, hg:2, ag:1, ft:true},
-  {date:'Jul 11', time:'10:00pm', h:'Norway',      a:'England',      hOdds:2.900, dOdds:2.750, aOdds:0.850, hg:null, ag:null, ft:false},
-  {date:'Jul 12', time:'2:00am',  h:'Argentina',   a:'Switzerland',  hOdds:0.667, dOdds:2.600, aOdds:4.250, hg:null, ag:null, ft:false},
+  {date:'Jul 11', time:'10:00pm', h:'Norway',      a:'England',      hOdds:2.900, dOdds:2.750, aOdds:0.850, hg:1, ag:1, ft:true, aetWinner:'England', aetScore:'1-2'},
+  {date:'Jul 12', time:'2:00am',  h:'Argentina',   a:'Switzerland',  hOdds:0.667, dOdds:2.600, aOdds:4.250, hg:1, ag:1, ft:true, aetWinner:'Argentina', aetScore:'3-1'},
 ];
 
 // Maximum number of the entrant's teams that could reach the Quarter Finals,
@@ -1319,7 +1318,9 @@ function renderAll() {
 
   // ── Upcoming
   document.getElementById('upcoming').innerHTML = UPCOMING().map(u=>{
-    const badge = u.g==='QF'
+    const badge = u.g==='SF'
+      ? `<span class="rbadge" style="background:#fef2f2;color:#991b1b;font-weight:700">SF</span>`
+      : u.g==='QF'
       ? `<span class="rbadge" style="background:#fef3c7;color:#92400e;font-weight:700">QF</span>`
       : u.g==='R16'
       ? `<span class="rbadge" style="background:#ede9fe;color:#6d28d9">R16</span>`
