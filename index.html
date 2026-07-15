@@ -253,6 +253,10 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <!-- ═══ RESULTS ═══════════════════════════════════════════════════════════ -->
 <h2>Results</h2>
 <p style="font-size:12px;color:#888;margin-bottom:10px">Most recent first.</p>
+<div id="results-sf-wrap" style="margin-bottom:18px">
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px">Semi Finals</div>
+  <div class="card" id="results-sf"></div>
+</div>
 <div id="results-qf-wrap" style="margin-bottom:18px">
   <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px">Quarter Finals</div>
   <div class="card" id="results-qf"></div>
@@ -523,7 +527,7 @@ const QF_FIXTURES = [
 
 // Semi-finals — SF multipliers: W×4.0, D×2.0, L×1.0
 const SF_FIXTURES = [
-  {date:'Jul 15', time:'8:00pm',  h:'France',    a:'Spain',     hOdds:1.300, dOdds:2.100, aOdds:2.250, hg:null, ag:null, ft:false},
+  {date:'Jul 15', time:'8:00pm',  h:'France',    a:'Spain',     hOdds:1.300, dOdds:2.100, aOdds:2.250, hg:0, ag:2, ft:true},
   {date:'Jul 16', time:'8:00pm',  h:'England',   a:'Argentina', hOdds:1.500, dOdds:2.100, aOdds:1.875, hg:null, ag:null, ft:false},
 ];
 
@@ -1271,6 +1275,34 @@ function renderAll() {
     </div>`;
   }).join('');
 
+  // ── Semi Final results
+  try {
+    const sfPlayed = SF_FIXTURES.filter(f => f.ft).slice().reverse();
+    if (document.getElementById('results-sf')) {
+      document.getElementById('results-sf').innerHTML = sfPlayed.length ? sfPlayed.map(f => {
+        const hGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.h));
+        const aGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.a));
+        const tpqSF = new Set(getThirdPlaceRanking().slice(0,8).map(t=>t.team));
+        const hAlive = teamIsAlive(f.h, hGrp, tpqSF);
+        const aAlive = teamIsAlive(f.a, aGrp, tpqSF);
+        let scoreDisplay = `${f.hg} – ${f.ag}`;
+        let suffixBadge = '<span class="rbadge ft">FT</span>';
+        if (f.aetWinner && f.aetScore) { scoreDisplay = f.aetScore; suffixBadge = '<span class="rbadge" style="background:#fef9c3;color:#78350f">AET</span>'; }
+        else if (f.penaltyWinner && f.penScore) { scoreDisplay = f.penScore; suffixBadge = '<span class="rbadge" style="background:#ede9fe;color:#6d28d9">Pens</span>'; }
+        return `<div class="rrow" style="flex-wrap:wrap">
+          <div style="display:flex;align-items:center;width:100%">
+            <div class="rhome"><span class="${allPicks[f.h]?'rpick':''}" style="${hAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.h}</span></div>
+            <div class="rscore ft">${scoreDisplay}</div>
+            <div class="raway"><span class="${allPicks[f.a]?'rpick':''}" style="${aAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.a}</span></div>
+            <span class="rbadge">${f.date}</span>${suffixBadge}
+          </div>
+        </div>`;
+      }).join('') : '<p style="font-size:12px;color:#aaa;padding:8px 0">No Semi Final results yet</p>';
+    }
+  } catch(e) {
+    document.getElementById('results-sf').innerHTML = `<p style="color:#ef4444;font-size:12px">Error: ${e.message}</p>`;
+  }
+
   // ── Quarter Final results
   const qfPlayed = QF_FIXTURES.filter(f => f.ft).slice().reverse();
   document.getElementById('results-qf').innerHTML = qfPlayed.length ? qfPlayed.map(f => {
@@ -1664,7 +1696,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jul 12 — England 1–1 Norway AET (England win 2-1), Argentina 1–1 Switzerland AET (Argentina win 3-1) added. QFs complete! SFs: France vs Spain, England vs Argentina.';
+  'Updated Jul 15 — Spain 2–0 France (SF, Oyarzabal pen 22′, Porro 58′). Spain earn 2.250 × 4.0 = +9.00 pts; France earn 1.300 × 1.0 = +1.30 pts. Spain into the final!';
 </script>
 </body>
 </html>
