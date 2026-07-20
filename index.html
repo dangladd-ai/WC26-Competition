@@ -189,7 +189,7 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="header">
   <div>
     <h1>⚽ World Cup 2026 — Fantasy Competition</h1>
-    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; Semi-finals: France vs Spain (Jul 15, 8pm BST) · England vs Argentina (Jul 16, 8pm BST).</p>
+    <p>23 entrants &nbsp;·&nbsp; £25 entry &nbsp;·&nbsp; 🏆 Spain are World Cup Champions! Final: Spain 1–0 Argentina (AET).</p>
     <p style="font-size:11px;color:#999;margin-top:2px">Prize money: 🥇 £275 &nbsp;·&nbsp; 🥈 £125 &nbsp;·&nbsp; 🥉 £75 &nbsp;·&nbsp; 4th £50 &nbsp;·&nbsp; 5th &amp; 6th £25</p>
     <p style="font-size:11px;color:#bbb;margin-top:4px">📱 Tip: rotate your phone to landscape mode for more columns</p>
     <div class="last-updated" id="last-updated">Loading...</div>
@@ -206,6 +206,11 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 <div class="card"><table class="lb-full" id="full-lb"></table></div>
 
 <hr class="section-divider">
+
+<!-- ═══ FINAL FIXTURE & ODDS ══════════════════════════════════════════════ -->
+<h2>🏆 The Final — fixture and odds</h2>
+<p style="font-size:12px;color:#888;margin-bottom:10px">The World Cup Final with kick-off time (BST) and Win/Draw/Win odds. Result based on normal time: Winner ×8.0, Draw ×4.0, Loser ×2.0. If drawn after 90 mins, <b>both teams</b> receive the ×4.0 draw multiplier regardless of who wins the trophy.</p>
+<div class="card" id="final-fixture"></div>
 
 <!-- ═══ SEMI FINAL FIXTURES & ODDS ══════════════════════════════════════ -->
 <h2>⚔️ Semi Finals — fixtures and odds</h2>
@@ -246,13 +251,13 @@ table.lb-full tbody tr td.name-cell{color:#1d4ed8;text-decoration:underline;text
 
 <hr class="section-divider">
 
-<!-- ═══ UPCOMING ══════════════════════════════════════════════════════════ -->
-<h2>Upcoming fixtures</h2>
-<div class="card" id="upcoming"></div>
-
 <!-- ═══ RESULTS ═══════════════════════════════════════════════════════════ -->
 <h2>Results</h2>
 <p style="font-size:12px;color:#888;margin-bottom:10px">Most recent first.</p>
+<div id="results-final-wrap" style="margin-bottom:18px">
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px">🏆 Final</div>
+  <div class="card" id="results-final"></div>
+</div>
 <div id="results-sf-wrap" style="margin-bottom:18px">
   <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px">Semi Finals</div>
   <div class="card" id="results-sf"></div>
@@ -531,6 +536,10 @@ const SF_FIXTURES = [
   {date:'Jul 16', time:'8:00pm',  h:'England',   a:'Argentina', hOdds:1.500, dOdds:2.100, aOdds:1.875, hg:1, ag:2, ft:true},
 ];
 
+// The Final — Final multipliers: W×8.0, D×4.0, L×2.0
+// 0-0 after 90 mins; Spain won 1-0 in extra time (Ferran Torres, 106')
+const FINAL_FIXTURE = {date:'Jul 19', time:'8:00pm', h:'Spain', a:'Argentina', hOdds:1.25, dOdds:2.00, aOdds:2.40, hg:0, ag:0, ft:true, aetWinner:'Spain', aetScore:'1-0'};
+
 // Maximum number of the entrant's teams that could reach the Quarter Finals,
 // given the actual R16 bracket. Same logic as R32: for each fixture, at most
 // 1 can go through even if the entrant picked both sides. Capped at 8.
@@ -623,6 +632,8 @@ function isLiveTeam(team) {
 // Returns true if a team is still alive in the tournament, false if eliminated.
 // Checks R32 result first (definitive), then falls back to group-stage position.
 function teamIsAlive(team, grp, thirdPlaceQualifiers) {
+  const fin = getFinalPoints(team);
+  if (fin) return !fin.eliminated;
   const sf = getSFPoints(team);
   if (sf) return !sf.eliminated;
   const qf = getQFPoints(team);
@@ -777,6 +788,22 @@ function getSFPoints(team) {
   return { pts: oddsUsed * mult, mult, drawn, won, odds: oddsUsed, eliminated };
 }
 
+// Final: W×8.0, D×4.0 (draw odds), L×2.0 (own win odds)
+function getFinalPoints(team) {
+  const f = FINAL_FIXTURE;
+  if (!f || (f.h !== team && f.a !== team) || !f.ft) return null;
+  const isHome = f.h === team;
+  const drawn = f.hg === f.ag;
+  const won = isHome ? f.hg > f.ag : f.ag > f.hg;
+  const ownOdds = isHome ? f.hOdds : f.aOdds;
+  const oddsUsed = drawn ? f.dOdds : ownOdds;
+  const mult = drawn ? 4.0 : (won ? 8.0 : 2.0);
+  let eliminated = !drawn && !won;
+  if (drawn && f.penaltyWinner) eliminated = (f.penaltyWinner !== team);
+  if (drawn && f.aetWinner) eliminated = (f.aetWinner !== team);
+  return { pts: oddsUsed * mult, mult, drawn, won, odds: oddsUsed, eliminated };
+}
+
 function calcEntrant(picks) {
   let total=0;
   const detail={};
@@ -798,9 +825,12 @@ function calcEntrant(picks) {
       const sf = getSFPoints(team);
       const sfPts = sf ? sf.pts : 0;
 
-      const pts = groupPts + r32Pts + r16Pts + qfPts + sfPts;
+      const fin = getFinalPoints(team);
+      const finPts = fin ? fin.pts : 0;
+
+      const pts = groupPts + r32Pts + r16Pts + qfPts + sfPts + finPts;
       total+=pts;
-      detail[team]={grp,pos,pts,odds,groupPts,r32Pts,r32,r16Pts,r16,qfPts,qf,sfPts,sf};
+      detail[team]={grp,pos,pts,odds,groupPts,r32Pts,r32,r16Pts,r16,qfPts,qf,sfPts,sf,finPts,fin};
     });
   });
   return {total,detail};
@@ -920,6 +950,8 @@ function renderTeamPopularity(scored, thirdPlaceQualifiers) {
 
   const getStatus = (team, grp) => {
     if (isLiveTeam(team)) return 'live';
+    const fin = getFinalPoints(team);
+    if (fin) return fin.eliminated ? 'eliminated' : 'thru';
     const sf = getSFPoints(team);
     if (sf) return sf.eliminated ? 'eliminated' : 'thru';
     const qf = getQFPoints(team);
@@ -1130,6 +1162,54 @@ function renderAll() {
       </tr>`;
     }).join('') + '</tbody>';
 
+  // ── Final fixture & odds
+  const FINAL_MULT = {W:8.0, D:4.0, L:2.0};
+  document.getElementById('final-fixture').innerHTML = (() => {
+    const f = FINAL_FIXTURE;
+    const hPick = allPicks[f.h], aPick = allPicks[f.a];
+    const played = f.ft;
+    let resultHTML, drawn = false;
+    if (played) {
+      drawn = f.hg === f.ag;
+      resultHTML = `<div class="rscore ft">${f.hg} – ${f.ag}</div>`;
+    } else {
+      resultHTML = `<div class="rscore" style="background:#fef9c3;color:#78350f">TBC</div>`;
+    }
+    const hWinCP  = (f.hOdds * FINAL_MULT.W).toFixed(2);
+    const hLoseCP = (f.hOdds * FINAL_MULT.L).toFixed(2);
+    const dCP     = (f.dOdds * FINAL_MULT.D).toFixed(2);
+    const aWinCP  = (f.aOdds * FINAL_MULT.W).toFixed(2);
+    const aLoseCP = (f.aOdds * FINAL_MULT.L).toFixed(2);
+    const hWon = played && !drawn && f.hg > f.ag;
+    const aWon = played && !drawn && f.ag > f.hg;
+    const hUsedCls  = hWon ? 'odds-used' : '';
+    const dUsedCls  = (played && drawn) ? 'odds-used' : '';
+    const aUsedCls  = aWon ? 'odds-used' : '';
+    const hLoseCls  = (played && !drawn && !hWon) ? 'odds-used' : '';
+    const aLoseCls  = (played && !drawn && !aWon) ? 'odds-used' : '';
+    const hGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.h));
+    const aGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.a));
+    const tpq = new Set(getThirdPlaceRanking().slice(0,8).map(t=>t.team));
+    const hAlive = teamIsAlive(f.h, hGrp, tpq);
+    const aAlive = teamIsAlive(f.a, aGrp, tpq);
+    return `<div class="rrow" style="flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;align-items:center;width:100%">
+        <div class="rhome"><span class="${hPick?'rpick':''}" style="${hAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.h}</span></div>
+        ${resultHTML}
+        <div class="raway"><span class="${aPick?'rpick':''}" style="${aAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.a}</span></div>
+        <span class="rbadge">${f.date} ${f.time}</span>
+        ${played ? '<span class="rbadge ft">FT</span>' : ''}
+      </div>
+      <div style="width:100%;display:flex;gap:8px;justify-content:center;margin-top:6px;font-size:11px;color:#888;flex-wrap:wrap">
+        <span class="odds-pill ${hUsedCls}">${f.h} win <b>${f.hOdds.toFixed(2)}</b> ×8.0 = <b style="color:#166534">${hWinCP}</b></span>
+        <span class="odds-pill ${dUsedCls}">Draw <b>${f.dOdds.toFixed(2)}</b> ×4.0 = <b style="color:#166534">${dCP}</b></span>
+        <span class="odds-pill ${aUsedCls}">${f.a} win <b>${f.aOdds.toFixed(2)}</b> ×8.0 = <b style="color:#166534">${aWinCP}</b></span>
+        <span class="odds-pill ${hLoseCls}">${f.h} lose <b>${f.hOdds.toFixed(2)}</b> ×2.0 = <b style="color:#888">${hLoseCP}</b></span>
+        <span class="odds-pill ${aLoseCls}">${f.a} lose <b>${f.aOdds.toFixed(2)}</b> ×2.0 = <b style="color:#888">${aLoseCP}</b></span>
+      </div>
+    </div>`;
+  })();
+
   // ── Semi Final fixtures & odds
   const SF_MULT = {W:4.0, D:2.0, L:1.0};
   document.getElementById('sf-fixtures').innerHTML = SF_FIXTURES.map(f => {
@@ -1274,6 +1354,37 @@ function renderAll() {
       </div>` : ''}
     </div>`;
   }).join('');
+
+  // ── Final result
+  try {
+    if (document.getElementById('results-final')) {
+      const f = FINAL_FIXTURE;
+      if (f.ft) {
+        const hGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.h));
+        const aGrp = Object.keys(GROUPS).find(g => GROUPS[g].includes(f.a));
+        const tpqFin = new Set(getThirdPlaceRanking().slice(0,8).map(t=>t.team));
+        const hAlive = teamIsAlive(f.h, hGrp, tpqFin);
+        const aAlive = teamIsAlive(f.a, aGrp, tpqFin);
+        let scoreDisplay = `${f.hg} – ${f.ag}`;
+        let suffixBadge = '<span class="rbadge ft">FT</span>';
+        if (f.aetWinner && f.aetScore) { scoreDisplay = f.aetScore; suffixBadge = '<span class="rbadge" style="background:#fef9c3;color:#78350f">AET</span>'; }
+        else if (f.penaltyWinner && f.penScore) { scoreDisplay = f.penScore; suffixBadge = '<span class="rbadge" style="background:#ede9fe;color:#6d28d9">Pens</span>'; }
+        document.getElementById('results-final').innerHTML = `<div class="rrow" style="flex-wrap:wrap">
+          <div style="display:flex;align-items:center;width:100%">
+            <div class="rhome"><span class="${allPicks[f.h]?'rpick':''}" style="${hAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.h}</span></div>
+            <div class="rscore ft">${scoreDisplay}</div>
+            <div class="raway"><span class="${allPicks[f.a]?'rpick':''}" style="${aAlive?'color:#166534;font-weight:700':'color:#ef4444'}">${f.a}</span></div>
+            <span class="rbadge">${f.date}</span>${suffixBadge}
+          </div>
+          ${(f.aetWinner||f.penaltyWinner)?`<div style="width:100%;font-size:11px;color:#aaa;text-align:center;padding:2px 0">${f.hg}–${f.ag} after 90 mins</div>`:''}
+        </div>`;
+      } else {
+        document.getElementById('results-final').innerHTML = '<p style="font-size:12px;color:#aaa;padding:8px 0">Final not yet played</p>';
+      }
+    }
+  } catch(e) {
+    if (document.getElementById('results-final')) document.getElementById('results-final').innerHTML = `<p style="color:#ef4444;font-size:12px">Error: ${e.message}</p>`;
+  }
 
   // ── Semi Final results
   try {
@@ -1445,23 +1556,6 @@ function renderAll() {
 
   // ── Team points by round table
   renderTeamPointsTable();
-
-  // ── Upcoming
-  document.getElementById('upcoming').innerHTML = UPCOMING().map(u=>{
-    const badge = u.g==='SF'
-      ? `<span class="rbadge" style="background:#fef2f2;color:#991b1b;font-weight:700">SF</span>`
-      : u.g==='QF'
-      ? `<span class="rbadge" style="background:#fef3c7;color:#92400e;font-weight:700">QF</span>`
-      : u.g==='R16'
-      ? `<span class="rbadge" style="background:#ede9fe;color:#6d28d9">R16</span>`
-      : `<span class="rbadge">R32</span>`;
-    const hPick = allPicks[u.h], aPick = allPicks[u.a];
-    return `<div class="urow">
-      <span class="udate">${u.date}${u.time ? ' '+u.time : ''}</span>
-      <span class="ufixture"><span class="${hPick?'upick':''}">${u.h}</span> vs <span class="${aPick?'upick':''}">${u.a}</span></span>
-      ${badge}
-    </div>`;
-  }).join('');
 }
 
 function renderTeamPointsTable() {
@@ -1481,10 +1575,12 @@ function renderTeamPointsTable() {
       const qfPts = qf ? qf.pts : null;
       const sf = getSFPoints(team);
       const sfPts = sf ? sf.pts : null;
-      const total = groupPts + (r32Pts || 0) + (r16Pts || 0) + (qfPts || 0) + (sfPts || 0);
+      const fin = getFinalPoints(team);
+      const finPts = fin ? fin.pts : null;
+      const total = groupPts + (r32Pts || 0) + (r16Pts || 0) + (qfPts || 0) + (sfPts || 0) + (finPts || 0);
 
       const alive = teamIsAlive(team, grp, thirdPlaceQualifiers);
-      allTeams.push({ team, grp, pos, groupPts, r32Pts, r16Pts, qfPts, sfPts, total, alive });
+      allTeams.push({ team, grp, pos, groupPts, r32Pts, r16Pts, qfPts, sfPts, finPts, total, alive });
     });
   });
 
@@ -1494,6 +1590,7 @@ function renderTeamPointsTable() {
   const r16Started = R16_FIXTURES.some(f => f.ft);
   const qfStartedTbl = QF_FIXTURES.some(f => f.ft);
   const sfStarted = SF_FIXTURES.some(f => f.ft);
+  const finalStarted = FINAL_FIXTURE.ft;
 
   const headers = `<thead><tr>
     <th style="width:30px">Pos</th>
@@ -1504,6 +1601,7 @@ function renderTeamPointsTable() {
     <th class="num">R16</th>
     <th class="num">QF</th>
     <th class="num">SF</th>
+    <th class="num">Final</th>
   </tr></thead>`;
 
   const rows = allTeams.map((t, i) => {
@@ -1511,6 +1609,7 @@ function renderTeamPointsTable() {
     const r16Cell = r16Started ? `<td class="pts" style="color:#888">${t.r16Pts !== null ? t.r16Pts.toFixed(2) : '—'}</td>` : `<td class="pts" style="color:#bbb">–</td>`;
     const qfCell  = qfStartedTbl ? `<td class="pts" style="color:#888">${t.qfPts !== null ? t.qfPts.toFixed(2) : '—'}</td>` : `<td class="pts" style="color:#bbb">–</td>`;
     const sfCell  = sfStarted ? `<td class="pts" style="color:#888">${t.sfPts !== null ? t.sfPts.toFixed(2) : '—'}</td>` : `<td class="pts" style="color:#bbb">–</td>`;
+    const finCell = finalStarted ? `<td class="pts" style="color:#888">${t.finPts !== null ? t.finPts.toFixed(2) : '—'}</td>` : `<td class="pts" style="color:#bbb">–</td>`;
     const nameCls = t.alive ? 'color:#166534;font-weight:700' : 'color:#ef4444';
     return `<tr>
       <td class="rank" style="color:#bbb">${i+1}</td>
@@ -1521,6 +1620,7 @@ function renderTeamPointsTable() {
       ${r16Cell}
       ${qfCell}
       ${sfCell}
+      ${finCell}
     </tr>`;
   }).join('');
 
@@ -1614,6 +1714,12 @@ function openModal(name) {
               else if (d.sf.drawn) { cls = 'mtp-thru'; label = 'SF Drew'; }
               else { cls = 'mtp-thru'; label = 'SF Won'; }
             }
+            // Final result overrides all
+            if (d.fin) {
+              if (d.fin.eliminated) { cls = 'mtp-out'; label = d.fin.drawn ? 'Final Drew (Runner-up)' : 'Runner-up'; }
+              else if (d.fin.drawn) { cls = 'mtp-thru'; label = 'Final Drew'; }
+              else { cls = 'mtp-thru'; label = '🏆 CHAMPIONS'; }
+            }
 
             const ptsStr = d.pts > 0 ? `+${d.pts.toFixed(2)}` : (pos==='F4' || (d.r32 && !d.r32.won && !d.r32.drawn)) ? '0.00' : '';
             return `<div class="modal-team">
@@ -1696,7 +1802,7 @@ document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDire
 // Init
 renderAll();
 document.getElementById('last-updated').innerHTML =
-  'Updated Jul 16 — Argentina 2–1 England (SF, Gordon 55′, Fernández 85′, Martínez 90+2′). Argentina earn 1.875 × 4.0 = +7.50 pts; England earn 1.500 × 1.0 = +1.50 pts. FINAL: Spain vs Argentina, Jul 19!';
+  '🏆 Updated Jul 19 — SPAIN ARE WORLD CHAMPIONS! Spain 1–0 Argentina (Ferran Torres, 106′, AET). 0–0 after 90 mins: both teams earn 2.00 × 4.0 = +8.00 pts. Tournament complete — final standings below!';
 </script>
 </body>
 </html>
